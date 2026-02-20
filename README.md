@@ -64,12 +64,17 @@ for migration decisions through structural analysis of COBOL assets.
 
 ## Repository Structure
 
-- `docs/00_project/`: Charter, roadmap, and research log
+- `docs/00_project/`: Charter and roadmap
 - `docs/10_ast/`: AST design artifacts
 - `docs/20_ir/`: IR definitions and mapping notes
 - `docs/30_cfg/`: CFG modeling notes
 - `docs/40_dfg/`: DFG modeling notes
 - `docs/90_glossary/`: Terminology definitions
+- `docs/prompts/`: Prompt assets for structured research workflow execution
+- `docs/prompts/research/exec/`: Executable prompt definitions (for example, Research Log generation)
 - `diagrams/mermaid/`: Mermaid source diagrams
+- `log/`: Canonical logging root for research and daily memo records
+- `log/research-log/`: Canonical research decision logs, templates, and governance notes
+- `log/working-memo/`: Canonical daily working memos and memo governance notes
 - `samples/cobol/`: COBOL input samples for analysis
 - `tools/`: Utilities and helper tooling (future use)
