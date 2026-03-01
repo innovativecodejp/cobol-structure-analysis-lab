@@ -40,14 +40,17 @@ Research Log のみが正式設計記録である。
 
 ## ファイル名
 
-YYYY-MM-DD.md
+YYYY-MM-DD_nn_Title.md
+
+- nn: その日の連番（01, 02...）
+- Title: テーマ名（英数字・アンダースコア）
 
 例：
 
-2026-02-19.md  
-2026-02-20.md  
+2026-03-01_01_GuaranteeDefinitionIdea.md
+2026-03-01_02_AST_Granularity_Memo.md
 
-1日1ファイルとする。
+1日複数ファイル作成可とする。
 
 ---
 
