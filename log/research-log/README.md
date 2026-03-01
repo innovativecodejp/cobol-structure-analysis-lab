@@ -44,16 +44,19 @@ Cursor：
 
 形式：
 
-YYYY-MM-DD_<ThemeName>.md
+yyyy-mm-dd_nn_Title.md
+
+- nn: その日の連番（01, 02...）
+- Title: テーマ名（英数字・アンダースコア）
 
 例：
 
-2026-02-19_AST_ScopeDefinition.md  
-2026-02-19_AST_ScopeFormalization.md  
+2026-02-19_01_AST_ScopeDefinition.md
+2026-02-19_02_AST_ScopeFormalization.md
 
 ---
 
-## 3.2 ThemeName命名ルール
+## 3.2 Title命名ルール
 
 - 英数字＋アンダースコアのみ
 - スペース禁止
@@ -62,7 +65,7 @@ YYYY-MM-DD_<ThemeName>.md
 
 例：
 
-AST_ScopeDefinition  
+AST_ScopeDefinition
 AST_GranularityPolicy  
 AST_DataHierarchyModel  
 IR_NormalizationRule  
