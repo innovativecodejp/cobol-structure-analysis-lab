@@ -19,130 +19,144 @@
 
 ---
 
-# 2. Dependency Graph の形式定義
+# 2. 依存関係の順序理論的定義
 
-保証空間に位相的制約を与える依存グラフを定義する。
+保証空間に位相的制約を与える依存グラフを、順序集合として厳密に再定義する。
 
-## 2.1 定義
-依存グラフ（Dependency Graph）を有向グラフ $D = (\mathbb{P}, E_{req})$ として定義する。
+## 2.1 依存順序 $\leq_D$
 
-- **頂点集合 $\mathbb{P}$**: 保存観点の集合 $\{ P_{syn}, P_{flow}, P_{data}, P_{side}, P_{bound} \}$
-- **辺集合 $E_{req} \subseteq \mathbb{P} \times \mathbb{P}$**: 依存関係（Prerequisite Relation）
+保存観点集合 $\mathbb{P} = \{ P_{syn}, P_{flow}, P_{data}, P_{side}, P_{bound} \}$ 上に、依存関係に基づく二項関係 $\leq_D$ を定義する。
 
-## 2.2 辺の意味論
-辺 $(p_i, p_j) \in E_{req}$ を $p_i \xrightarrow{req} p_j$ と表記し、以下の意味を持つものとする。
+$$
+p_j \leq_D p_i \iff (p_i \text{ を保証するには } p_j \text{ が必要})
+$$
 
-> **「性質 $p_i$ を保証するためには、性質 $p_j$ の保証が前提条件（Prerequisite）として必須である」**
+この関係 $\leq_D$ は以下の性質を満たすため、**半順序（Partial Order）** である。
 
-これは論理的な含意 $p_i \implies p_j$ と同値である。「$p_i$ が真ならば、必然的に $p_j$ も真でなければならない（さもなくば矛盾する）」ことを示す。
+1.  **反射律**: $p \leq_D p$ （任意の性質はそれ自身の成立を必要とする）
+2.  **反対称律**: $p \leq_D q \land q \leq_D p \implies p = q$ （循環依存はないと仮定）
+3.  **推移律**: $p \leq_D q \land q \leq_D r \implies p \leq_D r$
 
-## 2.3 具体的な依存構造
-本体系における依存関係を以下のように定義する。
+依存グラフ $D = (\mathbb{P}, E_{req})$ における辺 $p_i \xrightarrow{req} p_j$ は、順序関係 $p_j \leq_D p_i$ に対応する。すなわち、矢印の方向は「依存元から依存先」へ向かうが、順序の大小は「基礎（小さい）から応用（大きい）」へと向かう（$p_j$ の方が基礎的である）。
 
-1.  $P_{flow} \xrightarrow{req} P_{syn}$
-    - [構造層 $\to$ 構文層]: CFG構築にはASTが必要。
-2.  $P_{data} \xrightarrow{req} P_{flow}$
-    - [構造層内依存]: DFG構築にはCFGが必要。
-3.  $P_{bound} \xrightarrow{req} P_{syn}$
-    - [構造層 $\to$ 構文層]: インターフェース定義には構文解析が必要。
-4.  $P_{side} \xrightarrow{req} P_{flow} \land P_{data}$
-    - [判断層 $\to$ 構造層]: 副作用（I/O）の順序保証には制御流が、内容保証にはデータ依存が必要。
+## 2.2 具体的な順序構造
+
+本体系における依存順序 $(\mathbb{P}, \leq_D)$ は以下の通りである。
+
+1.  $P_{syn} \leq_D P_{flow}$ （構文は制御の基礎）
+2.  $P_{syn} \leq_D P_{bound}$ （構文は境界の基礎）
+3.  $P_{flow} \leq_D P_{data}$ （制御はデータの基礎）
+4.  $P_{flow} \leq_D P_{side}$ （制御は副作用の基礎）
+5.  $P_{data} \leq_D P_{side}$ （データは副作用の基礎）
 
 ---
 
-# 3. 依存閉包（Dependency Closure）
+# 3. 依存閉包と不動点理論
 
-依存グラフに基づき、ある保証集合が論理的に妥当であるかを判定するための閉包演算を定義する。
+依存順序に基づき、論理的に妥当な保証集合を定義するための閉包演算を導入する。
 
-## 3.1 閉包演算子 $Cl_D$
-任意の保証集合 $S \subseteq \mathbb{P}$ に対する依存閉包 $Cl_D(S)$ を以下のように再帰的に定義する。
+## 3.1 下集合（Lower Set）としての Valid State
 
+保証集合 $S \subseteq \mathbb{P}$ が論理的に妥当である（Valid）とは、その集合が順序 $\leq_D$ についての下集合（Lower Set / Ideal）であることを意味する。
+
+**定義:** $S$ が下集合であるとは、以下を満たすことである。
 $$
-Cl_D(S) = S \cup \{ q \in \mathbb{P} \mid \exists p \in S, p \xrightarrow{req} \dots \xrightarrow{req} q \}
-$$
-
-すなわち、$S$ に含まれる全ての性質について、その前提条件となる性質を（推移的に）全て含めた集合である。
-
-## 3.2 閉包の性質
-この演算子 $Cl_D: \mathcal{P}(\mathbb{P}) \to \mathcal{P}(\mathbb{P})$ は、クラトフスキの閉包公理（Kuratowski closure axioms）を満たす。
-
-1.  **拡大性**: $S \subseteq Cl_D(S)$
-2.  **冪等性**: $Cl_D(Cl_D(S)) = Cl_D(S)$
-3.  **単調性**: $S_1 \subseteq S_2 \implies Cl_D(S_1) \subseteq Cl_D(S_2)$
-
-## 3.3 妥当な保証状態（Valid Guarantee State）
-保証集合 $S$ が論理的に妥当である（Valid）とは、その集合が依存関係について閉じていることであると定義する。
-
-$$
-Valid(S) \iff S = Cl_D(S)
+\forall p \in S, \forall q \in \mathbb{P}, (q \leq_D p \implies q \in S)
 $$
 
-これは順序理論における**「下集合（Lower Set / Ideal）」**に相当する（依存矢印を順序 $p \ge q$ と見なした場合）。
+## 3.2 閉包演算子 $Cl_D$
+
+任意の保証集合 $S \subseteq \mathbb{P}$ に対する依存閉包 $Cl_D(S)$ を、**$S$ を含む最小の下集合**として定義する。
+
+$$
+Cl_D(S) = \{ q \in \mathbb{P} \mid \exists p \in S, q \leq_D p \}
+$$
+
+## 3.3 閉包の性質と不動点
+
+この演算子 $Cl_D: \mathcal{P}(\mathbb{P}) \to \mathcal{P}(\mathbb{P})$ は以下の性質を持つ。
+
+1.  **有限性**: $\mathbb{P}$ は有限集合であるため、閉包は必ず有限ステップで計算可能である。
+2.  **単調性**: $S_1 \subseteq S_2 \implies Cl_D(S_1) \subseteq Cl_D(S_2)$。
+3.  **不動点**: $S$ が Valid である必要十分条件は、それが $Cl_D$ の不動点であること（$S = Cl_D(S)$）である。
+
+Knaster–Tarski の不動点定理により、完全束上の単調関数である $Cl_D$ の不動点全体もまた完全束をなすことが保証される。
 
 ---
 
 # 4. 依存付き Guarantee Space の再定義
 
-独立仮定に基づく空間 $\mathcal{P}(\mathbb{P})$ を、依存関係を考慮した空間 $\mathcal{G}_{dep}$ へと縮退させる。
+## 4.1 定義：イデアル束としての $\mathcal{G}_{dep}$
 
-## 4.1 定義
-**依存付き保証空間（Dependent Guarantee Space）** $\mathcal{G}_{dep}$ を、妥当な保証状態のみの集合として定義する。
+**依存付き保証空間（Dependent Guarantee Space）** $\mathcal{G}_{dep}$ を、順序集合 $(\mathbb{P}, \leq_D)$ のイデアル（順序イデアル）全体の集合として再定義する。
 
 $$
-\mathcal{G}_{dep} = \{ S \in \mathcal{P}(\mathbb{P}) \mid S = Cl_D(S) \}
+\mathcal{G}_{dep} = Idl(\mathbb{P}, \leq_D) = \{ S \in \mathcal{P}(\mathbb{P}) \mid S = Cl_D(S) \}
 $$
 
-## 4.2 空間の縮退
-$$
-\mathcal{G}_{dep} \subset \mathcal{P}(\mathbb{P})
-$$
+## 4.2 定理：順序同型性
 
-$\mathbb{P}$ の要素数が $N=5$ の場合、単純な冪集合のサイズは $2^5=32$ であるが、$\mathcal{G}_{dep}$ のサイズは依存制約により大幅に削減される（後述の図式化参照）。これにより、移行プロジェクトが目指すべき「マイルストーン」が厳選される。
+$\mathcal{G}_{dep}$ は、包含関係 $\subseteq$ を順序とすることで、束（Lattice）をなす。
+
+**定理:**
+保証空間 $\mathcal{G}_{dep}$ は、順序集合 $(\mathbb{P}, \leq_D)$ 上の分配束（Distributive Lattice）である。
 
 ---
 
-# 5. 束構造の保存性検証
+# 5. 完備分配束性の証明
 
-依存制約を導入した後も、保証空間が数理的な扱いやすさ（束構造）を維持していることを証明する。
+$\mathcal{G}_{dep}$ が完備分配束（Complete Distributive Lattice）であることを証明する。
 
-## 5.1 共通部分（Meet）の保存
-任意の $A, B \in \mathcal{G}_{dep}$ について、その共通部分 $A \cap B$ もまた $\mathcal{G}_{dep}$ に属する。
+## 5.1 完備性（Completeness）
 
-**証明:**
-$p \in A \cap B$ とする。$p \xrightarrow{req} q$ となる任意の $q$ について、
-$A$ は閉包なので $q \in A$。$B$ は閉包なので $q \in B$。
-ゆえに $q \in A \cap B$。
-よって $A \cap B$ も依存関係について閉じている。
+任意の族 $\{ S_i \}_{i \in I} \subseteq \mathcal{G}_{dep}$ に対して：
 
-$$
-A \land_{dep} B = A \cap B
-$$
+1.  **Meet (共通部分)**: $\bigwedge S_i = \bigcap_{i \in I} S_i$
+    - 下集合の共通部分は常に下集合であるため、$\mathcal{G}_{dep}$ 内に存在する。
+2.  **Join (和集合)**: $\bigvee S_i = \bigcup_{i \in I} S_i$
+    - 下集合の和集合は常に下集合であるため、$\mathcal{G}_{dep}$ 内に存在する。
 
-## 5.2 和集合（Join）の保存
-任意の $A, B \in \mathcal{G}_{dep}$ について、その和集合 $A \cup B$ もまた $\mathcal{G}_{dep}$ に属する。
+任意の族に対して上限と下限が存在するため、$\mathcal{G}_{dep}$ は完備束である。
 
-**証明:**
-$p \in A \cup B$ とする。
-場合1: $p \in A$ ならば、その前提 $q$ は $A$ に含まれるため $A \cup B$ に含まれる。
-場合2: $p \in B$ ならば、その前提 $q$ は $B$ に含まれるため $A \cup B$ に含まれる。
-よって $A \cup B$ も依存関係について閉じている。
+## 5.2 分配性（Distributivity）
+
+$\mathcal{G}_{dep}$ の演算は集合の共通部分（$\cap$）と和集合（$\cup$）そのものであるため、集合演算の分配律を継承する。
 
 $$
-A \lor_{dep} B = A \cup B
+A \cap (B \cup C) = (A \cap B) \cup (A \cap C)
 $$
 
-## 5.3 結論：分配束（Distributive Lattice）
-$\mathcal{G}_{dep}$ は、集合の包含関係 $\subseteq$ を順序とし、$\cap, \cup$ を演算とする**分配束（Distributive Lattice）**をなす。
-これは、$\mathcal{G}_{dep}$ が $\mathcal{P}(\mathbb{P})$ の**部分束（Sublattice）**であることを意味する。
+よって、$\mathcal{G}_{dep}$ は完備分配束である。
 
 ---
 
-# 6. 保証空間の視覚化
+# 6. Unreachable の形式定義
 
-## 6.1 Dependency Graph (G)
+理論空間から除外されるべき無効状態を形式的に定義する。
+
+## 6.1 定義
+
+ある保証集合 $S \subseteq \mathbb{P}$ が **Unreachable（到達不能）** であるとは、それが依存閉包と一致しないことである。
+
+$$
+Unreachable(S) \iff S \neq Cl_D(S)
+$$
+
+## 6.2 意味論的解釈
+
+$Unreachable(S)$ である状態は、工学的に「不安定」または「定義不能」な状態を意味する。
+例えば $S = \{ P_{flow} \}$ は、$P_{syn} \leq_D P_{flow}$ であるにもかかわらず $P_{syn} \notin S$ であるため Unreachable である。これは「構文エラーがあるのに制御フローは正しい」という矛盾した状態を示しており、解析ツールの出力としてはあり得ない（バグである）。
+
+---
+
+# 7. 保証空間の視覚化
+
+## 7.1 Hasse Diagram of Order $(\mathbb{P}, \leq_D)$
+
+順序構造としての依存関係。下にあるものほど基礎（必須）である。
 
 ```mermaid
-graph TD
+graph BT
     %% Nodes
     P_side(P_side: 副作用)
     P_data(P_data: データ依存)
@@ -150,40 +164,26 @@ graph TD
     P_bound(P_bound: 境界)
     P_syn(P_syn: 構文)
 
-    %% Dependencies (Requires)
-    P_side -->|req| P_data
-    P_side -->|req| P_flow
-    P_data -->|req| P_flow
-    P_flow -->|req| P_syn
-    P_bound -->|req| P_syn
+    %% Order Relations (p_j <= p_i implies edge p_j --> p_i)
+    P_syn --> P_flow
+    P_syn --> P_bound
+    P_flow --> P_data
+    P_flow --> P_side
+    P_data --> P_side
     
-    %% Semantic Layers
-    subgraph DecisionLayer [判断層]
-        P_side
-    end
-    subgraph StructureLayer [構造層]
-        P_data
-        P_flow
-        P_bound
-    end
-    subgraph SyntaxLayer [構文層]
-        P_syn
-    end
+    %% Implicit transitivity: P_syn --> P_data, P_syn --> P_side
 ```
 
-## 6.2 Dependent Guarantee Space Lattice ($\mathcal{G}_{dep}$)
+## 7.2 Ideal Lattice $\mathcal{G}_{dep}$ (Valid States)
 
-有効な（Closedな）状態のみで構成される束構造。
+妥当な状態のみで構成される分配束。
 
 ```mermaid
 graph TD
     Top[Top: Full Guarantee]
     
-    %% Intermediate States
     S_NoSide[No SideEffect<br>{Syn, Flow, Data, Bound}]
     S_NoBound[No Boundary<br>{Syn, Flow, Data, Side}]
-    %% Note: Side requires Flow&Data. Bound is separate branch from Flow usually, 
-    %% but logically Bound requires Syn.
     
     S_Data[Data Struct<br>{Syn, Flow, Data}]
     S_BoundFlow[Bound & Flow<br>{Syn, Flow, Bound}]
@@ -210,36 +210,33 @@ graph TD
     S_Bound --> S_Syn
     
     S_Syn --> Bot
-    
-    %% Invalid State Examples (Implicitly Excluded)
-    %% e.g. {P_side} only is impossible because it requires others.
 ```
 
----
+## 7.3 Unreachable State Example (Red)
 
-# 7. 意味論的解釈
+理論空間から除外される状態の例。
 
-依存付き保証空間の導入により、理論体系は以下のように強化された。
-
-## 7.1 「保証」の物理的意味の確立
-「$P_{flow}$ は満たすが $P_{syn}$ は満たさない」といった、現実には観測不能な状態が理論空間から排除された。これにより、移行ツールの評価において「あり得ない組み合わせ」を議論する無駄が省かれる。
-
-## 7.2 マイルストーンの正当化
-空間内の各ノード（Valid State）は、移行プロジェクトにおける有効なマイルストーンを表す。
-- $S_{Syn}$: コンパイルが通る状態
-- $S_{Flow}$: ロジックフローが同じ状態（データ値は未検証）
-- $S_{Data}$: 値の計算ロジックまで同じ状態（I/Oは未検証）
-
-これらは「中途半端」ではなく「数学的に安定した部分空間」として定義される。
-
-## 7.3 検証順序の示唆
-依存グラフの矢印の逆方向は、検証手順（Verification Order）を示唆する。
-$P_{syn}$（構文）を検証せずに $P_{flow}$（制御）を検証することはできない。保証の積み上げは、必ず依存グラフの根（$P_{syn}$）から葉（$P_{side}$）に向かって行われなければならない。
+```mermaid
+graph TD
+    subgraph Invalid Space
+        Inv1[Invalid: Flow without Syn]:::invalid
+        Inv2[Invalid: Side without Data]:::invalid
+    end
+    
+    subgraph Valid Space
+        S_Flow[Valid: Flow + Syn]
+        S_Side[Valid: Side + Data + Flow + Syn]
+    end
+    
+    Inv1 -.->|Requires| S_Flow
+    Inv2 -.->|Requires| S_Side
+    
+    classDef invalid fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5;
+```
 
 ---
 
 # 8. 結論
 
-本稿では、保証空間に依存構造を導入し、$\mathcal{G}_{dep}$ として再定義した。
-この空間は分配束の性質を保持しており、部分保証の合成や比較が可能である。
-この理論的精密化により、COBOL構造解析における「保証」は、単なる概念から、数学的な操作対象（Operable Object）へと昇華された。
+本改訂により、保証空間 $\mathcal{G}_{dep}$ は単なる集合の集まりではなく、**順序集合 $(\mathbb{P}, \leq_D)$ 上のイデアル束**として厳密に定式化された。
+この数学的構造は完備分配束であり、任意のマージ操作（Join）や共通部分抽出（Meet）が常に空間内で閉じることを保証する。これは、複数の解析ツールや検証結果を統合する際の理論的基盤となるものである。
