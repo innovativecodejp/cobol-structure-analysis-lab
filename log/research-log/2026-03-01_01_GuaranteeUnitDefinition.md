@@ -31,7 +31,7 @@ COBOL移行プロジェクトにおいて、「変換の正当性」をどのよ
 
 以下のドキュメントを作成し、定義を明文化した。
 
-- `docs/07_Guarantee-Unit-Definition.md`: 保証単位の定義、AST/CFG/DFGとの関係、Mermaidによる保証フロー図を含む。
+- `docs/50_guarantee/01_Guarantee-Unit-Definition.md`: 保証単位の定義、AST/CFG/DFGとの関係、Mermaidによる保証フロー図を含む。
 
 ## 4. 今後のアクション
 

@@ -3,10 +3,10 @@
 ## 🎯 今日の目的
 - 「保証（Guarantee）」の概念を数学的・構造的に形式化する。
 - 曖昧になりがちな「移行成功」の定義を、検証可能な条件式（不変条件）の集合として再定義する。
-- `docs/08_Formal-Definition-of-Guarantee.md` を作成する。
+- `docs/50_guarantee/02_Formal-Definition-of-Guarantee.md` を作成する。
 
 ## 🛠 実施内容
-- `docs/08_Formal-Definition-of-Guarantee.md` を作成。
+- `docs/50_guarantee/02_Formal-Definition-of-Guarantee.md` を作成。
     - **保証の基本定義**: 変換関数 $\Phi$ を適用した前後での性質 $P$ の保存として定義。
     - **5つの保存観点**: 構文、制御流、データ依存、副作用、境界整合性を定義。
     - **3層モデル**: $G_{syntax}, G_{structure}, G_{decision}$ に保証レベルを分離。

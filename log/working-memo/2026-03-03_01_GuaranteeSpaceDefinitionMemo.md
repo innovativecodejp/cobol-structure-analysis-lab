@@ -3,10 +3,10 @@
 ## 🎯 今日の目的
 - 「保証（Guarantee）」の概念を真偽値（Boolean）から空間（Space）へと拡張する。
 - 部分保証や階層的保証を数学的に取り扱えるようにする。
-- `docs/09_Guarantee-Space-Definition.md` を作成する。
+- `docs/50_guarantee/03_Guarantee-Space-Definition.md` を作成する。
 
 ## 🛠 実施内容
-- `docs/09_Guarantee-Space-Definition.md` を作成。
+- `docs/50_guarantee/03_Guarantee-Space-Definition.md` を作成。
     - **基本定義**: 保証を保存観点集合 $\mathbb{P}$ の冪集合 $\mathcal{P}(\mathbb{P})$ として定義。
     - **順序構造**: 包含関係による半順序 $\leq$ を導入。これにより「保証の強さ」を比較可能にした。
     - **束構造**: Join ($\lor$) と Meet ($\land$) を定義し、複数の変換ツールの統合や共通部分の抽出を数学的に表現できるようにした。

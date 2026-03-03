@@ -6,7 +6,7 @@
 - プロジェクト成果物としてのドキュメントを作成し、リポジトリに反映する。
 
 ## 🛠 実施内容
-- `docs/07_Guarantee-Unit-Definition.md` を作成。
+- `docs/50_guarantee/01_Guarantee-Unit-Definition.md` を作成。
     - L1〜L5の保証単位を定義。
     - 静的/動的保証の分離モデルをMermaid図式化。
 - `log/research-log/2026-03-01_01_GuaranteeUnitDefinition.md` を作成。

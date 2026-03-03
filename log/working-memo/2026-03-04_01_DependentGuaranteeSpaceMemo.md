@@ -3,10 +3,10 @@
 ## 🎯 今日の目的
 - Guarantee Space（保証空間）の理論を強化し、保存性質間の「依存関係（Dependency）」を導入する。
 - 独立仮定（すべての性質の組み合わせが可能であるという仮定）を排除し、物理的・論理的にあり得る状態のみを扱う空間 $\mathcal{G}_{dep}$ を定義する。
-- `docs/10_Dependent-Guarantee-Space.md` を作成する。
+- `docs/50_guarantee/04_Dependent-Guarantee-Space.md` を作成する。
 
 ## 🛠 実施内容
-- `docs/10_Dependent-Guarantee-Space.md` を作成および理論強化改訂。
+- `docs/50_guarantee/04_Dependent-Guarantee-Space.md` を作成および理論強化改訂。
     - **依存順序（$\leq_D$）**: 依存関係を有向グラフから半順序関係へと厳密化。
     - **イデアル束**: $\mathcal{G}_{dep}$ を順序集合 $(\mathbb{P}, \leq_D)$ のイデアル（下集合）として再定義。
     - **完備分配束性**: 縮退後の空間が完備分配束であることを証明。

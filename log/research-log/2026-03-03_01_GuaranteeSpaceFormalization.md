@@ -40,7 +40,7 @@ $$
 
 ## 4. 成果物
 
-- `docs/09_Guarantee-Space-Definition.md`: 保証空間の定義、順序構造、束構造、およびその意味論的解釈を記述した理論文書。
+- `docs/50_guarantee/03_Guarantee-Space-Definition.md`: 保証空間の定義、順序構造、束構造、およびその意味論的解釈を記述した理論文書。
 
 ## 5. 結論
 

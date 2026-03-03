@@ -1,0 +1,68 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "WSL: rg (search)",
+      "type": "shell",
+      "command": "wsl",
+      "args": [
+        "-d", "Ubuntu",
+        "--", "bash", "-lc",
+        "cd \"$(wslpath -a '${workspaceFolder}')\" && rg --hidden --glob \"!.git/*\" \"${input:pattern}\""
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "WSL: grep -R (search)",
+      "type": "shell",
+      "command": "wsl",
+      "args": [
+        "-d", "Ubuntu",
+        "--", "bash", "-lc",
+        "cd \"$(wslpath -a '${workspaceFolder}')\" && grep -RIn --exclude-dir=.git -- \"${input:pattern}\" ."
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "WSL: make",
+      "type": "shell",
+      "command": "wsl",
+      "args": [
+        "-d", "Ubuntu",
+        "--", "bash", "-lc",
+        "cd \"$(wslpath -a '${workspaceFolder}')\" && make -j"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "WSL: dotnet test",
+      "type": "shell",
+      "command": "wsl",
+      "args": [
+        "-d", "Ubuntu",
+        "--", "bash", "-lc",
+        "cd \"$(wslpath -a '${workspaceFolder}')\" && dotnet test"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "WSL: shfmt (format .sh)",
+      "type": "shell",
+      "command": "wsl",
+      "args": [
+        "-d", "Ubuntu",
+        "--", "bash", "-lc",
+        "cd \"$(wslpath -a '${workspaceFolder}')\" && shfmt -w -i 2 -sr ."
+      ],
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "pattern",
+      "type": "promptString",
+      "description": "検索パターン（rg/grep に渡します）",
+      "default": "TODO"
+    }
+  ]
+}

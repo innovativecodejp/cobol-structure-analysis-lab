@@ -1,4 +1,4 @@
-# 08_Formal-Definition-of-Guarantee
+# 02_Formal-Definition-of-Guarantee
 
 # 1. 問題設定
 

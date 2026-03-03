@@ -44,7 +44,7 @@ $$
 
 ## 4. 成果物
 
-- `docs/08_Formal-Definition-of-Guarantee.md`: 保証の形式定義、数式モデル、Mermaidによる境界図を含む定義書。
+- `docs/50_guarantee/02_Formal-Definition-of-Guarantee.md`: 保証の形式定義、数式モデル、Mermaidによる境界図を含む定義書。
 
 ## 5. 結論
 

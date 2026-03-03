@@ -69,6 +69,7 @@ for migration decisions through structural analysis of COBOL assets.
 - `docs/20_ir/`: IR definitions and mapping notes
 - `docs/30_cfg/`: CFG modeling notes
 - `docs/40_dfg/`: DFG modeling notes
+- `docs/50_guarantee/`: Migration guarantee theory
 - `docs/90_glossary/`: Terminology definitions
 - `docs/prompts/`: Prompt assets for structured research workflow execution
 - `docs/prompts/research/exec/`: Executable prompt definitions (for example, Research Log generation)

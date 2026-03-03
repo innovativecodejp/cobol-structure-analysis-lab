@@ -49,7 +49,7 @@ $$
 
 ## 4. 成果物
 
-- `docs/10_Dependent-Guarantee-Space.md`: 順序構造、イデアル束、完備分配束性の証明を含む理論定義書。
+- `docs/50_guarantee/04_Dependent-Guarantee-Space.md`: 順序構造、イデアル束、完備分配束性の証明を含む理論定義書。
 
 ## 5. 結論
 
