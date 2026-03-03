@@ -1,4 +1,4 @@
-# 2026-03-03_02_DependentGuaranteeSpaceMemo
+# 2026-03-04_01_DependentGuaranteeSpaceMemo
 
 ## 🎯 今日の目的
 - Guarantee Space（保証空間）の理論を強化し、保存性質間の「依存関係（Dependency）」を導入する。
