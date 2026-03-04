@@ -6,174 +6,130 @@
 
 しかし、実際の移行プロジェクトでは、すべての保証が等価ではない。例えば、構文解析（Syntax）のコストと、副作用検証（Side-effect）のコストは桁違いである。また、それらが崩れた際のリスク（影響度）も異なる。
 
-本定義書では、保証空間に**「重み（Weight）」**という計量構造を導入し、保証の強度、コスト、難易度を定量的に評価するための数理モデル **Weighted Guarantee Space** を構築する。
+本定義書では、保証空間に**「測度（Measure）」**としての重み構造を導入し、保証空間を**Hypercube幾何**として解釈することで、移行パス最適化（Shortest Path Problem）への接続を理論的に確立する。
 
-# 2. 重み関数の定義
+# 2. 保証強度の測度化（Measure Theoretic Definition）
 
-保存性質集合 $\mathbb{P} = \{ P_{syn}, P_{flow}, P_{data}, P_{side}, P_{bound} \}$ の各要素に対し、その重要度やコストを表す非負実数を割り当てる。
+これまで単なる総和として定義していた「強度（Strength）」を、集合上の測度として再定義する。
 
-## 2.1 定義
+## 2.1 有限加法測度としての定義
 
-重み関数 $w: \mathbb{P} \to \mathbb{R}_{\geq 0}$ を定義する。
-
-$$
-w(p) \geq 0 \quad (\forall p \in \mathbb{P})
-$$
-
-この重み $w(p)$ の意味は、文脈（Context）に応じて以下のように解釈される。
-
-- **実装コスト**: その性質を保証する変換器を作る難易度
-- **検証コスト**: その性質が守られているかテストするコスト
-- **リスク**: その性質が守られなかった場合の影響度
-
-## 2.2 相対尺度（正規化）
-
-総和が1（または100）になるように正規化された重み $w_{norm}$ を定義することもある。
+保存性質集合 $\mathbb{P}$ の冪集合 $\mathcal{P}(\mathbb{P})$ 上の関数 $\mu: \mathcal{P}(\mathbb{P}) \to \mathbb{R}_{\geq 0}$ を以下のように定義する。
 
 $$
-\sum_{p \in \mathbb{P}} w_{norm}(p) = 1
+\mu(S) = \sum_{p \in S} w(p)
 $$
 
-### 重み配分の例（仮説）
+ここで $w(p) > 0$ は各性質の重みである。この $\mu$ は以下の性質を満たすため、**有限加法測度（Finitely Additive Measure）** である。
 
-| 性質 $p$ | 重み $w(p)$ | 理由 |
-| :--- | :--- | :--- |
-| $P_{syn}$ (構文) | 10 | 基礎的。自動化容易。 |
-| $P_{flow}$ (制御) | 20 | 構造解析が必要。 |
-| $P_{bound}$ (境界) | 15 | インターフェース整合。 |
-| $P_{data}$ (データ) | 30 | データフロー解析が必要。高コスト。 |
-| $P_{side}$ (副作用) | 50 | 環境依存。検証困難。最大コスト。 |
+1.  $\mu(\emptyset) = 0$
+2.  $S \cap T = \emptyset \implies \mu(S \cup T) = \mu(S) + \mu(T)$
 
-# 3. 保証強度（Guarantee Strength）
+## 2.2 強度（Strength）との等価性
 
-ある保証集合 $S \subseteq \mathbb{P}$ が持つ「強さ」を、要素の重みの総和として定義する。
-
-## 3.1 定義
+保証強度 $Strength(S)$ は、この測度 $\mu$ そのものである。
 
 $$
-Strength(S) = \sum_{p \in S} w(p)
+Strength(S) \equiv \mu(S)
 $$
 
-## 3.2 依存空間 $\mathcal{G}_{dep}$ 上での性質
+これにより、保証強度は集合論的な操作（和、差、共通部分）に対して整合的な挙動を示すことが数学的に保証される。
 
-$S \in \mathcal{G}_{dep}$ （すなわち $S$ がイデアルである）場合、この Strength 関数は、空間の順序構造と整合する。
+# 3. Hypercube 幾何としての解釈
 
-**単調性（Monotonicity）:**
-$$
-S \subseteq T \implies Strength(S) \leq Strength(T)
-$$
+保証空間 $\mathcal{G} = \mathcal{P}(\mathbb{P})$ は、幾何学的には $N=|\mathbb{P}|$ 次元の超立方体（Hypercube）と同型である。
 
-証明：
-$T = S \cup (T \setminus S)$ であり、$w(p) \geq 0$ であるため、
-$Strength(T) = Strength(S) + \sum_{p \in T \setminus S} w(p) \geq Strength(S)$。
+## 3.1 同型写像
 
-# 4. 依存構造と強制コスト
-
-Dependent Guarantee Space では、ある高度な性質 $p_{high}$ を保証しようとすると、その前提となる基礎性質 $p_{base}$ も（閉包演算により）強制的に保証セットに含まれる。
-
-## 4.1 限界費用（Marginal Cost）
-
-ある性質 $p$ を追加する際の「実質的なコスト」は、単体コスト $w(p)$ ではなく、その依存閉包全体を追加するコストである。
-
-既存の保証状態 $S$ に対して、性質 $p$ を追加する場合の増分コスト $\Delta Cost(S, p)$：
+任意の保証集合 $S \subseteq \mathbb{P}$ は、$N$次元のビットベクトル $v \in \{0, 1\}^N$ と一対一に対応する。
 
 $$
-\Delta Cost(S, p) = Strength(Cl_D(S \cup \{p\})) - Strength(S)
+v_i = \begin{cases} 1 & (p_i \in S) \\ 0 & (p_i \notin S) \end{cases}
 $$
 
-例：
-$S = \{ P_{syn} \}$ の状態から、$P_{data}$ を追加する場合、
-$Cl_D(\{ P_{syn}, P_{data} \}) = \{ P_{syn}, P_{flow}, P_{data} \}$ となるため、
-増分コストは $w(P_{data})$ だけでなく $w(P_{flow})$ も加算される。
+## 3.2 幾何学的意味
 
-$$
-\Delta Cost = w(P_{data}) + w(P_{flow})
-$$
-
-これは「データフローだけを保証することはできず、必然的に制御フローの保証コストも支払う必要がある」という工学的現実を数式化したものである。
-
-# 5. 保証難易度モデル（Migration Difficulty）
-
-この重み付き空間を用いて、移行プロジェクトの難易度を定量化する。
-
-## 5.1 難易度（Difficulty）
-
-現在の保証状態（現状）$S_{current}$ から、目標とする保証状態（To-Be）$S_{target}$ へ到達するための難易度 $Diff$ を定義する。
-
-$$
-Diff(S_{current}, S_{target}) = Strength(S_{target}) - Strength(S_{target} \cap S_{current})
-$$
-
-通常、$S_{target} = \top$（完全保証）を目指す場合、現状の達成度を引いた残りが難易度となる。
-
-$$
-Diff(\emptyset, \top) = Strength(\top) \quad \text{(全量コスト)}
-$$
-
-## 5.2 変換器の性能評価
-
-変換ツール $T$ が保証できる集合を $S_T$ とすると、そのツールの「カバレッジ率」を定義できる。
-
-$$
-Coverage(T) = \frac{Strength(S_T)}{Strength(\top)}
-$$
-
-これにより、「ツールAは機能数は多いが重要な部分（重い部分）をカバーしていない」といった定性的な評価を定量化できる。
-
-# 6. 幾何学的解釈と図式化
-
-Weighted Guarantee Space は、各ノードに「高さ（Strength）」が与えられた地形（Landscape）として解釈できる。
-
-## 6.1 Guarantee Landscape (Mermaid)
-
-各ノードに (コスト) を付記したハッセ図。
-※ 重み例: Syn=1, Bound=2, Flow=3, Data=5, Side=8
+- **頂点**: 各保証状態（$2^N$ 個）
+- **辺**: 単一の性質 $p_i$ の追加/削除
+- **原点**: $\bot = \emptyset$ （全成分0）
+- **対角点**: $\top = \mathbb{P}$ （全成分1）
 
 ```mermaid
-graph BT
-    %% Nodes with Strength
-    Bot[Bot (0)]
-    Syn[Syn (1)]
+graph TD
+    %% 3D Hypercube representation (simplified)
+    Bot((000))
+    P1((100))
+    P2((010))
+    P3((001))
     
-    Flow[Flow + Syn (1+3=4)]
-    Bound[Bound + Syn (1+2=3)]
+    P12((110))
+    P13((101))
+    P23((011))
     
-    Data[Data + Flow + Syn (1+3+5=9)]
+    Top((111))
     
-    BoundFlow[Bound + Flow + Syn (1+2+3=6)]
+    Bot --- P1
+    Bot --- P2
+    Bot --- P3
     
-    NoSide[NoSide (1+2+3+5=11)]
+    P1 --- P12
+    P1 --- P13
+    P2 --- P12
+    P2 --- P23
+    P3 --- P13
+    P3 --- P23
     
-    Top[Top (1+2+3+5+8=19)]
-
-    %% Edges (Dependency / Inclusion)
-    Bot --> Syn
-    Syn --> Flow
-    Syn --> Bound
-    
-    Flow --> Data
-    Flow --> BoundFlow
-    Bound --> BoundFlow
-    
-    Data --> NoSide
-    BoundFlow --> NoSide
-    
-    NoSide --> Top
-    
-    %% Styles
-    style Top fill:#f9f,stroke:#333,stroke-width:4px
-    style Bot fill:#eee,stroke:#333
+    P12 --- Top
+    P13 --- Top
+    P23 --- Top
 ```
 
-- **高さ（Y軸）**: Strengthを表す。
-- **勾配**: 辺の傾きは、そのステップの限界費用（Marginal Cost）を表す。
+# 4. Dependent Guarantee Space の幾何
+
+依存付き保証空間 $\mathcal{G}_{dep}$ は、この Hypercube の部分集合（部分グラフ）である。
+
+## 4.1 有効領域（Valid Region）
+
+$\mathcal{G}_{dep}$ は、順序制約 $p_j \leq_D p_i \implies v_j \geq v_i$ を満たす頂点の集合であり、これは Hypercube 上の **Ideal Lattice（イデアル束）** を形成する。
+
+## 4.2 Unreachable State
+
+制約を満たさない頂点は「到達不能（Unreachable）」として空間から除外される。幾何学的には、Hypercube の特定の部分領域が「欠損（Hollow）」した形となる。
+
+# 5. 移行パスの定式化（Migration Path）
+
+保証空間を状態空間と見なすことで、移行プロセスを数学的に定式化できる。
+
+## 5.1 定義
+
+移行パス（Migration Path）とは、保証空間上の状態の列である。
+
+$$
+Path = (S_0, S_1, \dots, S_n)
+$$
+
+ここで $S_0 = \emptyset$（開始）、$S_n = \top$（完了）であり、各ステップは原子的な変化（1性質の追加）であることが望ましい。
+
+## 5.2 コスト関数
+
+パスのコストは、各ステップ間の距離の総和で定義される（次章詳述）。
+
+$$
+Cost(Path) = \sum_{i=0}^{n-1} d_w(S_i, S_{i+1})
+$$
+
+# 6. 最短経路問題（Shortest Path Problem）
+
+移行戦略の立案は、以下の最適化問題に帰着される。
+
+**問題**: 依存制約を満たす部分グラフ $\mathcal{G}_{dep}$ 上において、始点 $\bot$ から終点 $\top$ への最短経路（最小コストパス）を求めよ。
+
+- **ノード**: 保証状態 $S \in \mathcal{G}_{dep}$
+- **エッジ**: 状態遷移 $S \to S \cup \{p\}$
+- **エッジ重み**: $w(p)$ （ただし $S \cup \{p\} \in \mathcal{G}_{dep}$ の場合のみ通行可能）
 
 # 7. 結論
 
-Weighted Guarantee Space の定義により、保証構造に「重み」という距離空間的な性質が付与された。
-
-1.  **定量評価**: 移行の進捗やツールの性能を、単なる集合の包含関係だけでなく、数値（Strength）として比較可能になった。
-2.  **コスト構造の可視化**: 依存関係による「強制コスト」が形式化され、上位レベルの保証（$P_{side}$など）がいかに高コストであるかが理論的に説明可能になった。
-3.  **意思決定への応用**: 「残りコスト」や「ROI」の算出根拠として使用できる。
-
-これは、移行プロジェクトのマネジメント層（判断層）にとって強力な理論的武器となる。
+本改訂により、Weighted Guarantee Space は単なる「重み付き集合」から「測度を持つ幾何空間」へと昇華された。
+これにより、移行プロジェクトは「Hypercube 上の Unreachable 領域を避けながら、原点から対角点へ向かう最短経路探索問題」として数学的に完全に記述されることとなった。
+これは、動的計画法（DP）やA*探索などのアルゴリズムを移行計画に応用する道を開くものである。
