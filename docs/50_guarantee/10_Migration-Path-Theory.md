@@ -24,6 +24,7 @@ $$
 2.  **終点（Goal Condition）**:
     $$ S_n = \top = \mathbb{P} $$
     プロジェクト完了時は、すべての性質が保証された状態に至る。
+    （ただし、依存関係 $D$ が $\mathbb{P}$ 内で完結している場合。すなわち $\forall p \in \mathbb{P}, Dependency(p) \subseteq \mathbb{P}$ が成立する場合に限る）
 
 3.  **遷移（Transition Condition）**:
     $$ (S_i, S_{i+1}) \in E $$
@@ -52,6 +53,13 @@ $$
 すなわち、新たに追加される性質 $p$ が依存するすべての性質は、すでに $S_i$ に含まれているか、あるいは $p$ 自身で完結していなければならない。
 これにより、「前提条件を満たさないまま機能を追加する」という工学的な誤りを理論的に排除する。
 
+## 3.1 Linear Extension Interpretation
+
+この Atomic Migration Step の連続により、保証性質の追加順序 $(p_1, p_2, \dots, p_n)$ が誘導される。
+ここで $S_i = \{p_1, \dots, p_i\}$ である。
+依存関係 $(P, \leq_D)$ が存在する場合、 $p_j \leq_D p_i$ ならば $j < i$ が成立しなければならない。
+したがって、Migration Path は半順序集合 $(\mathbb{P}, \leq_D)$ の **線形拡張（Linear Extension）**、すなわちトポロジカルソートの結果に対応する。
+
 # 4. Path Length（パス長）
 
 移行パスの長さ $L(Path)$ を以下のように定義する。
@@ -60,28 +68,36 @@ $$
 L(Path) = n
 $$
 
-これは、プロジェクト完了までに必要な **Atomic Migration Step の総数** である。
-$G_{trans}$ が DAG であり、各ステップで要素が1つずつ追加されるため、任意の完全な Migration Path の長さは保証性質の総数に等しい。
+一般に、閉包 $Cl_D$ によって複数の要素が同時に追加される場合、パス長は保証性質の総数以下となる ($L(Path) \leq |\mathbb{P}|$)。
+しかし、本モデルでは Atomic Step の条件として $Cl_D(S \cup \{p\}) = S \cup \{p\}$ （単一要素のみの追加）を要求しているため、常に以下が成立する。
 
 $$
 L(Path) = |\mathbb{P}|
 $$
 
-この事実は、どのような順序で移行を進めようとも、最終的に実施すべき「最小単位の作業数」は不変であることを示唆している。
-（ただし、各ステップの重み（コスト）が異なる場合、総コストは経路によって変化する。これについては次章以降で扱う）
+この事実は、どのような順序（線形拡張）で移行を進めようとも、最終的に実施すべき「最小単位の作業数」は不変であることを示している。
+（ただし、各ステップの重み（コスト）が異なる場合、総コストは経路によって変化する）
 
 # 5. Migration Planning（移行計画）
 
 移行計画（Migration Planning）とは、始点 $\bot$ から終点 $\top$ へ至る最適な Migration Path を発見する問題である。
 
 **Path Finding Problem**:
-- **Input**: Guarantee Transition Graph $G_{trans}$
+- **Input**: Guarantee Transition Graph $G_{trans}$ (DAG)
 - **Start**: $\bot$
 - **Goal**: $\top$
 - **Output**: A sequence of states $(S_0, \dots, S_n)$
 
-この問題は、グラフ探索アルゴリズム（DFS, BFS, A*など）によって解くことができる。
-すべてのパスが実行可能（Feasible）であるため、計画の焦点は「実行可能か」ではなく「どのパスが最適か（コスト、リスク、期間など）」に移る。
+この問題は、DAG（有向非巡回グラフ）上の最適経路探索であるため、以下のアルゴリズムが適している。
+
+1.  **Topological Shortest Path**:
+    DAGのトポロジカル順序を利用して線形時間で最短経路を求める手法。
+2.  **Dynamic Programming (DP)**:
+    部分問題の最適解を積み上げる手法。
+3.  **Dijkstra / A\***:
+    汎用的な最短経路アルゴリズム（DAGなのでDijkstraも有効）。
+
+Migration Planning は、本質的には **Topological Ordering（トポロジカルソート）の最適化問題** として解釈できる。
 
 # 6. Visualization（図式化）
 
@@ -134,5 +150,5 @@ graph TD
 # 7. 結論
 
 本稿により、COBOL移行プロセスは **Guarantee Transition Graph 上の経路探索問題** として定式化された。
-各ステップ（Atomic Migration Step）は依存関係と整合しており、後戻りのない着実な進捗を表現している。
-これにより、移行計画の策定は、経験則や勘ではなく、数学的に裏付けられたグラフアルゴリズムによって行われるべき対象となった。
+各ステップは依存関係と整合しており、Migration Path は依存順序の **線形拡張（Linear Extension）** に対応する。
+これにより、移行計画の策定は、数理的な **Topological Ordering 問題** として厳密に扱うことが可能となった。
