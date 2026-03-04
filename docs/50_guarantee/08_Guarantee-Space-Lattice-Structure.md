@@ -3,7 +3,7 @@
 # 1. 目的
 
 本稿では、Guarantee Space の代数的構造を定義し、それが **分配束（Distributive Lattice）** であることを示す。
-また、依存関係を考慮した Dependent Guarantee Space ($G_{dep}$) が、元の空間の **部分束（Sublattice）** となり、同様に分配束の性質を継承することを証明する。
+また、依存関係を考慮した Dependent Guarantee Space ($G_{dep}$) が、順序集合上の **Ideals (Lower Sets)** の集合として定義され、元の空間の **部分束（Sublattice）** として分配束の性質を保持することを証明する。
 これにより、次フェーズで扱う「グラフ上の最短経路問題」の数学的基礎（格子グラフ構造）を確立する。
 
 # 2. Guarantee Space の束構造
@@ -46,28 +46,24 @@ $$ S \cap (T \cup U) = (S \cap T) \cup (S \cap U) $$
 $$ S \cup (T \cap U) = (S \cup T) \cap (S \cup U) $$
 したがって $G$ は分配束である。 $\square$
 
-## 2.4 完備性（Completeness）
-
-有限集合 $\mathbb{P}$ 上の冪集合束は完備束（Complete Lattice）である。
-すなわち、任意の部分集合族に対して上限 $\bigcup$ と下限 $\bigcap$ が存在する。
-
 # 3. Dependent Guarantee Space の束構造
 
 依存関係 $D$ を持つ部分空間 $G_{dep}$ の構造を整理する。
 
-## 3.1 下側閉集合（Lower Set / Ideal）としての定義
+## 3.1 依存関係とIdeals (Lower Sets)
 
-前稿までの定義において、依存関係 $p_j \leq_D p_i$ （$p_i$ は $p_j$ に依存）が存在するとき、有効な保証状態 $S$ は閉包条件 $S = Cl_D(S)$ を満たす必要があった。
-これは、順序集合 $(\mathbb{P}, \leq_D)$ における **下側閉集合（Lower Set）**、あるいは有限順序集合における **イデアル（Ideal）** の定義と等価である。
+依存関係 $D \subseteq \mathbb{P} \times \mathbb{P}$ により、性質間の依存順序 $p_j \leq_D p_i$ （$p_i$ depends on $p_j$）を定義する。
+$G_{dep}$ は、順序集合 $(\mathbb{P}, \leq_D)$ 上の **Ideals (Lower Sets)** の集合として定義される。
 
 $$
-G_{dep} = \mathcal{O}(\mathbb{P}, \leq_D) = \{ S \subseteq \mathbb{P} \mid \forall p \in S, \forall q \leq_D p \implies q \in S \}
+G_{dep} = Idl(\mathbb{P}, \leq_D) = \{ S \subseteq \mathbb{P} \mid \forall p \in S, q \leq_D p \implies q \in S \}
 $$
 
 ## 3.2 定理：G_dep は部分束である
 
 **定理 3**:
 $G_{dep}$ は $G$ の部分束（Sublattice）である。すなわち、$G_{dep}$ は $\cup$ と $\cap$ について閉じている。
+また、$G_{dep}$ 自体も **Finite Distributive Lattice** を形成する。
 
 **証明**:
 任意の $S, T \in G_{dep}$ をとる。
@@ -81,50 +77,52 @@ $G_{dep}$ は $G$ の部分束（Sublattice）である。すなわち、$G_{dep
 
 以上より、$G_{dep}$ は $G$ の部分束である。 $\square$
 
-## 3.3 系：G_dep は分配束である
-
-**系**:
-$G_{dep}$ は分配束である。
-
-**証明**:
-$G$ が分配束であり、$G_{dep}$ がその部分束であることから、分配律は $G_{dep}$ 上でも成立する。 $\square$
-
-この性質は、依存関係のある保証状態の探索において、常に「共通部分（共通の前提）」や「合併（統合）」が有効な状態として存在することを保証する重要な性質である。
+明らかに $G_{dep} \subset \mathcal{P}(\mathbb{P})$ であり、部分束であることから分配律も成立する。
 
 # 4. Graph構造への接続（Prompt3 前提）
 
 束構造を離散グラフとして扱うための定義を導入する。
 
-## 4.1 被覆関係（Cover Relation）
+## 4.1 被覆関係（Cover Relation）の厳密定義
 
 順序集合 $(L, \leq)$ において、$x < y$ かつ $x < z < y$ となる $z$ が存在しないとき、「$y$ は $x$ を被覆する（covers）」といい、$x \lessdot y$ と書く。
 
-Guarantee Space $G$ における被覆関係は以下となる：
-$$ S \lessdot T \iff T = S \cup \{p\} \quad (p \notin S) $$
+Guarantee Space $G$ における被覆関係は、依存関係を考慮し以下のように定義される：
 
-これは **Hamming距離が1である** ことと同値である。
+$$ S \lessdot T \iff T = S \cup \{p\} \land p \notin S \land Cl_D(S \cup \{p\}) = S \cup \{p\} $$
 
-## 4.2 ハッセ図（Hasse Diagram）と Lattice Graph
+かつ、当然ながら $S, T \in G_{dep}$ である必要がある。
+すなわち、**単一の要素 $p$ を追加した結果が即座に有効な状態（Ideal）となる場合のみ**、被覆関係が成立する。
 
-束の要素を頂点とし、被覆関係 $x \lessdot y$ を有向辺 $(x, y)$ とみなしたグラフを **ハッセ図** または **Lattice Graph** と呼ぶ。
+## 4.2 Lattice Graph
 
-- **Guarantee Graph**: $G$ のハッセ図。$N$次元ハイパーキューブグラフと同型。
-- **Dependent Guarantee Graph**: $G_{dep}$ のハッセ図。ハイパーキューブの部分グラフ。
+**Lattice Graph** を以下のように定義する。
+
+$$
+Graph \ G = (V, E)
+$$
+- $V = G_{dep} = Idl(\mathbb{P}, \leq_D)$
+- $E = \{ (S, T) \mid S \lessdot T \}$
+
+このグラフは、全体空間 $G$ に対応する **Hypercube Graph の部分グラフ** として解釈できる。
+（ただしエッジは依存関係を満たす遷移のみに制限される）
 
 ```mermaid
 graph TD
-    subgraph "Lattice Structure (Hasse Diagram Example)"
+    subgraph "Lattice Structure (Hasse Diagram / Lattice Graph)"
         Top((Top: {p1, p2}))
         p1(( {p1} ))
         p2(( {p2} ))
         Bot((Bot: ∅))
 
         Bot -->|cover| p1
-        Bot -->|cover| p2
+        Bot -.->|invalid| p2
         p1 -->|cover| Top
-        p2 -->|cover| Top
+        p2 -.->|invalid| Top
     end
+    style p2 fill:#ccc,stroke-dasharray: 5 5
 ```
+*(注: 上図は p2 が p1 に依存する場合の例。p2単独はInvalidとなり、Bot->p2のエッジは存在しない)*
 
 このグラフ構造により、次フェーズ（Prompt3）において、移行パスを「Lattice Graph 上のパス」として定義し、最短経路問題を適用することが可能となる。
 
@@ -137,10 +135,12 @@ graph TD
     - Join = Union ($\cup$), Meet = Intersection ($\cap$)。
 
 2.  **依存空間**:
-    - $G_{dep}$ は $(\mathbb{P}, \leq_D)$ の **Lower Sets (Ideals)** の族である。
+    - $G_{dep} = Idl(\mathbb{P}, \leq_D)$ は順序集合 $(\mathbb{P}, \leq_D)$ の **Ideals (Lower Sets)** の集合である。
     - $G_{dep}$ は $G$ の **部分束** であり、かつ **分配束** である。
-    - つまり、有効な状態同士の $\cup$ と $\cap$ は常に有効である。
+    - $G_{dep} \subset \mathcal{P}(\mathbb{P})$。
 
 3.  **グラフ接続**:
-    - 順序関係 $\subseteq$ はグラフの経路に対応する。
-    - Step $S \to S'$ が原子的（Atomic）であるとは、それが Cover Relation $S \lessdot S'$ に対応することである。
+    - Lattice Graph $G = (V, E)$。
+    - $V = G_{dep}$。
+    - $E$: Cover Relation $S \lessdot T \iff T = S \cup \{p\}$ かつ $T \in G_{dep}$。
+    - これは Hypercube Graph の部分グラフである。
