@@ -30,7 +30,17 @@ $$
 d_w(G_1, G_2) = \sum_{p \in G_1 \triangle G_2} w(p)
 $$
 
-## 3.2 コスト解釈（Cost Interpretation）
+## 3.2 Measure と Metric の関係
+
+この距離 $d_w$ は、前章で定義した測度 $\mu$ によって誘導される。
+
+$$
+d_w(G_1, G_2) = \mu(G_1 \triangle G_2)
+$$
+
+これにより、集合の「大きさ（Measure）」と、集合間の「距離（Metric）」が数学的に整合していることが示される。
+
+## 3.3 コスト解釈（Cost Interpretation）
 
 この距離は、「ある状態から別の状態へ移行するための最小コスト」と解釈できる（ただし、依存制約を無視した場合）。
 移行ギャップ（Migration Gap）は、この距離によって定量化される。
@@ -57,15 +67,24 @@ $$
 
 # 5. Migration Geometry（移行の幾何学）
 
-最終的に、Guarantee Space は以下の数学的構造を併せ持つ**Migration Geometry**として整理される。
+最終的に、Guarantee Space は以下の数学的構造を併せ持つ**Finite Metric Graph**として整理される。
 
 | 数学構造 | 移行プロジェクトにおける意味 |
 | :--- | :--- |
-| **Hypercube** | 全体像。可能なすべての機能の組み合わせ（$2^N$通り）。 |
+| **Hypercube Graph** | 全体像。ノード（状態）とエッジ（遷移）からなるグラフ。 |
 | **Partial Order** | 依存関係。手順の前後関係制約。 |
 | **Ideal Lattice** | 有効領域。工学的に妥当なマイルストーン群。 |
 | **Measure ($\mu$)** | 強度。プロジェクトの達成価値（Earned Value）。 |
 | **Metric ($d_w$)** | 距離。残作業コストや乖離度。 |
+
+## 5.1 最短経路問題としての移行計画
+
+移行計画（Migration Planning）は、この **Finite Metric Graph 上の最短経路問題（Shortest Path Problem）** と同型である。
+
+- 始点: 現状 $S_{current}$
+- 終点: 目標 $S_{target}$
+- 制約: 経路上の全ノードが $\mathcal{G}_{dep}$ に含まれること
+- 目的: 経路コスト $\sum d_w(S_i, S_{i+1})$ の最小化
 
 # 6. 幾何学的解釈と図式化
 
@@ -81,7 +100,7 @@ graph TD
         Target((Target))
         
         %% Weighted Distance
-        Current -- "d_w (Hamming)" --- Target
+        Current -- "d_w = μ(C △ T)" --- Target
         Target -- "d_w" --- Top
         
         %% Unreachable Region
@@ -95,9 +114,9 @@ graph TD
     classDef invalid fill:#eee,stroke:#999,stroke-dasharray: 5 5;
 ```
 
-## 6.2 Migration Path Optimization
+## 6.2 Migration Path with Dependency
 
-最短経路問題としての移行パス。
+依存制約を考慮した有効な移行パス。
 
 ```mermaid
 graph LR
@@ -110,6 +129,17 @@ graph LR
     
     linkStyle 0,1,2 stroke-width:4px,stroke:blue;
     linkStyle 3,4 stroke-width:2px,stroke:red,stroke-dasharray: 5 5;
+    
+    subgraph Valid Path
+    S1
+    S2
+    end
+    
+    subgraph Invalid Path
+    A1[Unreachable<br>Dependency Violation]:::invalid
+    end
+    
+    classDef invalid fill:#ffcccc,stroke:#ff0000,stroke-dasharray: 5 5;
 ```
 （青：依存制約を満たすValid Path、赤：Unreachableを通る無効なパス）
 

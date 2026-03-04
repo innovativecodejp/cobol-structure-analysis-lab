@@ -6,7 +6,7 @@
 
 しかし、実際の移行プロジェクトでは、すべての保証が等価ではない。例えば、構文解析（Syntax）のコストと、副作用検証（Side-effect）のコストは桁違いである。また、それらが崩れた際のリスク（影響度）も異なる。
 
-本定義書では、保証空間に**「測度（Measure）」**としての重み構造を導入し、保証空間を**Hypercube幾何**として解釈することで、移行パス最適化（Shortest Path Problem）への接続を理論的に確立する。
+本定義書では、保証空間に**「測度（Measure）」**としての重み構造を導入し、保証空間を**Hypercube幾何**および**Hypercube Graph**として解釈することで、移行パス最適化（Shortest Path Problem）への接続を理論的に確立する。
 
 # 2. 保証強度の測度化（Measure Theoretic Definition）
 
@@ -39,13 +39,18 @@ $$
 
 保証空間 $\mathcal{G} = \mathcal{P}(\mathbb{P})$ は、幾何学的には $N=|\mathbb{P}|$ 次元の超立方体（Hypercube）と同型である。
 
-## 3.1 同型写像
+## 3.1 Hypercube Graph の定義
 
-任意の保証集合 $S \subseteq \mathbb{P}$ は、$N$次元のビットベクトル $v \in \{0, 1\}^N$ と一対一に対応する。
+保証空間をグラフ理論的に定義する。
 
 $$
-v_i = \begin{cases} 1 & (p_i \in S) \\ 0 & (p_i \notin S) \end{cases}
+Graph G = (V, E)
 $$
+
+- $V = \{0, 1\}^N \cong \mathcal{P}(\mathbb{P})$ （各保証状態は $N$次元ビットベクトル）
+- $E = \{(u, v) \mid d_H(u, v) = 1\}$ （ハミング距離が1の状態間にエッジが存在）
+
+これは、ある保証状態から、単一の性質 $p$ を追加または削除する操作がエッジに対応することを意味する。
 
 ## 3.2 幾何学的意味
 
@@ -88,11 +93,30 @@ graph TD
 
 依存付き保証空間 $\mathcal{G}_{dep}$ は、この Hypercube の部分集合（部分グラフ）である。
 
-## 4.1 有効領域（Valid Region）
+## 4.1 依存関係の形式定義
 
-$\mathcal{G}_{dep}$ は、順序制約 $p_j \leq_D p_i \implies v_j \geq v_i$ を満たす頂点の集合であり、これは Hypercube 上の **Ideal Lattice（イデアル束）** を形成する。
+依存関係を二項関係 $D \subseteq \mathbb{P} \times \mathbb{P}$ として定義する。
+$p_i$ が $p_j$ に依存することを $p_j \leq_D p_i$ と表記する。
 
-## 4.2 Unreachable State
+## 4.2 依存閉包（Dependency Closure）
+
+依存関係に基づく閉包演算 $Cl_D: \mathcal{P}(\mathbb{P}) \to \mathcal{P}(\mathbb{P})$ を定義する。
+
+$$
+Cl_D(S) = S \cup \{ p_j \in \mathbb{P} \mid \exists p_i \in S : p_j \leq_D p_i \}
+$$
+
+## 4.3 有効領域（Valid Region）
+
+$\mathcal{G}_{dep}$ は、依存閉包について閉じている集合のみからなる部分空間である。
+
+$$
+\mathcal{G}_{dep} = \{ S \in \mathcal{P}(\mathbb{P}) \mid S = Cl_D(S) \}
+$$
+
+これは Hypercube 上の **Ideal Lattice（イデアル束）** を形成する。
+
+## 4.4 Unreachable State
 
 制約を満たさない頂点は「到達不能（Unreachable）」として空間から除外される。幾何学的には、Hypercube の特定の部分領域が「欠損（Hollow）」した形となる。
 
@@ -108,9 +132,25 @@ $$
 Path = (S_0, S_1, \dots, S_n)
 $$
 
-ここで $S_0 = \emptyset$（開始）、$S_n = \top$（完了）であり、各ステップは原子的な変化（1性質の追加）であることが望ましい。
+ここで $S_0 = \emptyset$（開始）、$S_n = \top$（完了）である。
 
-## 5.2 コスト関数
+## 5.2 依存制約付き遷移（Migration Step）
+
+各ステップ $S_i \to S_{i+1}$ は、単一の性質 $p$ の追加に対応するが、依存制約により閉包を取る必要がある。
+
+$$
+S_{i+1} = Cl_D(S_i \cup \{p\})
+$$
+
+かつ、遷移先は有効な状態空間内でなければならない。
+
+$$
+S_{i+1} \in \mathcal{G}_{dep}
+$$
+
+これにより、ある性質を追加する際に、その前提条件も同時に（強制的に）追加される挙動が定式化される。
+
+## 5.3 コスト関数
 
 パスのコストは、各ステップ間の距離の総和で定義される（次章詳述）。
 
@@ -125,8 +165,8 @@ $$
 **問題**: 依存制約を満たす部分グラフ $\mathcal{G}_{dep}$ 上において、始点 $\bot$ から終点 $\top$ への最短経路（最小コストパス）を求めよ。
 
 - **ノード**: 保証状態 $S \in \mathcal{G}_{dep}$
-- **エッジ**: 状態遷移 $S \to S \cup \{p\}$
-- **エッジ重み**: $w(p)$ （ただし $S \cup \{p\} \in \mathcal{G}_{dep}$ の場合のみ通行可能）
+- **エッジ**: 状態遷移 $S \to S'$ （ここで $S' = Cl_D(S \cup \{p\})$）
+- **エッジ重み**: $d_w(S, S') = \mu(S' \setminus S)$
 
 # 7. 結論
 
