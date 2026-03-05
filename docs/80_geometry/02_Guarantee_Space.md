@@ -64,15 +64,29 @@ Points in $GS$ can be compared using Euclidean or Manhattan distance (see Phase4
 
 ---
 
-## 4. Relation to Phase 2/3
+## 4. Relation to Phase 2/3: Discrete → Continuous
 
-| Phase | Space | Interpretation |
+### 4.1 Discrete → Continuous Relaxation
+
+Phase 2/3 use **discrete structures**; Phase 4 introduces a **continuous relaxation**:
+
+| Phase | Structure | Interpretation |
 | :--- | :--- | :--- |
-| Phase 2 | $\mathcal{G} = \mathcal{P}(\mathbb{P})$ | Discrete lattice |
-| Phase 3 | $\mathcal{G}_{dep}$ (ideals) | Dependency-constrained |
-| Phase 4 | $GS = [0,1]^n$ | Continuous geometry |
+| Phase 2 | Guarantee Lattice $\mathcal{G} = \mathcal{P}(\mathbb{P})$ | Discrete (present/absent) |
+| Phase 3 | Dependency-Constrained Ideals $\mathcal{G}_{dep}$ | Discrete, dependency-closed |
+| Phase 4 | Continuous Guarantee Space $GS = [0,1]^n$ | Continuous (degree of preservation) |
 
-Phase 4 provides a **continuous relaxation** of the discrete model, enabling distance-based optimization.
+### 4.2 Theoretical Progression
+
+$$
+\text{Discrete Structure} \rightarrow \text{Continuous Geometry}
+$$
+
+- **Phase 2**: Guarantee states are sets (binary: $p \in S$ or $p \notin S$).
+- **Phase 3**: Valid states are ideals; migration is graph traversal.
+- **Phase 4**: States are points in $[0,1]^n$; migration is path optimization in continuous space.
+
+Phase 4 provides a **continuous relaxation** of the discrete model, enabling distance-based optimization and gradient-like reasoning.
 
 ---
 
