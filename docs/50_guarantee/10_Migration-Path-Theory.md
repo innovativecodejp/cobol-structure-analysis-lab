@@ -53,14 +53,45 @@ $$
 すなわち、新たに追加される性質 $p$ が依存するすべての性質は、すでに $S_i$ に含まれているか、あるいは $p$ 自身で完結していなければならない。
 これにより、「前提条件を満たさないまま機能を追加する」という工学的な誤りを理論的に排除する。
 
-## 3.1 Linear Extension Interpretation
+# 4. Linear Extension Interpretation
 
-この Atomic Migration Step の連続により、保証性質の追加順序 $(p_1, p_2, \dots, p_n)$ が誘導される。
-ここで $S_i = \{p_1, \dots, p_i\}$ である。
-依存関係 $(P, \leq_D)$ が存在する場合、 $p_j \leq_D p_i$ ならば $j < i$ が成立しなければならない。
-したがって、Migration Path は半順序集合 $(\mathbb{P}, \leq_D)$ の **線形拡張（Linear Extension）**、すなわちトポロジカルソートの結果に対応する。
+本章では、Migration Path と順序理論の関係について数学的な解釈を与える。
 
-# 4. Path Length（パス長）
+## 4.1 数学的定義
+
+保証性質集合を $\mathbb{P}$、依存関係を $\leq_D$ とする。
+$(\mathbb{P}, \leq_D)$ は部分順序集合（poset）である。
+
+Migration Path $(S_0 \to S_1 \to \dots \to S_n)$ は、保証性質の追加順序 $(p_1, p_2, \dots, p_n)$ を誘導する。
+ここで、各状態は以下のように表現できる。
+
+$$
+S_i = \{p_1, \dots, p_i\}
+$$
+
+Atomic Migration Step の定義より、次式が成立する。
+
+$$
+S_{i+1} = S_i \cup \{p_{i+1}\}
+$$
+
+## 4.2 順序保存性
+
+依存関係の定義より、もし $p_j \leq_D p_i$ （$p_i$ が $p_j$ に依存する）ならば、依存する側（$p_i$）よりも先に依存される側（$p_j$）が追加されていなければならない。
+すなわち、添字について以下の関係が成立する。
+
+$$
+p_j \leq_D p_i \implies j < i
+$$
+
+したがって、追加順序列 $(p_1, p_2, \dots, p_n)$ は、poset $(\mathbb{P}, \leq_D)$ の **線形拡張（Linear Extension）** である。
+
+## 4.3 理論的解釈
+
+この結果から、Migration Path は数学的には **poset の Linear Extension** と一対一に対応することが示された。
+したがって、Migration Planning（移行計画）は、無数に存在する Linear Extension の中から、コスト関数を最小化するものを選択する問題、すなわち **Topological Ordering（トポロジカルソート）の探索問題** として解釈できる。
+
+# 5. Path Length（パス長）
 
 移行パスの長さ $L(Path)$ を以下のように定義する。
 
@@ -78,7 +109,7 @@ $$
 この事実は、どのような順序（線形拡張）で移行を進めようとも、最終的に実施すべき「最小単位の作業数」は不変であることを示している。
 （ただし、各ステップの重み（コスト）が異なる場合、総コストは経路によって変化する）
 
-# 5. Migration Planning（移行計画）
+# 6. Migration Planning（移行計画）
 
 移行計画（Migration Planning）とは、始点 $\bot$ から終点 $\top$ へ至る最適な Migration Path を発見する問題である。
 
@@ -99,7 +130,7 @@ $$
 
 Migration Planning は、本質的には **Topological Ordering（トポロジカルソート）の最適化問題** として解釈できる。
 
-# 6. Visualization（図式化）
+# 7. Visualization（図式化）
 
 Guarantee Transition Graph と Migration Path の関係を以下に示す。
 
@@ -147,7 +178,7 @@ graph TD
 
 （青線は一つの有効な Migration Path の例：$\emptyset \to \{p_1\} \to \{p_1, p_3\} \to \dots \to \mathbb{P}$）
 
-# 7. 結論
+# 8. 結論
 
 本稿により、COBOL移行プロセスは **Guarantee Transition Graph 上の経路探索問題** として定式化された。
 各ステップは依存関係と整合しており、Migration Path は依存順序の **線形拡張（Linear Extension）** に対応する。
