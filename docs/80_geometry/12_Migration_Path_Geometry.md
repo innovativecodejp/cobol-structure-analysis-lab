@@ -20,8 +20,22 @@ $$
 
 ## 3. Path Risk
 
+### 3.1 Risk Density (Cost Field)
+
+The migration risk is expressed as an integral over a **Risk Density** (Cost Field):
+
 $$
-Risk(P) = \int_0^1 d_w(P(t), Ideal) \, dt
+cost(G) = d_w(G, Ideal)
+$$
+
+- **Risk Density**: 局所的移行リスク（各点 $G \in GS$ におけるリスク）
+- **Cost Field**: 空間上のリスク分布 $cost: GS \to \mathbb{R}_{\ge 0}$
+- **Gradient**: リスク増加方向 $\nabla cost$
+
+### 3.2 Path Risk Integral
+
+$$
+Risk(P) = \int_0^1 cost(P(t)) \, dt = \int_0^1 d_w(P(t), Ideal) \, dt
 $$
 
 ## 4. Optimization

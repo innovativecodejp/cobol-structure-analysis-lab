@@ -82,6 +82,29 @@ flowchart LR
 
 ---
 
-## 5. Conclusion
+## 5. Axis Dependency Graph
 
-Guarantee Axis Theory links each vector dimension to its **structural origin**. This ensures traceability from geometry (Migration Distance, Safe Region) back to program structure (AST, CFG, DFG).
+Guarantee Axes are **not fully independent**. Structural dependencies exist between axes:
+
+| Dependency | Explanation |
+| :--- | :--- |
+| State → Data | 状態はデータに依存 |
+| Transaction → State | トランザクションは状態に依存 |
+| Control → State | 制御は状態に依存 |
+| Interface → Transaction | インターフェースはトランザクションに依存 |
+
+```mermaid
+flowchart TD
+    Data --> State
+    State --> Transaction
+    Control --> State
+    Interface --> Transaction
+```
+
+See **16_Guarantee_Axis_Dependency.md** for the full formalization.
+
+---
+
+## 6. Conclusion
+
+Guarantee Axis Theory links each vector dimension to its **structural origin** and captures **axis dependencies**. This ensures traceability from geometry (Migration Distance, Safe Region) back to program structure (AST, CFG, DFG).

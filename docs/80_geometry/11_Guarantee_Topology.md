@@ -10,6 +10,14 @@
 
 A topology is introduced on the Guarantee Space, enabling formal treatment of Safe Region, Failure Region, and boundaries.
 
+**Euclidean Topology Inheritance**
+
+$$
+GS = [0,1]^n \subset \mathbb{R}^n
+$$
+
+GS inherits the **Euclidean topology** from $\mathbb{R}^n$. The subspace topology on $GS$ is the relative topology induced by the standard Euclidean topology on $\mathbb{R}^n$.
+
 ---
 
 ## 2. Topological Structure
