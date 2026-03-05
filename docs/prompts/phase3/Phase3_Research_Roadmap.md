@@ -2,7 +2,7 @@
 
 **Research Context:** COBOL Structure Analysis Laboratory  
 **Focus:** Structural Theory for Legacy Migration Decision Making  
-**Document ID:** `docs/Phase3_Research_Roadmap.md`
+**Document ID:** `docs/prompts/phase3/Phase3_Research_Roadmap.md`
 
 ---
 
