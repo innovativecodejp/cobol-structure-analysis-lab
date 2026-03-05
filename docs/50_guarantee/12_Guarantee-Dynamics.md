@@ -50,10 +50,10 @@ $$
 ある性質 $p \in Available(S)$ を追加することによる即時的な効果を、その性質の **Activation Potential** として厳密に定義する。
 
 $$
-Potential(p \mid S) = | Unlock(p) \cap Available(S \cup \{p\}) |
+Potential(p \mid S) = | (Unlock(p) \setminus S) \cap Available(S \cup \{p\}) |
 $$
 
-これは、「$p$ を追加することによって、新たに $Available$ 集合に追加される性質の数」を表す。
+これは、「$p$ を追加することによって、**新たに** $Available$ 集合に追加される性質（newly available guarantees）の数」を表す。
 高い Potential を持つ性質を優先的に導入することで、後の選択肢（Branching Factor）を広げ、プロジェクトの柔軟性を高めることができる。
 
 # 5. Critical Guarantees

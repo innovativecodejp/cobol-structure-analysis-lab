@@ -86,7 +86,21 @@ $$
 
 したがって、追加順序列 $(p_1, p_2, \dots, p_n)$ は、poset $(\mathbb{P}, \leq_D)$ の **線形拡張（Linear Extension）** である。
 
-## 4.3 理論的解釈
+$$
+\text{Migration Path Space} = \text{Linear Extension Space of } (\mathbb{P}, \leq_D)
+$$
+
+## 4.3 経路の数（Path Count）
+
+有効な移行パスの総数は、Poset $(\mathbb{P}, \leq_D)$ の Linear Extension の総数 $e(P)$ に等しい。
+
+$$
+|Paths| = e(P)
+$$
+
+これは、移行計画の探索空間の大きさを表す指標となる。
+
+## 4.4 理論的解釈
 
 この結果から、Migration Path は数学的には **poset の Linear Extension** と一対一に対応することが示された。
 したがって、Migration Planning（移行計画）は、無数に存在する Linear Extension の中から、コスト関数を最小化するものを選択する問題、すなわち **Topological Ordering（トポロジカルソート）の探索問題** として解釈できる。

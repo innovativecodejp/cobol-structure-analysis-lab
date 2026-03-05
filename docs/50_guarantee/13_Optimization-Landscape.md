@@ -79,13 +79,6 @@ $$
 **Migration Valley** とは、大域的な最適パス（Optimal Path）に近い状態の集合である。
 
 $$
-Valley_{\epsilon} = \{ S \in G_{dep} \mid E(S) - d_{min}(\bot, S) \leq \epsilon \}
-$$
-
-ここで、$E(S)$ は定義上 $d_{min}(\bot, S)$ と一致するため、上記の定義は常に $0 \leq \epsilon$ で成立する。
-より直感的には、ゴール $\top$ への最短経路距離 $d_{min}(S, \top)$ を考慮し、以下のように再定義する。
-
-$$
 Valley_{\epsilon} = \{ S \in G_{dep} \mid (d_{min}(\bot, S) + d_{min}(S, \top)) - d_{min}(\bot, \top) \leq \epsilon \}
 $$
 
@@ -99,7 +92,7 @@ $\epsilon=0$ の場合、Valley は厳密な最適経路（の集合）となる
 ある状態 $S$ から次の状態へ進むためのすべての遷移 $S \to T$ が、許容限界を超えるエネルギー勾配（コスト増分）を要求する場合、その状態は **Barrier** に直面している。
 
 $$
-Barrier(S) \iff \forall T \text{ s.t. } S \lessdot T, \ \Delta E(S, T) > Threshold
+Barrier(S) \iff \forall p \in Available(S), \ \Delta E(S, p) > Threshold
 $$
 
 ## 7.2 Local Optima (Greedy Trap)
@@ -166,3 +159,25 @@ graph TD
 Guarantee Space を Optimization Landscape として捉えることで、移行計画は「地形を読み、最適なルートを選び取る」幾何学的な問題として再定義された。
 特に、Migration Valley を「全体最適解からの乖離が少ない領域」として数学的に定義したことで、プロジェクトの健全性を定量的に評価する指標が得られた。
 この理論的枠組みは、複雑な依存関係を持つ大規模移行プロジェクトにおいて、迷走を防ぎ、最短ルートを維持するための羅針盤となる。
+
+# 11. Phase 2 Theory Structure
+
+本フェーズで構築された理論の全体構造は以下の通りである。
+
+1.  **Guarantee Space**: 保証状態の全体集合（冪集合）。
+    $\downarrow$
+2.  **Distributive Lattice**: 和集合と共通部分による代数構造。
+    $\downarrow$
+3.  **Dependency Poset**: 保証間の依存関係に基づく順序構造。
+    $\downarrow$
+4.  **Linear Extensions**: 依存関係を満たす順列の集合。
+    $\downarrow$
+5.  **Migration Paths**: 具体的な移行手順（Linear Extension に対応）。
+    $\downarrow$
+6.  **Migration Complexity**: 最小コストパスによる難易度の定量化。
+    $\downarrow$
+7.  **Guarantee Dynamics**: 時間軸に沿った状態の進化と活性化。
+    $\downarrow$
+8.  **Optimization Landscape**: コスト関数に基づく地形的解釈と最適化。
+
+これにより、COBOL移行問題は、単なる工学的課題から **Discrete Optimization Problem（離散最適化問題）** として数学的に完全に定式化された。

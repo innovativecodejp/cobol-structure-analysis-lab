@@ -57,12 +57,24 @@ $$
 ここで $\mathcal{P}_{S \to T}$ は、状態 $S$ から $T$ へのすべての有効な移行パスの集合である。
 この最小化問題は、重み付きグラフ上の **Shortest Path Problem（最短経路問題）** に帰着される。
 
+これは Phase 2 後半で定義される **Energy Function** の差分（あるいは到達エネルギー）と一致する概念である。
+
+$$
+MinCost(\bot, S) = E(S)
+$$
+
 # 5. Migration Complexity
 
 プロジェクト全体の移行複雑度 $C$ を、始点 $\bot$ から終点 $\top$ への最小移行コストとして定義する。
 
 $$
 C = MinCost(\bot, \top) = \min_{Path} \sum_{i=1}^{n} w(p_i \mid S_{i-1})
+$$
+
+さらに、最短経路距離の記法を用いて以下のように表現できる。
+
+$$
+C = d_{min}(\bot, \top)
 $$
 
 ## 5.1 Optimization Problem
