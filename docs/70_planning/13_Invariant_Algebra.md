@@ -129,6 +129,20 @@ $d_w$ satisfies:
 3. $d_w(S_1, S_2) = d_w(S_2, S_1)$
 4. $d_w(S_1, S_3) \le d_w(S_1, S_2) + d_w(S_2, S_3)$ (triangle inequality)
 
+### 5.5 Dependency-Weighted Migration Distance
+
+We define a **dependency-aware distance** that accounts for the depth of invariants in the dependency poset:
+
+$$
+d_{dep}(S_1, S_2) = \sum_{p \in S_1 \triangle S_2} depth(p)
+$$
+
+Where $depth(p)$ is the **level** of $p$ in the dependency poset $(I, \leq_D)$ (e.g., the length of the longest chain from a minimal element to $p$).
+
+**Interpretation**: Removing or losing a **deep** invariant (high $depth(p)$) costs more, because many derived invariants depend on it. Conversely, acquiring a deep invariant may unlock many others. The dependency-weighted metric reflects this structural impact.
+
+**Use in planning**: When comparing migration states or estimating effort, $d_{dep}$ can complement $d_w$ by emphasizing invariants that are foundational in the dependency structure.
+
 ---
 
 ## 6. Implications for Migration Planning

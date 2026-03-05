@@ -74,6 +74,32 @@ $$
 
 Reaching $\mathcal{S}$ requires $G_{crit} \subseteq S_{target}$; all critical invariants are hard.
 
+### 3.4 Relaxation Decision Model
+
+We introduce a **relaxation function** $\rho: I \to \{0, 1\}$:
+
+- $\rho(p) = 1$: Preserve invariant $p$ during migration.
+- $\rho(p) = 0$: Relax invariant $p$ (allow it to change or be dropped).
+
+**Constraint**: Hard invariants must always be preserved:
+$$
+\forall p \in I_{hard}: \rho(p) = 1
+$$
+
+**Migration planning** becomes an optimization problem:
+
+**Minimize**:
+$$
+MigrationCost + RiskPenalty(\rho)
+$$
+
+**Subject to**:
+$$
+\forall p \in I_{hard}: \rho(p) = 1
+$$
+
+Where $RiskPenalty(\rho)$ quantifies the risk of relaxing soft invariants (e.g., $\sum_{p \in I_{soft}, \rho(p)=0} risk(p)$). The planner trades off migration cost against the risk of relaxing soft invariants.
+
 ---
 
 ## 4. Allowed Invariant Relaxation

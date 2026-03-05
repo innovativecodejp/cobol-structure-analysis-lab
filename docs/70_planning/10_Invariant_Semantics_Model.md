@@ -138,13 +138,21 @@ $$
 \Phi: (AST, CFG, DFG) \to \mathcal{P}(I)
 $$
 
-$\Phi$ extracts invariants from structure. It is **sound** if:
+$\Phi$ extracts invariants from structure. The extraction is **sound but incomplete**:
+
+**Soundness**:
 $$
 \Phi(C) \subseteq invariants(Semantics(C))
 $$
 (i.e., we only claim invariants that truly hold).
 
-It may be **incomplete**: some invariants in $invariants(Semantics(C))$ may not be derivable from structure alone (e.g., require theorem proving or runtime verification).
+**Incompleteness**:
+$$
+\exists p \in invariants(Semantics(C)): p \notin \Phi(C)
+$$
+Some invariants that hold for $C$ are not derivable from AST/CFG/DFG alone.
+
+AST/CFG/DFG-based extraction is thus a **sound but incomplete semantic approximation**.
 
 ### 6.3 Approximation Limits
 
@@ -156,7 +164,19 @@ It may be **incomplete**: some invariants in $invariants(Semantics(C))$ may not 
 
 ---
 
-## 7. Conclusion
+## 7. Soundness and Incompleteness of Structural Analysis
+
+Static analysis (AST, CFG, DFG) **approximates** program semantics. It cannot capture full behavioral semantics, which would require:
+- **Runtime observation**: Some invariants (e.g., "loop terminates") need execution traces.
+- **Theorem proving**: Some invariants (e.g., "output equals input squared") need formal verification.
+
+Therefore:
+- **Soundness**: Every invariant extracted by $\Phi$ is correct. We never claim false invariants.
+- **Incompleteness**: We may miss invariants that hold. Migration planning is conservative: we plan based on what we can prove, and may need runtime verification for the rest.
+
+---
+
+## 8. Conclusion
 
 The Invariant Semantics Model:
 1. Defines $Semantics(C)$ as behavioral representation.
@@ -164,4 +184,4 @@ The Invariant Semantics Model:
 3. Connects invariants to control, data, state, and I/O semantics.
 4. Explains AST/CFG/DFG as static approximations of semantics for invariant extraction.
 
-This grounds the Phase 3.5 planning model in program semantics.
+This grounds the Phase 3.5 planning model in program semantics. The sound-but-incomplete nature of structural analysis is a fundamental limitation that migration planners must account for.

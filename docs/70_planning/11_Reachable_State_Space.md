@@ -46,13 +46,19 @@ $V_{reachable}$ is the smallest set containing $S_{start}$ and closed under appl
 
 **Effect**: Only dependency-closed states are considered. This is already enforced by $G_{state}$; dependency pruning is implicit in the edge definition.
 
-### 3.2 Dominance Pruning
+### 3.2 Dominance Pruning (Safe Rule)
 
-**Rule**: If $S_1 \subseteq S_2$ and $Cost(path_{S_1}) \ge Cost(path_{S_2})$, then $S_1$ is **dominated** by $S_2$. Prune $S_1$ from further expansion when searching for optimal paths.
+**Rule**: Dominance pruning is allowed **only if** all three conditions hold:
 
-**Rationale**: Reaching $S_2$ is strictly better than $S_1$ (more invariants, lower or equal cost). No optimal path goes through $S_1$ if $S_2$ is reachable.
+1. $S_1 \subseteq S_2$ (strict subset: $S_2$ has at least as many invariants).
+2. $Cost(path_{S_1}) \ge Cost(path_{S_2})$ (path to $S_2$ is cheaper or equal).
+3. $S_2$ can reach the Safety Region $\mathcal{S}$ (feasibility is preserved).
 
-**Caveat**: Dominance requires consistent cost structure (monotonicity). If costs can decrease with more invariants (e.g., economies of scale), dominance may not hold.
+If all three hold, $S_1$ is **dominated** by $S_2$. Prune $S_1$ from further expansion.
+
+**Rationale**: Reaching $S_2$ is strictly better than $S_1$ (more invariants, lower or equal cost, and $S_2$ leads to a feasible solution). No optimal path goes through $S_1$.
+
+**Caveat**: Condition 3 is critical. Pruning $S_1$ when $S_2$ cannot reach $\mathcal{S}$ would incorrectly eliminate feasible solutions.
 
 ### 3.3 Equivalent State Merging
 
@@ -70,6 +76,16 @@ $$
 **Rule**: If $Cost(path to S) > Budget$, prune $S$ and all descendants.
 
 **Effect**: Enforces resource feasibility early; avoids exploring infeasible regions.
+
+### 3.5 Feasibility-Preserving Dominance
+
+Dominance pruning carries a **risk**: if we prune state $S_1$ because $S_2$ dominates it, but $S_2$ later turns out to be a dead end (cannot reach $\mathcal{S}$), we may have incorrectly discarded $S_1$, which could have led to a feasible path.
+
+**Mitigation**: Condition 3 of the safe dominance rule requires that $S_2$ can reach $\mathcal{S}$. In practice, this may require:
+- **Reachability check**: Verify that $\mathcal{R}(S_2) \cap \mathcal{S} \neq \emptyset$ before pruning $S_1$.
+- **Conservative pruning**: When reachability is expensive to verify, avoid dominance pruning or apply it only when $S_2 \in \mathcal{S}$ (i.e., $S_2$ is already safe).
+
+**Implication**: Pruning states that lead to feasible solutions is a critical error. The safe dominance rule is designed to prevent this.
 
 ---
 
