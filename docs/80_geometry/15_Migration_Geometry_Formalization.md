@@ -43,6 +43,8 @@ Target
 | 13 | Discrete → Continuous Relaxation |
 | 14 | Migration Topology |
 | 15 | This summary |
+| 16 | Guarantee Axis Dependency |
+| 17 | Migration Risk Field |
 
 ---
 

@@ -67,6 +67,18 @@ Both $d$ and $d_w$ satisfy:
 
 ---
 
-## 5. Conclusion
+---
+
+## 5. Metric–Topology Connection
+
+The weighted Euclidean metric $d_w$ induces the **same topology** as the standard Euclidean metric on $\mathbb{R}^n$. Therefore the metric topology on $GS$ is **consistent** with the subspace topology introduced in **11_Guarantee_Topology.md**.
+
+$$
+\text{Metric Space } (GS, d_w) \rightarrow \text{Topology on } GS
+$$
+
+---
+
+## 6. Conclusion
 
 $(GS, d_w)$ is a **metric space**. Migration Risk is the distance to Ideal. This structure supports path optimization and topology (Phase4.5-3).

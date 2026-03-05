@@ -14,9 +14,17 @@ The **Migration Risk Field** (Cost Field) assigns a local risk value to each poi
 
 ## 2. Cost Field Definition
 
+**General form**: The cost function may be any non-negative scalar field
 $$
-cost: GS \to \mathbb{R}_{\ge 0}, \quad cost(G) = d_w(G, Ideal)
+cost: GS \to \mathbb{R}_{\ge 0}
 $$
+
+**Phase4.5 reference model**:
+$$
+cost(G) = d_w(G, Ideal)
+$$
+
+This preserves the generality that **Risk ≠ Distance** in general.
 
 - **Risk Density**: 局所的移行リスク
 - **Cost Field**: 空間上のリスク分布
@@ -47,6 +55,8 @@ flowchart LR
 ---
 
 ## 4. Gradient
+
+Since $GS \subset \mathbb{R}^n$, the gradient $\nabla cost$ is defined with respect to the **coordinate system inherited from $\mathbb{R}^n$**.
 
 $$
 \nabla cost(G) = \text{risk increase direction}

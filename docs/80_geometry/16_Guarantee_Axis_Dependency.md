@@ -67,14 +67,23 @@ flowchart LR
 
 ---
 
-## 5. Implications for Migration
+## 5. Dependency Constraints
+
+**Dependency constraints** restrict admissible migration paths.
+
+For example, if Data → State, migration operations affecting State should not violate Data guarantees. Similarly, Transaction changes must preserve State guarantees.
+
+---
+
+## 6. Implications for Migration
 
 - **Ordering**: Data and Control should be addressed before State; State before Transaction.
 - **Risk Propagation**: Degradation in a parent axis propagates to dependent axes.
 - **Path Geometry**: Migration paths should respect dependency order when possible.
+- **Path Optimization**: **Dependency constraints** exist as additional constraints in path optimization (see 12_Migration_Path_Geometry.md).
 
 ---
 
-## 6. Conclusion
+## 7. Conclusion
 
 Axis Dependency Graph formalizes structural relationships between guarantee dimensions. It informs migration strategy and risk analysis.

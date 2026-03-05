@@ -22,14 +22,22 @@ $$
 
 ### 3.1 Risk Density (Cost Field)
 
-The migration risk is expressed as an integral over a **Risk Density** (Cost Field):
+The migration risk is expressed as an integral over a **Risk Density** (Cost Field).
 
+**General form**: The cost function may be any non-negative scalar field
+$$
+cost: GS \to \mathbb{R}_{\ge 0}
+$$
+
+**Phase4.5 reference model**:
 $$
 cost(G) = d_w(G, Ideal)
 $$
 
+This preserves the generality that **Risk ≠ Distance** in general; distance is one possible cost model.
+
 - **Risk Density**: 局所的移行リスク（各点 $G \in GS$ におけるリスク）
-- **Cost Field**: 空間上のリスク分布 $cost: GS \to \mathbb{R}_{\ge 0}$
+- **Cost Field**: 空間上のリスク分布
 - **Gradient**: リスク増加方向 $\nabla cost$
 
 ### 3.2 Path Risk Integral
@@ -43,6 +51,8 @@ $$
 $$
 \min_P Risk(P) \quad \text{s.t. } P(t) \in \mathcal{S} \quad \forall t
 $$
+
+**Dependency constraints** (see 16_Guarantee_Axis_Dependency.md) restrict admissible migration paths and must be respected in path optimization.
 
 ---
 
