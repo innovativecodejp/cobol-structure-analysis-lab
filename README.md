@@ -76,6 +76,6 @@ for migration decisions through structural analysis of COBOL assets.
 - `diagrams/mermaid/`: Mermaid source diagrams
 - `log/`: Canonical logging root for research and daily memo records
 - `log/research-log/`: Canonical research decision logs, templates, and governance notes
-- `log/working-memo/`: Canonical daily working memos and memo governance notes
+- `log/working-log/`: Canonical daily working memos and memo governance notes
 - `samples/cobol/`: COBOL input samples for analysis
 - `tools/`: Utilities and helper tooling (future use)

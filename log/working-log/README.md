@@ -1,4 +1,4 @@
-# COBOL構造解析研究室｜Working Memo 運用規約
+# COBOL構造解析研究室｜Working Log 運用規約
 
 本ディレクトリは、
 COBOL構造解析研究室プロジェクトにおける
@@ -11,7 +11,7 @@ COBOL構造解析研究室プロジェクトにおける
 
 # 1. 目的
 
-Working Memo の目的は以下である：
+Working Log の目的は以下である：
 
 - 思考の途中経過を保存する
 - 試行錯誤を記録する
@@ -23,7 +23,7 @@ Working Memo の目的は以下である：
 
 # 2. Research Log との違い（重要）
 
-| 区分 | Working Memo | Research Log |
+| 区分 | Working Log | Research Log |
 |------|--------------|--------------|
 | 性質 | 未確定 | 確定済 |
 | 抽象度 | 混在可 | 明確 |
@@ -31,7 +31,7 @@ Working Memo の目的は以下である：
 | Mermaid図 | 任意 | 原則1枚 |
 | 正式成果物 | ❌ | ✅ |
 
-Working Memo は設計決定ではない。
+Working Log は設計決定ではない。
 Research Log のみが正式設計記録である。
 
 ---
@@ -56,7 +56,7 @@ YYYY-MM-DD_nn_Title.md
 
 # 4. 記述方針
 
-Working Memo は以下を自由に含めてよい：
+Working Log は以下を自由に含めてよい：
 
 - 思考途中の仮説
 - 曖昧な構想
@@ -100,7 +100,7 @@ Working Memo は以下を自由に含めてよい：
 
 # 6. 昇格ルール
 
-Working Memo に書かれた内容が
+Working Log に書かれた内容が
 
 - 設計として確定した
 - 抽象モデルとして整理できた
@@ -110,7 +110,7 @@ Working Memo に書かれた内容が
 
 新規 Research Log として別ファイルを生成する。
 
-Working Memo を直接編集して昇格させない。
+Working Log を直接編集して昇格させない。
 
 ---
 
@@ -125,7 +125,7 @@ Working Memo を直接編集して昇格させない。
 
 # 8. 位置づけ
 
-Working Memo は、
+Working Log は、
 
 研究の「思考の層」である。
 

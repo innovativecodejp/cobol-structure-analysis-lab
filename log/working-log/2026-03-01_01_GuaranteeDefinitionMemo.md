@@ -11,7 +11,7 @@
     - 静的/動的保証の分離モデルをMermaid図式化。
 - `log/research-log/2026-03-01_01_GuaranteeUnitDefinition.md` を作成。
     - 上記定義の決定プロセスと背景を記録。
-- `log/research-log/README.md`, `log/working-memo/README.md` の命名規則を更新。
+- `log/research-log/README.md`, `log/working-log/README.md` の命名規則を更新。
     - `yyyy-mm-dd_nn_Title.md` 形式に統一。
 
 ## 🔍 結果
