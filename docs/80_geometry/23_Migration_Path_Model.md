@@ -40,15 +40,17 @@ $$
 
 ### 3.1 Direct Path (Big Bang)
 
-*   **Trajectory**: Straight line connecting $S_{legacy}$ and $S_{target}$.
-*   **Characteristics**: Shortest geometric distance, but often passes through the **Failure Region** (high risk during the "black box" rewrite phase).
-*   **Risk**: High probability of $P(t) \in \mathcal{F}$ for $0 < t < 1$.
+*   **Trajectory**: Geodesic (straight line) connecting $S_{legacy}$ and $S_{target}$.
+*   **Characteristics**: Shortest geometric distance ($d$).
+*   **Risk**: Often traverses $\mathcal{F}$ (Failure Region). High exposure.
+*   **Cost**: Low path integration cost, but infinite risk cost if it fails.
 
 ### 3.2 Safe Path (Incremental)
 
-*   **Trajectory**: A curve that stays strictly within the **Safe Region** $\mathcal{S}$.
-*   **Characteristics**: Longer total distance (more steps, intermediate adapters), but maintains system availability and correctness throughout.
-*   **Risk**: Low. $P(t) \in \mathcal{S}$ for all $t$.
+*   **Trajectory**: A curve constrained to stay within $\mathcal{S}$.
+*   **Characteristics**: Longer distance ($d_{safe} > d_{direct}$).
+*   **Risk**: Minimized.
+*   **Cost**: Higher integration cost (adapters, scaffolding), but bounded risk.
 
 ### 3.3 Boundary Path (Aggressive)
 
@@ -80,15 +82,18 @@ graph LR
 
 ---
 
-## 5. Path Constraints
+## 5. Path Properties
 
-1.  **Safety Constraint**:
-    $$ \forall t, P(t) \in \mathcal{S} $$
-2.  **Monotonicity (Optional)**:
-    Ideally, $d(P(t), S_{target})$ should be strictly decreasing. In reality, some steps (e.g., refactoring) might temporarily increase distance to build a better foundation (backtracking).
+1.  **Path Length (Total Displacement)**:
+    $$ L(P) = \int_0^1 |\dot{P}(t)| dt $$
+    Proxy for total volume of code changes.
+
+2.  **Safety Clearance**:
+    $$ \min_t \text{dist}(P(t), \partial\mathcal{F}) $$
+    Minimum margin of error during the project.
 
 ---
 
 ## 6. Conclusion
 
-The Migration Path Model formalizes "migration strategy" as a geometric curve. The core problem of migration design becomes **finding a path $P$ that connects Legacy to Target while staying within $\mathcal{S}$ and minimizing Cost**.
+The Migration Path Model separates the **Geometry of the Path** (shape) from the **Physics of Migration** (cost/risk). Optimization seeks the "best" shape that balances Length vs. Safety.

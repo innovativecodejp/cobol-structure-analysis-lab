@@ -51,7 +51,25 @@ States are classified based on their location relative to the Safe Region $\math
 
 ---
 
-## 4. State Transitions
+## 4. State Evaluation (Utility)
+
+We introduce a scalar **Utility Function** $\phi(S)$ to evaluate the "goodness" of a state, independent of where it came from.
+
+$$
+\phi(S) = \text{Utility}(S) \in [0, 1]
+$$
+
+*   $\phi(S) \approx 1.0$: High-quality state (high guarantees, low technical debt).
+*   $\phi(S) \approx 0.0$: Low-quality state.
+
+### 4.1 Utility vs. Safety
+
+*   **Safety**: Binary classification ($S \in \mathcal{S}$ or $S \notin \mathcal{S}$).
+*   **Utility**: Continuous gradient within $\mathcal{S}$. A state can be safe but have low utility (e.g., "Safe but minimal functionality").
+
+---
+
+## 5. State Transitions
 
 A transition $T$ is a vector difference between two states:
 
@@ -84,6 +102,11 @@ graph LR
 
 ---
 
-## 6. Conclusion
+## 7. Conclusion
 
-The Migration State Model allows us to precisely quantify the "health" of a system at any step of the migration using coordinates in the Guarantee Space.
+The Migration State Model defines the "where" and "how good" of a system.
+*   **Position**: Coordinate vector $S$.
+*   **Value**: Utility $\phi(S)$.
+*   **Validity**: Inclusion in $\mathcal{S}$.
+
+This separation allows us to optimize for high-utility states while respecting safety boundaries.

@@ -14,11 +14,16 @@ The **Strategy Space** organizes different migration approaches (patterns) based
 
 ## 2. Strategy Definition
 
-A **Migration Strategy** $\Sigma$ is a **class of paths** sharing topological or geometric properties.
+A **Migration Strategy** $\Sigma$ is a **family of paths** (homotopy class) sharing topological or geometric properties.
 
 $$
 \Sigma = \{ P \mid P \text{ satisfies condition } C_\Sigma \}
 $$
+
+Strategies are distinguished by:
+1.  **Topology**: Do they stay in $\mathcal{S}$?
+2.  **Step Granularity**: Continuous vs. Discrete chunks.
+3.  **Support**: Do they rely on parallel systems ($S_{legacy}$)?
 
 ---
 
@@ -70,6 +75,11 @@ How to choose a strategy based on geometry:
 
 ---
 
-## 6. Conclusion
+## 5. Conclusion
 
-Migration Strategy is no longer a subjective choice but a geometric selection problem constrained by the shape of the Safe Region and the position of the Legacy system.
+Migration Strategies are **families of geometric paths**.
+*   **Big Bang**: Geodesic, ignoring constraints.
+*   **Strangler**: Boundary-hugging, fine-grained.
+*   **Phased**: Waypoint-based, coarse-grained.
+
+Selecting a strategy is selecting a **region of path space** to explore.

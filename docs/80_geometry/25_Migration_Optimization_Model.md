@@ -15,18 +15,22 @@
 ## 2. Objective Function
 
 We seek to minimize the **Total Migration Cost** $J(P)$.
+This function integrates **Operational Effort** and **Risk Exposure**.
 
 $$
-\min_{P} J(P) = \int_{0}^{1} \left[ \underbrace{Cost(P(t), \dot{P}(t))}_{\text{Movement Cost}} + \underbrace{Risk(P(t))}_{\text{Position Risk}} \right] dt
+\min_{P} J(P) = \int_{0}^{1} \left[ \underbrace{C_{ops}(\dot{P}(t))}_{\text{Effort}} + \underbrace{C_{risk}(P(t))}_{\text{Exposure}} - \underbrace{\phi(P(t))}_{\text{Utility}} \right] dt
 $$
 
 ### 2.1 Terms
 
-1.  **Movement Cost**: Cost of engineering work. Proportional to path length and difficulty.
-    *   $\propto d_w(P(t), P(t+\Delta t))$
-2.  **Position Risk** (Risk Field): Cost of operating in a degraded state.
-    *   $\propto \frac{1}{\text{dist}(P(t), \partial\mathcal{F})}$ (Inverse distance to failure)
-    *   High cost if path gets too close to failure boundary.
+1.  **Effort (Kinetic Energy)**: Cost of change.
+    *   $C_{ops} \propto |\dot{P}(t)|^2$ (or $|\dot{P}|$ in L1).
+    *   Rapid changes (high velocity) cost disproportionately more (overtime, cognitive load).
+2.  **Risk Exposure (Potential Energy)**: Cost of danger.
+    *   $C_{risk} \propto \frac{1}{\text{dist}(P(t), \partial\mathcal{F})}$.
+    *   Penalty for getting too close to failure.
+3.  **Utility Gain**:
+    *   We want to maximize time spent in high-utility states (optional term, relevant for incremental value delivery).
 
 ---
 
@@ -34,13 +38,12 @@ $$
 
 The optimization is subject to:
 
-1.  **Boundary Conditions**:
-    *   $P(0) = S_{legacy}$
-    *   $P(1) = S_{target}$
-2.  **Safety Constraint**:
-    *   $P(t) \in \mathcal{S} \quad \forall t \in [0,1]$
-3.  **Resource Constraint** (Optional):
-    *   $\int |\dot{P}(t)| dt \le \text{Budget}$
+1.  **Hard Constraint (Safety)**:
+    *   $P(t) \in \mathcal{S} \quad \forall t$
+2.  **Boundary Conditions**:
+    *   $P(0) = S_{legacy}, \quad P(1) = S_{target}$
+3.  **Dynamics (Resource Limits)**:
+    *   $|\dot{P}(t)| \le V_{max}$ (Team capacity limit).
 
 ---
 
@@ -81,8 +84,9 @@ graph TD
 
 ## 6. Conclusion
 
-Migration planning is mathematically defined as a constrained optimization problem.
-*   **Objective**: Minimize (Work + Risk).
-*   **Constraint**: Stay Safe.
+Migration planning is formulated as a **Constrained Optimal Control Problem**.
+*   **State**: Guarantee Vector $S$.
+*   **Control**: Migration Velocity $\dot{P}$ (Change Rate).
+*   **Cost**: Effort + Risk - Utility.
 
-This formalization allows us to use algorithmic approaches to suggest optimal migration strategies in Phase 6.
+This model mathematically grounds "Agile vs. Waterfall" debates as parameter choices in an optimization landscape.
