@@ -79,7 +79,17 @@ L5: 仕様
 
 → 今日の到達：**L1（構文）〜 L5境界（仕様）**。ASTの粒度原則を仕様として明文化し、IRへの委譲境界を確定した。
 
-## ⏭ 次の研究ステップ
-- EVALUATEのノード化方針（独立ノード化 vs Branch配下）を決定する。
-- INSPECT / UNSTRING / STRING の粒度規則を確定する。
-- DECLARATIVESの構造粒度とAST配置ルールを定義する。
+## Concept Image
+
+```mermaid
+flowchart TB
+    Statement --> Assign
+    Statement --> Compute
+    Statement --> Branch
+    Statement --> Loop
+    Statement --> IO
+    Statement --> Call
+
+    Assign -.Lowering.-> IR
+    Compute -.Lowering.-> IR
+```

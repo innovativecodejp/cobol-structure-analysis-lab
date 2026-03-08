@@ -42,7 +42,14 @@ $$
 
 - `docs/50_guarantee/03_Guarantee-Space-Definition.md`: 保証空間の定義、順序構造、束構造、およびその意味論的解釈を記述した理論文書。
 
-## 5. 結論
+## Concept Image
 
-保証を空間として定義することで、移行プロジェクトにおける「品質」を定量的な集合演算として扱えるようになった。
-「完全保証か否か」という不毛な二元論から脱却し、「現在の保証状態 $G_{current}$ は空間内のどこに位置し、$\top$ までの距離（差集合）はどれだけか」という建設的なエンジニアリングが可能となる。
+```mermaid
+graph TD
+    G1[Guarantee A]
+    G2[Guarantee B]
+    G3[Guarantee C]
+
+    G1 --> G2
+    G2 --> G3
+```

@@ -43,7 +43,14 @@ $$
 
 - `docs/50_guarantee/06_Metric-on-Guarantee-Space.md`: 距離関数の定義、公理の検証、進捗モデルを含む理論文書。
 
-## 5. 結論
+## Concept Image
 
-Guarantee Space に距離構造を導入したことで、移行プロジェクトは「地図上の移動」として可視化・計測可能になった。
-この理論は、プロジェクトの遅延リスク検知や、複数チーム間の成果物統合（Merge）の難易度評価などに直接応用できる強力なツールとなる。
+```mermaid
+graph LR
+    G1((State1))
+    G2((State2))
+    G3((State3))
+
+    G1 --- G2
+    G2 --- G3
+```

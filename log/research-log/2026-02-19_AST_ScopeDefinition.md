@@ -62,8 +62,14 @@ L5: 仕様
 
 → 今日の到達：**L1（構文）** — ASTの責務をL1に限定し、L2以降との境界を明文化した。
 
-## ⏭ 次の研究ステップ
-- ASTノード種別の網羅的定義（Assign / Compute / Branch / Loop / IO の詳細）
-- PERFORM THRU の扱い方針の決定
-- 88レベルのAST上の位置づけ確定
-- IR責務定義へ移行（TEMPLATE_A_General.md または TEMPLATE_C_IR.md を使用）
+## Concept Image
+
+```mermaid
+flowchart LR
+    Source[COBOL Source]
+    Source --> CST[CST]
+    CST --> AST[AST: Syntax Layer]
+    AST --> IR[IR: Semantic Layer]
+    IR --> CFG[CFG]
+    IR --> DFG[DFG]
+```

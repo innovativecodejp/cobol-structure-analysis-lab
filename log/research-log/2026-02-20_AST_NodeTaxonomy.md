@@ -79,7 +79,15 @@ L5: 仕様
 
 → 今日の到達：**L1（構文）〜 L5境界（仕様）**。ASTノード種の最小集合を仕様レベルで確定した。
 
-## ⏭ 次の研究ステップ
-- BranchStatementNode配下の内部分類方針（IF/EVALUATEの扱い）を確定する。
-- INSPECT / UNSTRING / MOVE CORRESPONDING の分類規則を定義する。
-- DECLARATIVESのAST上の配置と責務境界を明文化する。
+## Concept Image
+
+```mermaid
+flowchart TB
+    Program --> Division
+    Division --> DataDivision
+    Division --> ProcedureDivision
+    DataDivision --> DataItem
+    ProcedureDivision --> Section
+    ProcedureDivision --> Paragraph
+    Paragraph --> Statement
+```

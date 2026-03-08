@@ -69,8 +69,14 @@ L5: 仕様
 
 → 今日の到達：**L1（構文）〜 L5境界（仕様）** — ASTの責務を形式仕様として定義し、不変条件・禁止事項を確定した。
 
-## ⏭ 次の研究ステップ
-- Symbol解決の層（AST vs IR）の決定
-- COPY展開タイミングの方針確定
-- IR責務の形式定義へ移行
-- ASTノード種別の形式列挙（Assign / Compute / Branch / Loop / IO）
+## Concept Image
+
+```mermaid
+flowchart LR
+    Source[COBOL Source]
+    Source --> CST[CST]
+    CST --> AST[AST: Syntax Layer]
+    AST --> IR[IR: Semantic Layer]
+    IR --> CFG[CFG]
+    IR --> DFG[DFG]
+```

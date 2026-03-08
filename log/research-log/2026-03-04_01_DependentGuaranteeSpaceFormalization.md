@@ -51,8 +51,14 @@ $$
 
 - `docs/50_guarantee/04_Dependent-Guarantee-Space.md`: 順序構造、イデアル束、完備分配束性の証明を含む理論定義書。
 
-## 5. 結論
+## Concept Image
 
-保証空間に依存構造を導入したことで、理論モデルは物理的実態と完全に整合した。
-COBOL構造解析における「保証」は、抽象的な集合から、順序理論に基づく「イデアル束」へと昇華された。
-この構造は、複数の解析ツールを統合する際の理論的基盤（Lattice-based integration）として機能する。
+```mermaid
+graph TD
+    G1[Guarantee A]
+    G2[Guarantee B]
+    G3[Guarantee C]
+
+    G1 --> G2
+    G2 --> G3
+```

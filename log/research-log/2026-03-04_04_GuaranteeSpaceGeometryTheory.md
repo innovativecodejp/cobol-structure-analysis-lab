@@ -40,8 +40,14 @@ Guarantee Space $\mathcal{G}$ が $N=|\mathbb{P}|$ 次元の Hypercube $\{0,1\}^
 - `docs/50_guarantee/05_Weighted-Guarantee-Space.md`: 改訂版。測度論、Hypercube、最短経路問題の導入。
 - `docs/50_guarantee/06_Metric-on-Guarantee-Space.md`: 改訂版。Weighted Hamming Metric、商距離、Migration Geometryの定義。
 
-## 5. 結論
+## Concept Image
 
-Guarantee Space は、単なる集合の集まりではなく、豊かな数学的構造を持つ「幾何空間」であることが明らかになった。
-この理論的基盤の上に、具体的な探索アルゴリズム（A*など）を適用することで、工学的最適解としての「移行ロードマップ」を自動生成する道が開かれた。
-本研究により、COBOL移行の理論的抽象度は頂点に達し、実装フェーズへの強固なブリッジが完成した。
+```mermaid
+graph LR
+    G1((State1))
+    G2((State2))
+    G3((State3))
+
+    G1 --- G2
+    G2 --- G3
+```

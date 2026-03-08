@@ -46,8 +46,13 @@ $$
 
 - `docs/50_guarantee/02_Formal-Definition-of-Guarantee.md`: 保証の形式定義、数式モデル、Mermaidによる境界図を含む定義書。
 
-## 5. 結論
+## Concept Image
 
-「保証」とは、曖昧な安心感ではなく、定義された不変条件 $\mathbb{P}$ が数学的に守られていることである。この定義により、移行プロジェクトにおいて「何を自動化し、何を手動でテストするか」の定量的な配分計画が可能となる。
+```mermaid
+flowchart LR
+    AST --> Guarantee
+    CFG --> Guarantee
+    DFG --> Guarantee
 
-特に、$G_{structure}$ を満たす領域については、回帰テストの自動生成や形式的検証（Formal Verification）の適用が可能となり、移行コストの大幅な削減が期待できる。
+    Guarantee --> VerifiedTransformation
+```

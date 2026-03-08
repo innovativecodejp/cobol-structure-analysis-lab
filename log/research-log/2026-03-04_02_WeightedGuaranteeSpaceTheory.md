@@ -48,7 +48,14 @@ $$
 
 - `docs/50_guarantee/05_Weighted-Guarantee-Space.md`: 重み関数、保証強度、限界費用、難易度モデルを定義した理論文書。
 
-## 5. 結論
+## Concept Image
 
-Guarantee Space に計量構造（Metric Structure）を入れたことで、本理論は「定性的な構造分析」から「定量的なプロジェクト管理」へと応用範囲を広げた。
-このモデルは、移行プロジェクトの予算策定、ツール選定、リスク評価における科学的な根拠（Evidence）として機能する。
+```mermaid
+graph TD
+    G1[Guarantee A]
+    G2[Guarantee B]
+    G3[Guarantee C]
+
+    G1 --> G2
+    G2 --> G3
+```

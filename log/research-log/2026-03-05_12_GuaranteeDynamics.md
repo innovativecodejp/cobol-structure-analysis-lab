@@ -34,6 +34,11 @@ COBOL移行プロセスにおける保証の時間的進化を **Guarantee Dynam
 移行プロセスを「保証活性化プロセス」と捉えることで、プロジェクトマネジメントに有用な示唆が得られる。
 例えば、初期段階では Activation Potential の高い Critical Guarantee に注力し、中期以降で並列性を活かす戦略が数学的に正当化される。
 
-## 4. 成果物
+## Concept Image
 
-- `docs/50_guarantee/12_Guarantee-Dynamics.md`: 理論定義書。
+```mermaid
+flowchart TD
+    State1 --> State2
+    State2 --> State3
+    State3 --> StableState
+```
