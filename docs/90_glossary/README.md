@@ -10,23 +10,15 @@ This directory contains terminology definitions for the COBOL Structure Analysis
 
 ## Term Format
 
-```
-## Term Name
+Terms are defined in a Markdown table format for readability.
 
-**Layer**: Syntax / Structure / Guarantee / Geometry / Decision
+| Term | Layer | Definition | Formal Description | Related Concepts |
+| :--- | :--- | :--- | :--- | :--- |
+| **Term Name** | Syntax / Structure / Guarantee / Geometry / Decision | A clear, concise definition. | Formula (optional) | [[RelatedTerm]] |
 
-**Definition**:
-A clear, concise definition of the term.
-
-**Formal Description**:
-Mathematical or formal definition (if applicable).
-$$
-Formula
-$$
-
-**Related Concepts**:
-- [[RelatedTerm]]
-
-**Example**:
-Concrete example or diagram.
-```
+### Columns
+- **Term**: The name of the concept.
+- **Layer**: The architectural layer (Syntax, Structure, Guarantee, Geometry, Decision).
+- **Definition**: Description of the term.
+- **Formal Description**: Mathematical definition or formula if applicable.
+- **Related Concepts**: Links to related terms.
