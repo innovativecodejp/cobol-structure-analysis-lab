@@ -1,56 +1,56 @@
 # Research Log: 2026-03-10
 
 ## Theme
-- Glossary Systematization and Migration Geometry Definitions
+- 用語集の体系化とMigration Geometryの定義
 
 ## Objective
-- To systematize the terminology definitions for the project, particularly focusing on formalizing and cataloging the Migration Geometry concepts constructed in Phase 5.
+- プロジェクトの用語定義を体系化し、特にPhase 5で構築されたMigration Geometryの概念を形式化・カタログ化することを目的とする。
 
 ## Background
-- As new concepts (Guarantee Space, Migration Path, etc.) increase, definition inconsistencies and reference difficulties have arisen.
-- Precise definitions are crucial for the geometric approach to migration.
+- 新しい概念（Guarantee Space, Migration Pathなど）が増えるにつれ、定義の不整合や参照の困難さが発生している。
+- 幾何学的アプローチによる移行には正確な定義が不可欠である。
 
 ## Problem
-- Terminology definitions are scattered across various documents.
-- Formal descriptions (formulas) and natural language definitions are not well-linked.
-- A standardized format for glossaries is missing.
+- 用語定義が各文書に散在している。
+- 形式的記述（数式）と自然言語の定義が十分にリンクされていない。
+- 用語集の標準フォーマットが欠如している。
 
 ## Hypothesis
-- Creating a centralized glossary directory (`docs/90_glossary/`) categorized by layers (Syntax, Structure, Guarantee, Geometry, Decision) will improve clarity.
-- Using a Markdown Table format will facilitate the identification of missing definitions and placeholders.
+- 層（Syntax, Structure, Guarantee, Geometry, Decision）ごとに分類された中央集権的な用語集ディレクトリ（`docs/90_glossary/`）を作成することで、明確さが向上する。
+- Markdownテーブル形式を使用することで、定義の欠落やプレースホルダーの特定が容易になる。
 
 ## Approach
-- Establish the `docs/90_glossary/` directory structure.
-- Define a standard Markdown Table format for terms (Term, Layer, Definition, Formal Description, Related Concepts).
-- Create the first glossary file `05_GeometryOfMigration.md` to define core geometric concepts.
+- `docs/90_glossary/` ディレクトリ構造を確立する。
+- 用語の標準Markdownテーブルフォーマット（Term, Layer, Definition, Formal Description, Related Concepts）を定義する。
+- 最初の用語集ファイル `05_GeometryOfMigration.md` を作成し、幾何学の中核概念を定義する。
 
 ## Experiment / Analysis
-- Created `docs/90_glossary/README.md` to define the file structure and format.
-- Created `docs/90_glossary/05_GeometryOfMigration.md` defining:
+- ファイル構造とフォーマットを定義した `docs/90_glossary/README.md` を作成した。
+- 以下の用語を定義した `docs/90_glossary/05_GeometryOfMigration.md` を作成した:
   - Migration Geometry
   - Migration Distance
   - Migration Path
-  - Shortest Migration Path (as a placeholder)
+  - Shortest Migration Path (プレースホルダーとして)
   - Migration Cost
-- Renamed past `working-log` files to comply with the naming convention `{YYYY-MM-DD}_{Seq}_{Title}.md`.
+- 過去の `working-log` ファイル名を命名規則 `{YYYY-MM-DD}_{Seq}_{Title}.md` に準拠するよう変更した。
 
 ## Result
-- The relationship between terms (Distance -> Cost -> Optimization) became visible through the table format.
-- "Shortest Migration Path" was explicitly identified as a placeholder awaiting the full Optimization Model formalization.
-- The distinction between Geometry layer and Decision layer (e.g., Migration Cost) was clarified.
+- テーブル形式により、用語間の関係（Distance -> Cost -> Optimization）が可視化された。
+- 「Shortest Migration Path」は、完全な最適化モデルの形式化を待つプレースホルダーとして明示的に特定された。
+- Geometry層とDecision層（例：Migration Cost）の区別が明確になった。
 
 ## Insight
-- The table format is effective for checking definition completeness.
-- The act of defining terms in this format prompts further refinement of the conceptual model (e.g., realizing that "Shortest Path" definition depends on "Optimization Model").
+- テーブル形式は定義の網羅性をチェックするのに有効である。
+- このフォーマットで用語を定義する行為自体が、概念モデルのさらなる精緻化を促す（例：「最短経路」の定義が「最適化モデル」に依存することへの気づき）。
 
 ## Open Questions
-- How to formally define the connection between "Syntax Layer" terms and "Guarantee Layer" terms in the glossary?
-- Should the "Status" column be added to the table to track definition maturity?
+- 用語集において「Syntax層」の用語と「Guarantee層」の用語の接続をどのように形式的に定義するか？
+- 定義の成熟度を追跡するために、テーブルに「Status」列を追加すべきか？
 
 ## Next Actions
-- Create `TermsAstIrCfgDfg.md` for Syntax/Structure layers.
-- Create `TermsGuaranteeSpace.md` for Guarantee layer.
-- Populate the `Glossary.md` index.
+- Syntax/Structure層のための `TermsAstIrCfgDfg.md` を作成する。
+- Guarantee層のための `TermsGuaranteeSpace.md` を作成する。
+- `Glossary.md` インデックスを作成する。
 
 ## Concept Image
 
@@ -93,5 +93,5 @@ flowchart TD
 - None
 
 ## Notes
-- Renamed past working logs to maintain consistency.
-- Corrected the date in today's working log filename.
+- 一貫性を保つため、過去の作業ログをリネームした。
+- 本日の作業ログファイル名の日付を修正した。
