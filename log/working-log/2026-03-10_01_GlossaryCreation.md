@@ -1,4 +1,4 @@
-# 2026-03-08 Glossary Creation
+# 2026-03-10 Glossary Creation
 
 ## 1. Context
 - Migration Geometry の概念が固まってきたため、用語集 (Glossary) の整備を開始した。
