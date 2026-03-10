@@ -1,4 +1,4 @@
-# 24. Migration Strategy Space
+# 24. 移行戦略空間 (Migration Strategy Space)
 
 **Phase 5: Migration Geometry Construction**  
 **Document ID:** `docs/80_geometry/24_Migration_Strategy_Space.md`  
@@ -6,80 +6,80 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The **Strategy Space** organizes different migration approaches (patterns) based on their geometric characteristics in the Guarantee Space.
+**戦略空間** は、保証空間における幾何学的特性に基づいて、異なる移行アプローチ（パターン）を体系化する。
 
 ---
 
-## 2. Strategy Definition
+## 2. 戦略定義
 
-A **Migration Strategy** $\Sigma$ is a **family of paths** (homotopy class) sharing topological or geometric properties.
+**移行戦略** $\Sigma$ は、位相的または幾何学的特性を共有する **経路の族**（ホモトピー類）である。
 
 $$
 \Sigma = \{ P \mid P \text{ satisfies condition } C_\Sigma \}
 $$
 
-Strategies are distinguished by:
-1.  **Topology**: Do they stay in $\mathcal{S}$?
-2.  **Step Granularity**: Continuous vs. Discrete chunks.
-3.  **Support**: Do they rely on parallel systems ($S_{legacy}$)?
+戦略は以下によって区別される：
+1.  **位相**: $\mathcal{S}$ 内に留まるか？
+2.  **ステップ粒度**: 連続的 vs 離散的チャンク。
+3.  **サポート**: 並行システム ($S_{legacy}$) に依存するか？
 
 ---
 
-## 3. Strategy Families
+## 3. 戦略ファミリ
 
-### 3.1 The "Big Bang" Strategy ($\Sigma_{BB}$)
+### 3.1 "ビッグバン" 戦略 ($\Sigma_{BB}$)
 
-*   **Definition**: A path with a single step $S_0 \to S_{target}$, or a path that exits $\mathcal{S}$ for a significant duration.
-*   **Geometry**: Geodesic (straight line) in unconstrained space.
-*   **Pros**: Minimal intermediate overhead.
-*   **Cons**: High risk of catastrophic failure (landing in $\mathcal{F}$).
+*   **定義**: 単一ステップ $S_0 \to S_{target}$ を持つ経路、または $\mathcal{S}$ をかなりの期間逸脱する経路。
+*   **幾何学**: 制約のない空間における測地線（直線）。
+*   **利点**: 中間オーバーヘッドが最小。
+*   **欠点**: 壊滅的な失敗（$\mathcal{F}$ への着地）のリスクが高い。
 
-### 3.2 The "Strangler Fig" Strategy ($\Sigma_{SF}$)
+### 3.2 "ストラングラーフィグ" 戦略 ($\Sigma_{SF}$)
 
-*   **Definition**: A path composed of many small steps, keeping the legacy system live while incrementally replacing functionality.
-*   **Geometry**: A discrete path $S_0 \to S_1 \to \dots \to S_k$ where every $S_i$ is close to $S_{i-1}$ and $S_i \in \mathcal{S}$.
-*   **Pros**: High safety, verifiable steps.
-*   **Cons**: Higher total distance (cost of adapters, dual maintenance).
+*   **定義**: レガシーシステムを生かしたまま、機能を段階的に置き換える多数の小さなステップで構成される経路。
+*   **幾何学**: すべての $S_i$ が $S_{i-1}$ に近く、かつ $S_i \in \mathcal{S}$ である離散経路 $S_0 \to S_1 \to \dots \to S_k$。
+*   **利点**: 高い安全性、検証可能なステップ。
+*   **欠点**: 総距離が長い（アダプタ、二重保守のコスト）。
 
-### 3.3 The "Parallel Run" Strategy ($\Sigma_{PR}$)
+### 3.3 "並行稼働" 戦略 ($\Sigma_{PR}$)
 
-*   **Definition**: A path where the system state is effectively duplicated, $S_{new}$ and $S_{old}$ run simultaneously, and the "effective state" is a weighted average.
-*   **Geometry**: Maintains a position in high-guarantee space by using the legacy system as a fallback (safety net).
+*   **定義**: システム状態が事実上複製され、$S_{new}$ と $S_{old}$ が同時に実行され、「有効な状態」が加重平均となる経路。
+*   **幾何学**: レガシーシステムをフォールバック（セーフティネット）として使用することで、高保証空間内の位置を維持する。
 
 ---
 
-## 4. Strategy Map
+## 4. 戦略マップ
 
-We can map strategies on axes of **Step Size** vs. **Safety Margin**.
+戦略を **ステップサイズ** vs **安全マージン** の軸上にマッピングできる。
 
-| Strategy | Step Size ($\Delta S$) | Safety Margin | Cost Overhead |
+| 戦略 | ステップサイズ ($\Delta S$) | 安全マージン | コストオーバーヘッド |
 | :--- | :--- | :--- | :--- |
-| **Big Bang** | Large (1.0) | Low / Negative | Low |
-| **Phased** | Medium (0.3) | Medium | Medium |
-| **Strangler** | Small (0.05) | High | High |
+| **Big Bang** | 大 (1.0) | 低 / 負 | 低 |
+| **Phased** | 中 (0.3) | 中 | 中 |
+| **Strangler** | 小 (0.05) | 高 | 高 |
 
 ---
 
-## 5. Geometric Selection Criteria
+## 5. 幾何学的選択基準
 
-How to choose a strategy based on geometry:
+幾何学に基づいて戦略を選択する方法：
 
-1.  If **Legacy is near Boundary** ($\mathcal{S}$ is narrow):
-    *   $\implies$ Use **Strangler** (Small steps required to avoid falling into $\mathcal{F}$).
-2.  If **Legacy is deep in Safe Region** ($\mathcal{S}$ is wide):
-    *   $\implies$ **Phased** or **Big Bang** might be acceptable risks for speed.
-3.  If **Target is far** (large $d$):
-    *   $\implies$ **Strangler** preferred to manage accumulated error.
+1.  **レガシーが境界に近い場合** ($\mathcal{S}$ が狭い):
+    *   $\implies$ **Strangler** を使用（$\mathcal{F}$ への転落を避けるために小さなステップが必要）。
+2.  **レガシーが安全領域の深い位置にある場合** ($\mathcal{S}$ が広い):
+    *   $\implies$ 速度のために **Phased** または **Big Bang** が許容可能なリスクかもしれない。
+3.  **ターゲットが遠い場合** (大きな $d$):
+    *   $\implies$ 累積エラーを管理するために **Strangler** が好ましい。
 
 ---
 
-## 5. Conclusion
+## 5. 結論
 
-Migration Strategies are **families of geometric paths**.
-*   **Big Bang**: Geodesic, ignoring constraints.
-*   **Strangler**: Boundary-hugging, fine-grained.
-*   **Phased**: Waypoint-based, coarse-grained.
+移行戦略は **幾何学的経路の族** である。
+*   **Big Bang**: 制約を無視した測地線。
+*   **Strangler**: 境界に沿った、微細粒度。
+*   **Phased**: ウェイポイントベース、粗粒度。
 
-Selecting a strategy is selecting a **region of path space** to explore.
+戦略を選択することは、探索すべき **経路空間の領域** を選択することである。

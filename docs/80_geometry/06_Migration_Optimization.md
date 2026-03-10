@@ -1,4 +1,4 @@
-# 06. Migration Optimization
+# 06. 移行最適化 (Migration Optimization)
 
 **Phase 4: Migration Geometry**  
 **Document ID:** `docs/80_geometry/06_Migration_Optimization.md`  
@@ -6,46 +6,46 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-Migration planning becomes an **optimization problem**: find the path from Legacy to Target that **minimizes risk** while satisfying safety constraints.
+移行計画は **最適化問題** となる：安全制約を満たしつつ、レガシーからターゲットへの **リスクを最小化する** 経路を見つけることである。
 
 ---
 
-## 2. Formal Definition
+## 2. 形式的定義
 
-### 2.1 Optimization Problem
+### 2.1 最適化問題
 
 $$
 \min_{P} Risk(P)
 $$
 
-Subject to:
+制約条件：
 
 $$
 g_i(P(t)) \ge \tau_i \quad \forall t \in [0,1], \forall i
 $$
 
-(i.e., the path remains in the Safe Region $\mathcal{S}$)
+（すなわち、経路は安全領域 $\mathcal{S}$ 内に留まる）
 
-### 2.2 Objective
+### 2.2 目的関数
 
-**Minimize** the total migration risk (distance from Ideal along the path).
+経路全体のリスク（経路に沿った理想点からの距離）を **最小化** する。
 
-### 2.3 Constraints
+### 2.3 制約
 
-- Path starts at Legacy: $P(0) = G(Legacy)$
-- Path ends at Target: $P(1) = G(Target)$
-- Path stays in Safe Region: $P(t) \in \mathcal{S}$ for all $t$
-
----
-
-## 3. Geometric Interpretation
-
-The problem is a **shortest path** (or minimum-cost path) in the Guarantee Space, constrained to the Safe Region. This connects to Phase 2's Hypercube Graph and Phase 3.5's Optimal Migration Path.
+- 経路はレガシーから始まる：$P(0) = G(Legacy)$
+- 経路はターゲットで終わる：$P(1) = G(Target)$
+- 経路は安全領域内に留まる：すべての $t$ について $P(t) \in \mathcal{S}$
 
 ---
 
-## 4. Conclusion
+## 3. 幾何学的解釈
 
-Migration Optimization formalizes the goal: **minimum-risk migration** within safety bounds. It elevates migration design from heuristic to **mathematical optimization**.
+この問題は、安全領域に制約された保証空間内の **最短経路**（または最小コスト経路）問題である。これは Phase 2 の超立方体グラフおよび Phase 3.5 の最適移行経路に接続する。
+
+---
+
+## 4. 結論
+
+移行最適化は、ゴールを形式化する：安全境界内での **最小リスク移行** である。これにより、移行設計はヒューリスティックなものから **数学的最適化** へと昇華される。

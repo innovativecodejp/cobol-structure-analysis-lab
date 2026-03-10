@@ -1,4 +1,4 @@
-# 08. Failure Geometry
+# 08. 失敗幾何学 (Failure Geometry)
 
 **Phase 4: Migration Geometry**  
 **Document ID:** `docs/80_geometry/08_Failure_Geometry.md`  
@@ -6,46 +6,46 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-**Migration Failure** is defined geometrically as entry into the **Unsafe Region** (Failure Zone). This document formalizes the Failure Geometry.
+**移行失敗** は幾何学的に、**不安全領域**（失敗ゾーン）への進入として定義される。本文書では失敗幾何学を形式化する。
 
 ---
 
-## 2. Formal Definition
+## 2. 形式的定義
 
-### 2.1 Failure Region (Unsafe Region)
+### 2.1 失敗領域 (不安全領域)
 
 $$
 \mathcal{F} = GS \setminus \mathcal{S} = \{ (g_1, \dots, g_n) \mid \exists i: g_i < \tau_i \}
 $$
 
-### 2.2 Example Failure Conditions
+### 2.2 失敗条件の例
 
-| Dimension | Failure Threshold | Interpretation |
+| 次元 | 失敗閾値 | 解釈 |
 | :--- | :--- | :--- |
-| Transaction | $g_4 < 0.6$ | Transaction integrity compromised |
-| State | $g_3 < 0.7$ | State transitions broken |
+| Transaction | $g_4 < 0.6$ | トランザクション整合性が侵害された |
+| State | $g_3 < 0.7$ | 状態遷移が破壊された |
 
-### 2.3 Failure Zone
+### 2.3 失敗ゾーン
 
-The Failure Zone is the set of points where migration has **failed**—at least one guarantee dimension falls below its threshold.
-
----
-
-## 3. Geometric Interpretation
-
-Migration failure = path $P(t)$ enters $\mathcal{F}$ at some $t$. The boundary between $\mathcal{S}$ and $\mathcal{F}$ is defined by $g_i = \tau_i$ for each dimension.
+失敗ゾーンは、移行が **失敗** した点（少なくとも1つの保証次元が閾値を下回った点）の集合である。
 
 ---
 
-## 4. Relation to Safe Region
+## 3. 幾何学的解釈
 
-- **Safe Region** $\mathcal{S}$: $g_i \ge \tau_i$ for all $i$
-- **Failure Zone** $\mathcal{F}$: $g_i < \tau_i$ for some $i$
+移行失敗 = 経路 $P(t)$ がある $t$ において $\mathcal{F}$ に進入すること。$\mathcal{S}$ と $\mathcal{F}$ の境界は、各次元について $g_i = \tau_i$ で定義される。
 
 ---
 
-## 5. Conclusion
+## 4. 安全領域との関係
 
-Failure Geometry provides a **geometric characterization** of migration failure. Avoiding $\mathcal{F}$ is equivalent to staying in $\mathcal{S}$—the core constraint of Migration Optimization.
+- **安全領域** $\mathcal{S}$: すべての $i$ について $g_i \ge \tau_i$
+- **失敗ゾーン** $\mathcal{F}$: ある $i$ について $g_i < \tau_i$
+
+---
+
+## 5. 結論
+
+失敗幾何学は、移行失敗の **幾何学的特徴付け** を提供する。$\mathcal{F}$ を回避することは $\mathcal{S}$ に留まることと等価であり、これが移行最適化の中核制約となる。

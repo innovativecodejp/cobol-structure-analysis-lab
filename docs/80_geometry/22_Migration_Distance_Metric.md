@@ -1,4 +1,4 @@
-# 22. Migration Distance Metric
+# 22. 移行距離メトリクス (Migration Distance Metric)
 
 **Phase 5: Migration Geometry Construction**  
 **Document ID:** `docs/80_geometry/22_Migration_Distance_Metric.md`  
@@ -6,77 +6,77 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-**Migration Distance** quantifies the geometric displacement between two states.
-Crucially, **Distance $\neq$ Cost**.
+**移行距離** は、2つの状態間の幾何学的変位を定量化する。
+重要な点として、**距離 $\neq$ コスト** である。
 
-*   **Distance ($d$)**: Geometric difference in guarantee levels. "How different is the system?"
-*   **Cost ($J$)**: Operational effort to traverse a path. "How hard is the work?"
-*   **Risk ($R$)**: Exposure to failure. "How dangerous is the position?"
+*   **距離 ($d$)**: 保証レベルの幾何学的差異。「システムはどれくらい異なっているか？」
+*   **コスト ($J$)**: 経路を横断するための運用労力。「作業はどれくらい大変か？」
+*   **リスク ($R$)**: 失敗への露出。「その位置はどれくらい危険か？」
 
-This document defines the **Distance Metric ($d$)**.
+本文書では **距離メトリクス ($d$)** を定義する。
 
 ---
 
-## 2. Metric Definition
+## 2. メトリクス定義
 
-We define a **Weighted Euclidean Metric** (L2) as the standard geometric measure.
+標準的な幾何学的尺度として、**重み付きユークリッドメトリクス** (L2) を定義する。
 
-### 2.1 Weighted L2 Metric (Displacement)
+### 2.1 重み付き L2 メトリクス (変位)
 
 $$
 d_w(A, B) = \sqrt{ \sum_{i=1}^{n} w_i (b_i - a_i)^2 }
 $$
 
-*   $d_w$ measures **geometric proximity** in the Guarantee Space.
-*   It serves as a **proxy** for the magnitude of change required.
+*   $d_w$ は保証空間における **幾何学的近接性** を測定する。
+*   これは必要な変更の大きさの **プロキシ** として機能する。
 
-### 2.2 Weighted L1 Metric (Manhattan)
+### 2.2 重み付き L1 メトリクス (マンハッタン)
 
 $$
 d_{L1}(A, B) = \sum_{i=1}^{n} w_i |b_i - a_i|
 $$
 
-*   Represents the sum of changes across dimensions, assuming independence.
+*   独立性を仮定した、次元ごとの変更の総和を表す。
 
 ---
 
-## 3. Weighting Strategy ($w_i$)
+## 3. 重み付け戦略 ($w_i$)
 
-Weights reflect the **structural rigidity** or **impact factor** of a dimension. High weight means a unit change on that axis represents a "larger" structural shift.
+重みは、次元の **構造的剛性** または **影響係数** を反映する。高い重みは、その軸上の単位変更が「より大きな」構造的シフトを表すことを意味する。
 
-| Dimension | Weight ($w_i$) | Geometric Interpretation |
+| 次元 | 重み ($w_i$) | 幾何学的解釈 |
 | :--- | :--- | :--- |
-| **Data ($g_2$)** | **2.0** | Space is "stretched" along the Data axis; small data changes imply large distance. |
-| **Transaction ($g_4$)** | **1.8** | Transaction changes cover large geometric ground. |
-| **State ($g_3$)** | **1.5** | Medium expansion. |
-| **Control ($g_1$)** | **1.2** | Closer to standard Euclidean. |
-| **Interface ($g_5$)** | **1.0** | Baseline scale. |
+| **Data ($g_2$)** | **2.0** | 空間は Data 軸に沿って「引き伸ばされて」いる。小さなデータの変更は大きな距離を意味する。 |
+| **Transaction ($g_4$)** | **1.8** | トランザクションの変更は大きな幾何学的領域をカバーする。 |
+| **State ($g_3$)** | **1.5** | 中程度の拡張。 |
+| **Control ($g_1$)** | **1.2** | 標準ユークリッドに近い。 |
+| **Interface ($g_5$)** | **1.0** | ベースラインスケール。 |
 
 ---
 
-## 4. Distance Interpretation
+## 4. 距離の解釈
 
-1.  **Geometric Displacement**: $d(S_{current}, S_{target})$
-    *   Purely spatial. "How far are we from the goal?"
-2.  **Safety Margin**: $\min_{B \in \partial\mathcal{S}} d(S_{current}, B)$
-    *   Geometric clearance from the failure boundary.
+1.  **幾何学的変位**: $d(S_{current}, S_{target})$
+    *   純粋に空間的。「ゴールからどれくらい離れているか？」
+2.  **安全マージン**: $\min_{B \in \partial\mathcal{S}} d(S_{current}, B)$
+    *   失敗境界からの幾何学的クリアランス。
 
-*Note: Cost is derived from Distance but includes path-dependent factors (velocity, friction). See 25_Migration_Optimization_Model.*
-
----
-
-## 5. Geometry of Metrics
-
-Visually, states equidistant from the Target form **Metric Hyperspheres**.
-
-*   In a non-weighted space, these are spheres.
-*   In our weighted space, they are **Ellipsoids** stretched along the Data and Transaction axes.
-*   This means "short" moves in Data space are geometrically equivalent to "long" moves in Interface space.
+*注: コストは距離から導出されるが、経路依存の要因（速度、摩擦）を含む。25_Migration_Optimization_Model 参照。*
 
 ---
 
-## 6. Conclusion
+## 5. メトリクスの幾何学
 
-The Migration Distance Metric maps abstract "change magnitude" to a concrete scalar value. It forms the basis for Cost calculation but is distinct from Cost and Risk.
+視覚的には、ターゲットから等距離にある状態は **メトリクス超球面** を形成する。
+
+*   重み付けのない空間では、これらは球である。
+*   我々の重み付き空間では、これらは Data 軸と Transaction 軸に沿って引き伸ばされた **楕円体** である。
+*   これは、Data 空間での「短い」移動が、Interface 空間での「長い」移動と幾何学的に等価であることを意味する。
+
+---
+
+## 6. 結論
+
+移行距離メトリクスは、抽象的な「変更の大きさ」を具体的なスカラー値にマッピングする。これはコスト計算の基礎となるが、コストやリスクとは異なるものである。

@@ -1,4 +1,4 @@
-# 23. Migration Path Model
+# 23. 移行経路モデル (Migration Path Model)
 
 **Phase 5: Migration Geometry Construction**  
 **Document ID:** `docs/80_geometry/23_Migration_Path_Model.md`  
@@ -6,15 +6,15 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-A **Migration Path** is the trajectory of the system through the Guarantee Space from Legacy to Target. It represents the *strategy* of migration execution.
+**移行経路** は、レガシーからターゲットへの保証空間を通るシステムの軌跡である。これは移行実行の *戦略* を表す。
 
 ---
 
-## 2. Path Definition
+## 2. 経路定義
 
-### 2.1 Continuous Path (Theoretical)
+### 2.1 連続経路 (理論的)
 
 $$
 P: [0, 1] \to GS
@@ -22,9 +22,9 @@ $$
 
 *   $P(0) = S_{legacy}$
 *   $P(1) = S_{target}$
-*   $P(t)$ represents the system state at migration progress $t$.
+*   $P(t)$ は移行進捗 $t$ におけるシステム状態を表す。
 
-### 2.2 Discrete Path (Operational)
+### 2.2 離散経路 (運用的)
 
 $$
 P = \langle S_0, S_1, S_2, \dots, S_k \rangle
@@ -32,35 +32,35 @@ $$
 
 *   $S_0 = S_{legacy}$
 *   $S_k = S_{target}$
-*   Each step $S_i \to S_{i+1}$ represents a migration iteration (sprint, release).
+*   各ステップ $S_i \to S_{i+1}$ は移行イテレーション（スプリント、リリース）を表す。
 
 ---
 
-## 3. Path Types
+## 3. 経路タイプ
 
-### 3.1 Direct Path (Big Bang)
+### 3.1 直接経路 (ビッグバン)
 
-*   **Trajectory**: Geodesic (straight line) connecting $S_{legacy}$ and $S_{target}$.
-*   **Characteristics**: Shortest geometric distance ($d$).
-*   **Risk**: Often traverses $\mathcal{F}$ (Failure Region). High exposure.
-*   **Cost**: Low path integration cost, but infinite risk cost if it fails.
+*   **軌跡**: $S_{legacy}$ と $S_{target}$ を結ぶ測地線（直線）。
+*   **特徴**: 最短の幾何学的距離 ($d$)。
+*   **リスク**: しばしば $\mathcal{F}$（失敗領域）を横断する。高い露出。
+*   **コスト**: 経路統合コストは低いが、失敗した場合のリスクコストは無限大。
 
-### 3.2 Safe Path (Incremental)
+### 3.2 安全経路 (インクリメンタル)
 
-*   **Trajectory**: A curve constrained to stay within $\mathcal{S}$.
-*   **Characteristics**: Longer distance ($d_{safe} > d_{direct}$).
-*   **Risk**: Minimized.
-*   **Cost**: Higher integration cost (adapters, scaffolding), but bounded risk.
+*   **軌跡**: $\mathcal{S}$ 内に留まるように制約された曲線。
+*   **特徴**: 距離が長い ($d_{safe} > d_{direct}$)。
+*   **リスク**: 最小化される。
+*   **コスト**: 統合コスト（アダプタ、足場）は高いが、リスクは有界。
 
-### 3.3 Boundary Path (Aggressive)
+### 3.3 境界経路 (アグレッシブ)
 
-*   **Trajectory**: Hugs the boundary $\partial\mathcal{S}$.
-*   **Characteristics**: Maximizes speed/efficiency while barely maintaining minimum safety.
-*   **Risk**: High sensitivity to perturbations.
+*   **軌跡**: 境界 $\partial\mathcal{S}$ に沿う。
+*   **特徴**: 最小限の安全性を維持しつつ、速度/効率を最大化する。
+*   **リスク**: 摂動に対する感度が高い。
 
 ---
 
-## 4. Path Visualization
+## 4. 経路の視覚化
 
 ```mermaid
 graph LR
@@ -82,18 +82,18 @@ graph LR
 
 ---
 
-## 5. Path Properties
+## 5. 経路特性
 
-1.  **Path Length (Total Displacement)**:
+1.  **経路長 (総変位)**:
     $$ L(P) = \int_0^1 |\dot{P}(t)| dt $$
-    Proxy for total volume of code changes.
+    コード変更の総量のプロキシ。
 
-2.  **Safety Clearance**:
+2.  **安全クリアランス**:
     $$ \min_t \text{dist}(P(t), \partial\mathcal{F}) $$
-    Minimum margin of error during the project.
+    プロジェクト中の最小エラーマージン。
 
 ---
 
-## 6. Conclusion
+## 6. 結論
 
-The Migration Path Model separates the **Geometry of the Path** (shape) from the **Physics of Migration** (cost/risk). Optimization seeks the "best" shape that balances Length vs. Safety.
+移行経路モデルは、**経路の幾何学**（形状）を **移行の物理学**（コスト/リスク）から分離する。最適化は、長さ vs 安全性のバランスをとる「最良の」形状を探索する。

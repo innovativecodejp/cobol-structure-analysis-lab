@@ -1,4 +1,4 @@
-# 25. Migration Optimization Model
+# 25. 移行最適化モデル (Migration Optimization Model)
 
 **Phase 5: Migration Geometry Construction**  
 **Document ID:** `docs/80_geometry/25_Migration_Optimization_Model.md`  
@@ -6,62 +6,62 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-**Migration Optimization** is the mathematical formulation of finding the "best" migration plan. It combines the Geometry, Metric, and Path models into an optimization problem.
+**移行最適化** は、「最良の」移行計画を見つけるための数学的定式化である。これは幾何学、メトリクス、経路モデルを最適化問題に統合する。
 
 ---
 
-## 2. Objective Function
+## 2. 目的関数
 
-We seek to minimize the **Total Migration Cost** $J(P)$.
-This function integrates **Operational Effort** and **Risk Exposure**.
+**総移行コスト** $J(P)$ を最小化することを目指す。
+この関数は **運用労力** と **リスク露出** を統合する。
 
 $$
 \min_{P} J(P) = \int_{0}^{1} \left[ \underbrace{C_{ops}(\dot{P}(t))}_{\text{Effort}} + \underbrace{C_{risk}(P(t))}_{\text{Exposure}} - \underbrace{\phi(P(t))}_{\text{Utility}} \right] dt
 $$
 
-### 2.1 Terms
+### 2.1 項
 
-1.  **Effort (Kinetic Energy)**: Cost of change.
-    *   $C_{ops} \propto |\dot{P}(t)|^2$ (or $|\dot{P}|$ in L1).
-    *   Rapid changes (high velocity) cost disproportionately more (overtime, cognitive load).
-2.  **Risk Exposure (Potential Energy)**: Cost of danger.
-    *   $C_{risk} \propto \frac{1}{\text{dist}(P(t), \partial\mathcal{F})}$.
-    *   Penalty for getting too close to failure.
-3.  **Utility Gain**:
-    *   We want to maximize time spent in high-utility states (optional term, relevant for incremental value delivery).
+1.  **労力 (運動エネルギー)**: 変更のコスト。
+    *   $C_{ops} \propto |\dot{P}(t)|^2$ (または L1 では $|\dot{P}|$ )。
+    *   急激な変更（高速度）は不均衡にコストがかかる（残業、認知的負荷）。
+2.  **リスク露出 (位置エネルギー)**: 危険のコスト。
+    *   $C_{risk} \propto \frac{1}{\text{dist}(P(t), \partial\mathcal{F})}$。
+    *   失敗に近づきすぎることへのペナルティ。
+3.  **効用獲得**:
+    *   高効用状態で過ごす時間を最大化したい（オプション項、段階的な価値提供に関連）。
 
 ---
 
-## 3. Constraints
+## 3. 制約
 
-The optimization is subject to:
+最適化は以下に従う：
 
-1.  **Hard Constraint (Safety)**:
+1.  **ハード制約 (安全性)**:
     *   $P(t) \in \mathcal{S} \quad \forall t$
-2.  **Boundary Conditions**:
+2.  **境界条件**:
     *   $P(0) = S_{legacy}, \quad P(1) = S_{target}$
-3.  **Dynamics (Resource Limits)**:
-    *   $|\dot{P}(t)| \le V_{max}$ (Team capacity limit).
+3.  **ダイナミクス (リソース制限)**:
+    *   $|\dot{P}(t)| \le V_{max}$ (チーム容量制限)。
 
 ---
 
-## 4. The Shortest Safe Path Problem
+## 4. 最短安全経路問題
 
-This is equivalent to the **Shortest Path Problem with Obstacles** in robotics.
+これはロボット工学における **障害物あり最短経路問題** と等価である。
 
-*   **Obstacles**: The Failure Region $\mathcal{F}$.
-*   **Terrain**: The Guarantee Space with weighted movement costs.
+*   **障害物**: 失敗領域 $\mathcal{F}$。
+*   **地形**: 重み付き移動コストを持つ保証空間。
 
-### 4.1 Solution Approaches
+### 4.1 解法アプローチ
 
-1.  **Grid Search / A***: Discretize GS and find the shortest path on the grid.
-2.  **Potential Fields**: Treat Target as an attractive force and $\mathcal{F}$ as a repulsive force. The path follows the gradient descent.
+1.  **グリッド探索 / A***: GS を離散化し、グリッド上の最短経路を見つける。
+2.  **ポテンシャル場**: ターゲットを引力、$\mathcal{F}$ を斥力として扱う。経路は勾配降下に従う。
 
 ---
 
-## 5. Optimization Diagram
+## 5. 最適化図
 
 ```mermaid
 graph TD
@@ -82,11 +82,11 @@ graph TD
 
 ---
 
-## 6. Conclusion
+## 6. 結論
 
-Migration planning is formulated as a **Constrained Optimal Control Problem**.
-*   **State**: Guarantee Vector $S$.
-*   **Control**: Migration Velocity $\dot{P}$ (Change Rate).
-*   **Cost**: Effort + Risk - Utility.
+移行計画は **制約付き最適制御問題** として定式化される。
+*   **状態**: 保証ベクトル $S$。
+*   **制御**: 移行速度 $\dot{P}$ (変更率)。
+*   **コスト**: 労力 + リスク - 効用。
 
-This model mathematically grounds "Agile vs. Waterfall" debates as parameter choices in an optimization landscape.
+このモデルは、「アジャイル vs ウォーターフォール」の議論を、最適化ランドスケープにおけるパラメータ選択として数学的に基礎づける。

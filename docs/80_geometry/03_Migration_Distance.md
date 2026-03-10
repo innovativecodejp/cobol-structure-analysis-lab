@@ -1,4 +1,4 @@
-# 03. Migration Distance
+# 03. 移行距離 (Migration Distance)
 
 **Phase 4: Migration Geometry**  
 **Document ID:** `docs/80_geometry/03_Migration_Distance.md`  
@@ -6,53 +6,53 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-**Migration Risk** is defined as the **distance** between the current guarantee vector and the ideal state. This document formalizes the distance metric.
+**移行リスク** は、現在の保証ベクトルと理想状態との間の **距離** として定義される。本文書では、この距離メトリクスを形式化する。
 
 ---
 
-## 2. Formal Definition
+## 2. 形式的定義
 
-### 2.1 Risk as Distance
+### 2.1 距離としてのリスク
 
 $$
 Risk(T) = distance(G(T), Ideal)
 $$
 
-Where $Ideal = (1, 1, 1, \dots, 1)$.
+ここで $Ideal = (1, 1, 1, \dots, 1)$ である。
 
-### 2.2 Euclidean Distance
+### 2.2 ユークリッド距離
 
 $$
 d_{Eucl}(G, Ideal) = \sqrt{\sum_{i=1}^{n} (1 - g_i)^2}
 $$
 
-### 2.3 Manhattan Distance
+### 2.3 マンハッタン距離
 
 $$
 d_{Man}(G, Ideal) = \sum_{i=1}^{n} |1 - g_i|
 $$
 
-### 2.4 Weighted Distance (重み付き距離)
+### 2.4 重み付き距離
 
-A **weighted metric** accounts for the relative importance of each guarantee dimension:
+**重み付きメトリクス** は、各保証次元の相対的な重要性を考慮する：
 
 $$
 d_w(G, Ideal) = \sqrt{\sum_{i=1}^{n} w_i (1 - g_i)^2}
 $$
 
-Where $w_i > 0$ is the **weight** (importance) of axis $i$. Example weights:
+ここで $w_i > 0$ は軸 $i$ の **重み**（重要度）である。重みの例：
 
-| Axis | Weight $w_i$ | Interpretation |
+| 軸 | 重み $w_i$ | 解釈 |
 | :--- | :--- | :--- |
-| Control | 1.0 | Baseline |
-| Data | 1.2 | Data integrity critical |
-| State | 1.5 | State transitions high impact |
-| Transaction | 1.6 | Transaction boundary most critical |
-| Interface | 0.8 | Interface often adaptable |
+| Control | 1.0 | ベースライン |
+| Data | 1.2 | データ整合性は重要 |
+| State | 1.5 | 状態遷移は影響大 |
+| Transaction | 1.6 | トランザクション境界は最も重要 |
+| Interface | 0.8 | インターフェースは適応可能な場合が多い |
 
-Weighted Manhattan:
+重み付きマンハッタン距離：
 
 $$
 d_{w,Man}(G, Ideal) = \sum_{i=1}^{n} w_i |1 - g_i|
@@ -60,23 +60,23 @@ $$
 
 ---
 
-## 3. Interpretation
+## 3. 解釈
 
-- **Higher distance** → Higher migration risk
-- **Distance 0** → $G = Ideal$ (perfect preservation)
-- **Maximum distance** → $G = Origin$ (all guarantees destroyed)
+- **距離が大きい** → 移行リスクが高い
+- **距離 0** → $G = Ideal$（完全な保存）
+- **最大距離** → $G = Origin$（すべての保証が破壊）
 
 ---
 
-## 4. Path Distance
+## 4. 経路距離
 
-For a migration path $P(t)$ from $t=0$ (Legacy) to $t=1$ (Target):
+$t=0$（レガシー）から $t=1$（ターゲット）への移行経路 $P(t)$ に対して：
 
 $$
 Risk(P) = \int_0^1 distance(G(P(t)), Ideal) \, dt
 $$
 
-Or discretized:
+またはステップ $k$ で離散化した場合：
 
 $$
 Risk(P) = \sum_{k} distance(G(P_k), Ideal)
@@ -84,6 +84,6 @@ $$
 
 ---
 
-## 5. Conclusion
+## 5. 結論
 
-Migration Distance provides a **quantitative risk** measure. It is the foundation for Migration Optimization (minimize Risk) and the definition of Safe/Failure regions.
+移行距離は **定量的なリスク** 尺度を提供する。これは移行最適化（リスク最小化）および安全/失敗領域の定義の基礎となる。

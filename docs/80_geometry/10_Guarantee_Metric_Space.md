@@ -1,4 +1,4 @@
-# 10. Guarantee Metric Space
+# 10. 保証距離空間 (Guarantee Metric Space)
 
 **Phase 4.5: Geometry Formalization**  
 **Document ID:** `docs/80_geometry/10_Guarantee_Metric_Space.md`  
@@ -6,21 +6,21 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The Guarantee Space $GS = [0,1]^n$ is formalized as a **Metric Space**. This document defines the metric structure that enables distance-based migration analysis.
+保証空間 $GS = [0,1]^n$ は **距離空間** として形式化される。本文書では、距離ベースの移行分析を可能にする距離構造を定義する。
 
 ---
 
-## 2. Guarantee Space as Metric Space
+## 2. 距離空間としての保証空間
 
-### 2.1 Underlying Set
+### 2.1 基礎集合
 
 $$
 X = GS = \{ (g_1, \dots, g_n) \mid 0 \le g_i \le 1 \}
 $$
 
-### 2.2 Ideal Point
+### 2.2 理想点
 
 $$
 Ideal = (1, 1, \dots, 1)
@@ -28,50 +28,48 @@ $$
 
 ---
 
-## 3. Metric Definitions
+## 3. 距離定義
 
-### 3.1 Euclidean Metric
+### 3.1 ユークリッド距離
 
 $$
 d(G, I) = \sqrt{\sum_{i=1}^{n} (1 - g_i)^2}
 $$
 
-### 3.2 Weighted Metric
+### 3.2 重み付き距離
 
 $$
 d_w(G, I) = \sqrt{\sum_{i=1}^{n} w_i (1 - g_i)^2}
 $$
 
-Where $w_i > 0$ is the weight of axis $i$.
+ここで $w_i > 0$ は軸 $i$ の重みである。
 
-### 3.3 Weight Semantics
+### 3.3 重みの意味論
 
-| Axis | Weight $w_i$ | Interpretation |
+| 軸 | 重み $w_i$ | 解釈 |
 | :--- | :--- | :--- |
-| Control | 1.0 | Baseline |
-| Data | 1.2 | Data integrity critical |
-| State | 1.5 | State transitions high impact |
-| Transaction | 1.6 | Transaction boundary most critical |
-| Interface | 0.8 | Interface often adaptable |
+| Control | 1.0 | ベースライン |
+| Data | 1.2 | データ整合性は重要 |
+| State | 1.5 | 状態遷移は影響大 |
+| Transaction | 1.6 | トランザクション境界は最も重要 |
+| Interface | 0.8 | インターフェースは適応可能な場合が多い |
 
 ---
 
-## 4. Metric Axioms
+## 4. 距離公理
 
-Both $d$ and $d_w$ satisfy:
+$d$ と $d_w$ は共に以下を満たす：
 
-1. $d(x,y) \ge 0$ (non-negativity)
+1. $d(x,y) \ge 0$ （非負性）
 2. $d(x,y) = 0 \iff x = y$
-3. $d(x,y) = d(y,x)$ (symmetry)
-4. $d(x,z) \le d(x,y) + d(y,z)$ (triangle inequality)
+3. $d(x,y) = d(y,x)$ （対称性）
+4. $d(x,z) \le d(x,y) + d(y,z)$ （三角不等式）
 
 ---
 
----
+## 5. 距離と位相の接続
 
-## 5. Metric–Topology Connection
-
-The weighted Euclidean metric $d_w$ induces the **same topology** as the standard Euclidean metric on $\mathbb{R}^n$. Therefore the metric topology on $GS$ is **consistent** with the subspace topology introduced in **11_Guarantee_Topology.md**.
+重み付きユークリッド距離 $d_w$ は、$\mathbb{R}^n$ 上の標準ユークリッド距離と **同じ位相** を誘導する。したがって、$GS$ 上の距離位相は、**11_Guarantee_Topology.md** で導入される部分空間位相と **整合** している。
 
 $$
 \text{Metric Space } (GS, d_w) \rightarrow \text{Topology on } GS
@@ -79,6 +77,6 @@ $$
 
 ---
 
-## 6. Conclusion
+## 6. 結論
 
-$(GS, d_w)$ is a **metric space**. Migration Risk is the distance to Ideal. This structure supports path optimization and topology (Phase4.5-3).
+$(GS, d_w)$ は **距離空間** である。移行リスクは理想点への距離である。この構造は経路最適化と位相（Phase4.5-3）をサポートする。

@@ -1,4 +1,4 @@
-# 11. Guarantee Topology
+# 11. 保証位相 (Guarantee Topology)
 
 **Phase 4.5: Geometry Formalization**  
 **Document ID:** `docs/80_geometry/11_Guarantee_Topology.md`  
@@ -6,35 +6,35 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-A topology is introduced on the Guarantee Space, enabling formal treatment of Safe Region, Failure Region, and boundaries.
+保証空間に位相を導入し、安全領域、失敗領域、および境界の形式的な扱いを可能にする。
 
-**Euclidean Topology Inheritance**
+**ユークリッド位相の継承**
 
 $$
 GS = [0,1]^n \subset \mathbb{R}^n
 $$
 
-GS inherits the **Euclidean topology** from $\mathbb{R}^n$. The subspace topology on $GS$ is the relative topology induced by the standard Euclidean topology on $\mathbb{R}^n$.
+GS は $\mathbb{R}^n$ から **ユークリッド位相** を継承する。GS 上の部分空間位相は、$\mathbb{R}^n$ 上の標準ユークリッド位相によって誘導される相対位相である。
 
 ---
 
-## 2. Topological Structure
+## 2. 位相構造
 
-### 2.1 Safe Region
+### 2.1 安全領域
 
 $$
 \mathcal{S} = \{ (g_1, \dots, g_n) \in GS \mid g_i \ge \tau_i \quad \forall i \}
 $$
 
-### 2.2 Failure Region
+### 2.2 失敗領域
 
 $$
 \mathcal{F} = GS \setminus \mathcal{S}
 $$
 
-### 2.3 Boundary
+### 2.3 境界
 
 $$
 \partial \mathcal{S} = \{ G \in GS \mid g_i = \tau_i \text{ for some } i \}
@@ -42,6 +42,6 @@ $$
 
 ---
 
-## 3. Conclusion
+## 3. 結論
 
-Guarantee Topology formalizes Safe/Failure as topological regions. See 14_Migration_Topology.md for migration-specific interpretation.
+保証位相は、安全/失敗を位相的な領域として形式化する。移行固有の解釈については 14_Migration_Topology.md を参照。

@@ -1,4 +1,4 @@
-# 12. Migration Path Geometry
+# 12. 移行経路幾何学 (Migration Path Geometry)
 
 **Phase 4.5: Geometry Formalization**  
 **Document ID:** `docs/80_geometry/12_Migration_Path_Geometry.md`  
@@ -6,56 +6,56 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The Migration Path is formalized as a geometric curve in the Guarantee Space.
+移行経路は、保証空間内の幾何学的な曲線として形式化される。
 
 ---
 
-## 2. Path Definition
+## 2. 経路定義
 
 $$
 P: [0,1] \to GS, \quad P(0)=G(Legacy), \quad P(1)=G(Target)
 $$
 
-## 3. Path Risk
+## 3. 経路リスク
 
-### 3.1 Risk Density (Cost Field)
+### 3.1 リスク密度 (コスト場)
 
-The migration risk is expressed as an integral over a **Risk Density** (Cost Field).
+移行リスクは、**リスク密度**（コスト場）上の積分として表現される。
 
-**General form**: The cost function may be any non-negative scalar field
+**一般形**: コスト関数は任意の非負スカラー場であり得る
 $$
 cost: GS \to \mathbb{R}_{\ge 0}
 $$
 
-**Phase4.5 reference model**:
+**Phase4.5 参照モデル**:
 $$
 cost(G) = d_w(G, Ideal)
 $$
 
-This preserves the generality that **Risk ≠ Distance** in general; distance is one possible cost model.
+これは、**リスク ≠ 距離** という一般性を保持する。距離は1つの可能なコストモデルに過ぎない。
 
 - **Risk Density**: 局所的移行リスク（各点 $G \in GS$ におけるリスク）
 - **Cost Field**: 空間上のリスク分布
 - **Gradient**: リスク増加方向 $\nabla cost$
 
-### 3.2 Path Risk Integral
+### 3.2 経路リスク積分
 
 $$
 Risk(P) = \int_0^1 cost(P(t)) \, dt = \int_0^1 d_w(P(t), Ideal) \, dt
 $$
 
-## 4. Optimization
+## 4. 最適化
 
 $$
 \min_P Risk(P) \quad \text{s.t. } P(t) \in \mathcal{S} \quad \forall t
 $$
 
-**Dependency constraints** (see 16_Guarantee_Axis_Dependency.md) restrict admissible migration paths and must be respected in path optimization.
+**依存関係制約**（16_Guarantee_Axis_Dependency.md 参照）は許容可能な移行経路を制限し、経路最適化において尊重されなければならない。
 
 ---
 
-## 5. Conclusion
+## 5. 結論
 
-Migration Path Geometry treats migration as a curve in metric space.
+移行経路幾何学は、移行を距離空間内の曲線として扱う。

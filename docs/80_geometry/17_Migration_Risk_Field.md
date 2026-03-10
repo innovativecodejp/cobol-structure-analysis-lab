@@ -1,4 +1,4 @@
-# 17. Migration Risk Field
+# 17. 移行リスク場 (Migration Risk Field)
 
 **Phase 4.5: Geometry Formalization**  
 **Document ID:** `docs/80_geometry/17_Migration_Risk_Field.md`  
@@ -6,32 +6,32 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The **Migration Risk Field** (Cost Field) assigns a local risk value to each point in the Guarantee Space. Path risk is the integral of this field along the migration path.
+**移行リスク場**（コスト場）は、保証空間内の各点に局所的なリスク値を割り当てる。経路リスクは、移行経路に沿ったこの場の積分である。
 
 ---
 
-## 2. Cost Field Definition
+## 2. コスト場定義
 
-**General form**: The cost function may be any non-negative scalar field
+**一般形**: コスト関数は任意の非負スカラー場であり得る
 $$
 cost: GS \to \mathbb{R}_{\ge 0}
 $$
 
-**Phase4.5 reference model**:
+**Phase4.5 参照モデル**:
 $$
 cost(G) = d_w(G, Ideal)
 $$
 
-This preserves the generality that **Risk ≠ Distance** in general.
+これは、**リスク ≠ 距離** という一般性を保持する。
 
 - **Risk Density**: 局所的移行リスク
 - **Cost Field**: 空間上のリスク分布
 
 ---
 
-## 3. Risk Field Diagram
+## 3. リスク場図
 
 ```mermaid
 flowchart LR
@@ -54,29 +54,29 @@ flowchart LR
 
 ---
 
-## 4. Gradient
+## 4. 勾配
 
-Since $GS \subset \mathbb{R}^n$, the gradient $\nabla cost$ is defined with respect to the **coordinate system inherited from $\mathbb{R}^n$**.
+$GS \subset \mathbb{R}^n$ であるため、勾配 $\nabla cost$ は **$\mathbb{R}^n$ から継承された座標系** に関して定義される。
 
 $$
 \nabla cost(G) = \text{risk increase direction}
 $$
 
-The gradient points toward higher risk. Migration paths should avoid moving along the gradient when possible.
+勾配はより高いリスクの方を指す。移行経路は可能な限り、勾配に沿って移動することを避けるべきである。
 
 ---
 
-## 5. Path Risk
+## 5. 経路リスク
 
 $$
 Risk(P) = \int_0^1 cost(P(t)) \, dt
 $$
 
-The path risk is the integral of the cost field along the path.
+経路リスクは、経路に沿ったコスト場の積分である。
 
 ---
 
-## 6. Geometry Structure
+## 6. 幾何学的構造
 
 ```mermaid
 flowchart TD
@@ -99,6 +99,6 @@ flowchart TD
 
 ---
 
-## 7. Conclusion
+## 7. 結論
 
-Migration Risk Field formalizes local risk as a scalar field on GS. It connects Path Geometry (12) with Metric Space (10) and supports optimization of migration paths.
+移行リスク場は、局所的リスクを GS 上のスカラー場として形式化する。これは経路幾何学 (12) を距離空間 (10) と接続し、移行経路の最適化をサポートする。

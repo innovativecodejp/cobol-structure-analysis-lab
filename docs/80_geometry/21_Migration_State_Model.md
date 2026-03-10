@@ -1,4 +1,4 @@
-# 21. Migration State Model
+# 21. 移行状態モデル (Migration State Model)
 
 **Phase 5: Migration Geometry Construction**  
 **Document ID:** `docs/80_geometry/21_Migration_State_Model.md`  
@@ -6,83 +6,83 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-A **Migration State** represents a snapshot of the system's guarantee levels at a specific point in time. In Migration Geometry, a state is a **point** within the Guarantee Space.
+**移行状態** は、特定の時点におけるシステムの保証レベルのスナップショットを表す。移行幾何学において、状態は保証空間内の **点** である。
 
 ---
 
-## 2. State Definition
+## 2. 状態定義
 
-A state $S$ is a vector in $GS$:
+状態 $S$ は $GS$ 内のベクトルである：
 
 $$
 S = (g_1, g_2, \dots, g_n) \in [0,1]^n
 $$
 
-### 2.1 Key Reference States
+### 2.1 主要な参照状態
 
-*   **Legacy State ($S_{legacy}$)**: The starting point of migration. Typically assumes high guarantees for existing behavior but may be structurally opaque.
-    *   Example: $S_{legacy} = (1.0, 1.0, 1.0, 1.0, 1.0)$ relative to itself.
-    *   *Note: Often we normalize the target relative to the legacy, or vice versa. Here, we define $1.0$ as the "Ideal" or "Target" requirement met.*
+*   **レガシー状態 ($S_{legacy}$)**: 移行の出発点。通常、既存の振る舞いに対して高い保証を仮定するが、構造的には不透明な場合がある。
+    *   例: それ自身に対して $S_{legacy} = (1.0, 1.0, 1.0, 1.0, 1.0)$。
+    *   *注: しばしばターゲットをレガシーに対して正規化するか、その逆を行う。ここでは、$1.0$ を「理想」または「ターゲット」要件が満たされた状態と定義する。*
 
-*   **Target State ($S_{target}$)**: The goal of the migration.
-    *   Example: $S_{target} = (1.0, 1.0, 1.0, 1.0, 1.0)$ (Full equivalence + Modernization).
+*   **ターゲット状態 ($S_{target}$)**: 移行のゴール。
+    *   例: $S_{target} = (1.0, 1.0, 1.0, 1.0, 1.0)$ (完全な等価性 + 近代化)。
 
-*   **Zero State ($S_{zero}$)**: Total loss of guarantees.
-    *   $S_{zero} = (0, 0, 0, 0, 0)$.
+*   **ゼロ状態 ($S_{zero}$)**: 保証の完全な喪失。
+    *   $S_{zero} = (0, 0, 0, 0, 0)$。
 
-### 2.2 Intermediate States
+### 2.2 中間状態
 
-Migration involves passing through intermediate states $S_t$.
+移行は中間状態 $S_t$ を通過することを伴う。
 
-*   **Partial Migration**: $S_{partial} = (1.0, 0.8, 0.5, 1.0, 0.9)$
-    *   *Interpretation*: Logic and Transaction are perfect, Data is acceptable, but State consistency is temporarily degraded (e.g., during dual-write implementation).
-
----
-
-## 3. State Classification
-
-States are classified based on their location relative to the Safe Region $\mathcal{S}$.
-
-1.  **Admissible State**: $S \in \mathcal{S}$. The system is functional and safe.
-2.  **Inadmissible State**: $S \in \mathcal{F}$. The system is broken or violates critical constraints (e.g., data corruption).
-3.  **Boundary State**: $S \in \partial\mathcal{S}$. The system is on the edge of failure; zero margin for error.
+*   **部分移行**: $S_{partial} = (1.0, 0.8, 0.5, 1.0, 0.9)$
+    *   *解釈*: ロジックとトランザクションは完璧、データは許容範囲だが、状態の一貫性は一時的に低下している（例：二重書き込み実装中）。
 
 ---
 
-## 4. State Evaluation (Utility)
+## 3. 状態分類
 
-We introduce a scalar **Utility Function** $\phi(S)$ to evaluate the "goodness" of a state, independent of where it came from.
+状態は、安全領域 $\mathcal{S}$ に対する位置に基づいて分類される。
+
+1.  **許容状態 (Admissible State)**: $S \in \mathcal{S}$。システムは機能しており安全である。
+2.  **不許可状態 (Inadmissible State)**: $S \in \mathcal{F}$。システムは壊れているか、クリティカルな制約（例：データ破損）に違反している。
+3.  **境界状態 (Boundary State)**: $S \in \partial\mathcal{S}$。システムは失敗の瀬戸際にあり、エラーのマージンはゼロである。
+
+---
+
+## 4. 状態評価 (効用)
+
+状態がどこから来たかに関わらず、状態の「良さ」を評価するために、スカラー **効用関数** $\phi(S)$ を導入する。
 
 $$
 \phi(S) = \text{Utility}(S) \in [0, 1]
 $$
 
-*   $\phi(S) \approx 1.0$: High-quality state (high guarantees, low technical debt).
-*   $\phi(S) \approx 0.0$: Low-quality state.
+*   $\phi(S) \approx 1.0$: 高品質な状態（高い保証、低い技術的負債）。
+*   $\phi(S) \approx 0.0$: 低品質な状態。
 
-### 4.1 Utility vs. Safety
+### 4.1 効用 vs. 安全性
 
-*   **Safety**: Binary classification ($S \in \mathcal{S}$ or $S \notin \mathcal{S}$).
-*   **Utility**: Continuous gradient within $\mathcal{S}$. A state can be safe but have low utility (e.g., "Safe but minimal functionality").
+*   **安全性**: 二値分類 ($S \in \mathcal{S}$ または $S \notin \mathcal{S}$)。
+*   **効用**: $\mathcal{S}$ 内の連続的な勾配。状態は安全だが効用が低い場合がある（例：「安全だが機能は最小限」）。
 
 ---
 
-## 5. State Transitions
+## 5. 状態遷移
 
-A transition $T$ is a vector difference between two states:
+遷移 $T$ は2つの状態間のベクトル差分である：
 
 $$
 T_{a \to b} = S_b - S_a = \Delta S
 $$
 
-*   **Positive Transition**: $\Delta g_i > 0$ (Guarantee improvement / Recovery)
-*   **Negative Transition**: $\Delta g_i < 0$ (Guarantee degradation / Risk acceptance)
+*   **正の遷移**: $\Delta g_i > 0$ (保証の改善 / 回復)
+*   **負の遷移**: $\Delta g_i < 0$ (保証の劣化 / リスク受容)
 
 ---
 
-## 5. Example: Strangler Pattern States
+## 6. 例: ストラングラーパターンの状態
 
 ```mermaid
 graph LR
@@ -95,18 +95,18 @@ graph LR
     style S4 fill:#9f9,stroke:#333
 ```
 
-*   $S_0$: All Legacy
-*   $S_1$: Interface stable ($g_5=1$), internal logic opaque.
-*   $S_2$: Data synched ($g_2 \approx 1$), but complexity high.
-*   $S_3$: State moved ($g_3 \to 1$).
+*   $S_0$: すべてレガシー
+*   $S_1$: インターフェース安定 ($g_5=1$)、内部ロジックは不透明。
+*   $S_2$: データ同期 ($g_2 \approx 1$)、しかし複雑性は高い。
+*   $S_3$: 状態移行 ($g_3 \to 1$)。
 
 ---
 
-## 7. Conclusion
+## 7. 結論
 
-The Migration State Model defines the "where" and "how good" of a system.
-*   **Position**: Coordinate vector $S$.
-*   **Value**: Utility $\phi(S)$.
-*   **Validity**: Inclusion in $\mathcal{S}$.
+移行状態モデルは、システムの「場所」と「良さ」を定義する。
+*   **位置**: 座標ベクトル $S$。
+*   **価値**: 効用 $\phi(S)$。
+*   **妥当性**: $\mathcal{S}$ への包含。
 
-This separation allows us to optimize for high-utility states while respecting safety boundaries.
+この分離により、安全境界を尊重しながら高効用状態に向けて最適化することが可能になる。

@@ -1,4 +1,4 @@
-# 05. Migration Path
+# 05. 移行経路 (Migration Path)
 
 **Phase 4: Migration Geometry**  
 **Document ID:** `docs/80_geometry/05_Migration_Path.md`  
@@ -6,31 +6,31 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-Migration is a process from **Legacy** to **Target**. In the geometry model, this is represented as a **path** (curve) in the Guarantee Space.
+移行は **レガシー** から **ターゲット** へのプロセスである。幾何学モデルでは、これは保証空間内の **経路**（曲線）として表現される。
 
 ---
 
-## 2. Formal Definition
+## 2. 形式的定義
 
-### 2.1 Migration Path
+### 2.1 移行経路
 
 $$
 P(t) \in GS \quad t \in [0, 1]
 $$
 
-Where:
-- $P(0)$ = Legacy state (initial guarantee vector)
-- $P(1)$ = Target state (final guarantee vector)
+ここで：
+- $P(0)$ = レガシー状態（初期保証ベクトル）
+- $P(1)$ = ターゲット状態（最終保証ベクトル）
 
-### 2.2 Path as Curve
+### 2.2 曲線としての経路
 
-$P(t)$ is a **continuous curve** in the Guarantee Space. Each $t$ corresponds to an intermediate transformation state.
+$P(t)$ は保証空間内の **連続曲線** である。各 $t$ は中間的な変換状態に対応する。
 
 ---
 
-## 3. Example Path
+## 3. 経路の例
 
 ```mermaid
 flowchart TD
@@ -45,17 +45,17 @@ flowchart TD
     Split --> Target
 ```
 
-Each step corresponds to a point $P(t_k)$ in $GS$.
+各ステップは $GS$ 内の点 $P(t_k)$ に対応する。
 
 ---
 
-## 4. Path Risk
+## 4. 経路リスク
 
 $$
 Risk(P) = \int_0^1 distance(G(P(t)), Ideal) \, dt
 $$
 
-Or discretized over steps $k$:
+またはステップ $k$ で離散化した場合：
 
 $$
 Risk(P) = \sum_k distance(G(P_k), Ideal)
@@ -63,6 +63,6 @@ $$
 
 ---
 
-## 5. Conclusion
+## 5. 結論
 
-Migration Path $P(t)$ formalizes the **Legacy → Target** journey as a geometric trajectory. Migration Optimization seeks paths that minimize Risk while staying in the Safe Region.
+移行経路 $P(t)$ は、**レガシー → ターゲット** の旅路を幾何学的な軌跡として形式化する。移行最適化は、安全領域に留まりつつリスクを最小化する経路を探索する。

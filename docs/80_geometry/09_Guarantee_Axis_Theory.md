@@ -1,4 +1,4 @@
-# 09. Guarantee Axis Theory
+# 09. 保証軸理論 (Guarantee Axis Theory)
 
 **Phase 4: Migration Geometry**  
 **Document ID:** `docs/80_geometry/09_Guarantee_Axis_Theory.md`  
@@ -6,25 +6,25 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-Each dimension of the Guarantee Vector $G(T) = (g_1, \dots, g_5)$ has a **structural origin**—the program structure from which the guarantee is derived. This document formalizes the **Guarantee Axis Theory**.
+保証ベクトル $G(T) = (g_1, \dots, g_5)$ の各次元は、**構造的起源**（その保証が導出されるプログラム構造）を持つ。本文書では **保証軸理論** を形式化する。
 
 ---
 
-## 2. Axis–Structure Mapping
+## 2. 軸と構造のマッピング
 
-| Axis | Meaning | Structural Origin |
+| 軸 | 意味 | 構造的起源 |
 | :--- | :--- | :--- |
-| $g_1$ (Control) | Control Flow Preservation | CFG |
-| $g_2$ (Data) | Data Flow Preservation | DFG |
-| $g_3$ (State) | State Transition Preservation | State Machine |
-| $g_4$ (Transaction) | Transaction Boundary Preservation | Transaction Model |
-| $g_5$ (Interface) | External Interface Preservation | I/O Boundary |
+| $g_1$ (Control) | 制御フローの保存 | CFG |
+| $g_2$ (Data) | データフローの保存 | DFG |
+| $g_3$ (State) | 状態遷移の保存 | State Machine |
+| $g_4$ (Transaction) | トランザクション境界の保存 | Transaction Model |
+| $g_5$ (Interface) | 外部インターフェースの保存 | I/O Boundary |
 
 ---
 
-## 3. Structural Origin Diagram
+## 3. 構造的起源図
 
 ```mermaid
 flowchart TD
@@ -43,7 +43,7 @@ flowchart TD
 
 ---
 
-## 4. Geometry Structure
+## 4. 幾何学的構造
 
 ```mermaid
 flowchart LR
@@ -82,11 +82,11 @@ flowchart LR
 
 ---
 
-## 5. Axis Dependency Graph
+## 5. 軸依存グラフ
 
-Guarantee Axes are **not fully independent**. Structural dependencies exist between axes:
+保証軸は **完全に独立ではない**。軸間に構造的な依存関係が存在する：
 
-| Dependency | Explanation |
+| 依存関係 | 説明 |
 | :--- | :--- |
 | State → Data | 状態はデータに依存 |
 | Transaction → State | トランザクションは状態に依存 |
@@ -101,10 +101,10 @@ flowchart TD
     Interface --> Transaction
 ```
 
-See **16_Guarantee_Axis_Dependency.md** for the full formalization.
+完全な形式化については **16_Guarantee_Axis_Dependency.md** を参照。
 
 ---
 
-## 6. Conclusion
+## 6. 結論
 
-Guarantee Axis Theory links each vector dimension to its **structural origin** and captures **axis dependencies**. This ensures traceability from geometry (Migration Distance, Safe Region) back to program structure (AST, CFG, DFG).
+保証軸理論は、各ベクトル次元をその **構造的起源** にリンクさせ、**軸依存関係** を捉える。これにより、幾何学（移行距離、安全領域）からプログラム構造（AST, CFG, DFG）へのトレーサビリティが確保される。

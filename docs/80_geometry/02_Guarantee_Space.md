@@ -1,4 +1,4 @@
-# 02. Guarantee Space (Geometry)
+# 02. 保証空間 (Guarantee Space - Geometry)
 
 **Phase 4: Migration Geometry**  
 **Document ID:** `docs/80_geometry/02_Guarantee_Space.md`  
@@ -6,33 +6,33 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The **Guarantee Space** in Phase 4 is the continuous space where each program transformation is represented as a **point**. This document defines the geometric structure of this space.
+Phase 4 における **保証空間** は、各プログラム変換が **点** として表現される連続空間である。本文書では、この空間の幾何学的構造を定義する。
 
 ---
 
-## 2. Formal Definition
+## 2. 形式的定義
 
-### 2.1 Guarantee Space
+### 2.1 保証空間
 
 $$
 GS = \mathbb{R}^n
 $$
 
-Where $n$ is the number of guarantee dimensions (e.g., $n = 5$).
+ここで $n$ は保証次元の数（例：$n = 5$）。
 
-### 2.2 Bounded Unit Hypercube
+### 2.2 有界単位超立方体
 
 $$
 GS = \{ (g_1, g_2, \dots, g_n) \mid 0 \le g_i \le 1 \}
 $$
 
-This is the **unit hypercube** $[0,1]^n$. Each $g_i \in [0,1]$ represents the preservation degree of dimension $i$.
+これは **単位超立方体** $[0,1]^n$ である。各 $g_i \in [0,1]$ は次元 $i$ の保存度を表す。
 
-### 2.3 Program as Point
+### 2.3 点としてのプログラム
 
-A program transformation $T$ maps to a point:
+プログラム変換 $T$ は点にマッピングされる：
 
 $$
 G(T) \in GS
@@ -40,56 +40,56 @@ $$
 
 ---
 
-## 3. Geometric Interpretation
+## 3. 幾何学的解釈
 
-### 3.1 Ideal Point
+### 3.1 理想点 (Ideal Point)
 
 $$
 Ideal = (1, 1, 1, \dots, 1)
 $$
 
-The "perfect" state where all guarantees are fully preserved.
+すべての保証が完全に保存されている「完璧な」状態。
 
-### 3.2 Origin
+### 3.2 原点 (Origin)
 
 $$
 Origin = (0, 0, 0, \dots, 0)
 $$
 
-Complete destruction of all guarantees.
+すべての保証が破壊された状態。
 
-### 3.3 Distance
+### 3.3 距離
 
-Points in $GS$ can be compared using Euclidean or Manhattan distance (see Phase4-3 Migration Distance).
+$GS$ 内の点は、ユークリッド距離またはマンハッタン距離を用いて比較できる（Phase4-3 移行距離を参照）。
 
 ---
 
-## 4. Relation to Phase 2/3: Discrete → Continuous
+## 4. Phase 2/3 との関係: 離散から連続へ
 
-### 4.1 Discrete → Continuous Relaxation
+### 4.1 離散 → 連続緩和
 
-Phase 2/3 use **discrete structures**; Phase 4 introduces a **continuous relaxation**:
+Phase 2/3 では **離散構造** を使用していたが、Phase 4 では **連続緩和** を導入する：
 
-| Phase | Structure | Interpretation |
+| Phase | 構造 | 解釈 |
 | :--- | :--- | :--- |
-| Phase 2 | Guarantee Lattice $\mathcal{G} = \mathcal{P}(\mathbb{P})$ | Discrete (present/absent) |
-| Phase 3 | Dependency-Constrained Ideals $\mathcal{G}_{dep}$ | Discrete, dependency-closed |
-| Phase 4 | Continuous Guarantee Space $GS = [0,1]^n$ | Continuous (degree of preservation) |
+| Phase 2 | 保証束 $\mathcal{G} = \mathcal{P}(\mathbb{P})$ | 離散（有無） |
+| Phase 3 | 依存関係制約付きイデアル $\mathcal{G}_{dep}$ | 離散、依存関係閉包 |
+| Phase 4 | 連続保証空間 $GS = [0,1]^n$ | 連続（保存度） |
 
-### 4.2 Theoretical Progression
+### 4.2 理論的進展
 
 $$
 \text{Discrete Structure} \rightarrow \text{Continuous Geometry}
 $$
 
-- **Phase 2**: Guarantee states are sets (binary: $p \in S$ or $p \notin S$).
-- **Phase 3**: Valid states are ideals; migration is graph traversal.
-- **Phase 4**: States are points in $[0,1]^n$; migration is path optimization in continuous space.
+- **Phase 2**: 保証状態は集合である（二値：$p \in S$ または $p \notin S$）。
+- **Phase 3**: 有効な状態はイデアルであり、移行はグラフ探索である。
+- **Phase 4**: 状態は $[0,1]^n$ 内の点であり、移行は連続空間内の経路最適化である。
 
-Phase 4 provides a **continuous relaxation** of the discrete model, enabling distance-based optimization and gradient-like reasoning.
+Phase 4 は離散モデルの **連続緩和** を提供し、距離ベースの最適化や勾配的な推論を可能にする。
 
 ---
 
-## 5. Conclusion
+## 5. 結論
 
-The Guarantee Space $GS$ is the unit hypercube $[0,1]^n$. Program transformations are points, and migration planning becomes a **geometric path-finding problem** in this space.
+保証空間 $GS$ は単位超立方体 $[0,1]^n$ である。プログラム変換は点であり、移行計画はこの空間における **幾何学的経路探索問題** となる。

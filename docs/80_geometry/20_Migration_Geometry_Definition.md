@@ -1,4 +1,4 @@
-# 20. Migration Geometry Definition
+# 20. 移行幾何学定義 (Migration Geometry Definition)
 
 **Phase 5: Migration Geometry Construction**  
 **Document ID:** `docs/80_geometry/20_Migration_Geometry_Definition.md`  
@@ -6,61 +6,61 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-Migration Geometry is the mathematical framework that treats software migration as a geometric problem within the **Guarantee Space**. This document formally defines the **Migration Geometry** tuple.
+移行幾何学は、ソフトウェア移行を **保証空間** 内の幾何学的問題として扱う数学的枠組みである。本文書では **移行幾何学** タプルを形式的に定義する。
 
 ---
 
-## 2. Formal Definition
+## 2. 形式的定義
 
-A **Migration Geometry** is a tuple $\mathcal{M}$:
+**移行幾何学** はタプル $\mathcal{M}$ である：
 
 $$
 \mathcal{M} = (GS, d, \mathcal{S}, \mathcal{F}, \phi)
 $$
 
-Where:
+ここで：
 
-*   **$GS$ (Guarantee Space)**: The bounded hypercube $[0,1]^n$ representing the space of all possible system states with respect to guarantee levels. This is a **first-order approximation** assuming orthogonal dimensions.
-*   **$d$ (Metric)**: A distance function $d: GS \times GS \to \mathbb{R}_{\ge 0}$ measuring the geometric displacement between states.
-*   **$\mathcal{S}$ (Safe Region)**: A subset $\mathcal{S} \subseteq GS$ representing states where the system operates within acceptable guarantee thresholds.
-*   **$\mathcal{F}$ (Failure Region)**: The complement $\mathcal{F} = GS \setminus \mathcal{S}$, representing unacceptable states.
-*   **$\phi$ (Utility Function)**: A scalar field $\phi: GS \to \mathbb{R}$ representing the intrinsic value or "health" of a state (see 21_Migration_State_Model).
+*   **$GS$ (保証空間)**: 保証レベルに関するすべての可能なシステム状態を表す有界超立方体 $[0,1]^n$。これは直交次元を仮定した **一次近似** である。
+*   **$d$ (距離)**: 状態間の幾何学的変位を測定する距離関数 $d: GS \times GS \to \mathbb{R}_{\ge 0}$。
+*   **$\mathcal{S}$ (安全領域)**: システムが許容可能な保証閾値内で動作する状態を表す部分集合 $\mathcal{S} \subseteq GS$。
+*   **$\mathcal{F}$ (失敗領域)**: 許容できない状態を表す補集合 $\mathcal{F} = GS \setminus \mathcal{S}$。
+*   **$\phi$ (効用関数)**: 状態の本質的な価値や「健全性」を表すスカラー場 $\phi: GS \to \mathbb{R}$（21_Migration_State_Model 参照）。
 
 ---
 
-## 3. Guarantee Space Structure
+## 3. 保証空間構造
 
-The Guarantee Space is defined by $n$ orthogonal axes.
+保証空間は $n$ 個の直交軸によって定義される。
 
-**Orthogonality Assumption**:
-In this baseline model, we assume guarantee dimensions are independent.
-*   *Reality*: Dimensions are often coupled (e.g., Transaction guarantees rely on State consistency).
-*   *Model*: We treat them as orthogonal for geometric simplicity, handling couplings via **Safe Region constraints** ($\mathcal{S}$) rather than warping the space itself.
+**直交性の仮定**:
+このベースラインモデルでは、保証次元は独立であると仮定する。
+*   *現実*: 次元はしばしば結合している（例：トランザクション保証は状態の一貫性に依存する）。
+*   *モデル*: 幾何学的単純さのために直交として扱い、結合は空間自体を歪めるのではなく **安全領域制約** ($\mathcal{S}$) を通じて処理する。
 
 $$
 GS = \prod_{i=1}^{n} [0,1]_i
 $$
 
-Typical dimensions ($n=5$):
-1.  $g_1$: **Control Flow** (Semantic equivalence of logic)
-2.  $g_2$: **Data Flow** (Integrity of data lineage)
-3.  $g_3$: **State** (Consistency of state transitions)
-4.  $g_4$: **Transaction** (Atomicity and boundary preservation)
-5.  $g_5$: **Interface** (External contract adherence)
+典型的な次元 ($n=5$):
+1.  $g_1$: **Control Flow** (ロジックの意味的等価性)
+2.  $g_2$: **Data Flow** (データ系統の整合性)
+3.  $g_3$: **State** (状態遷移の一貫性)
+4.  $g_4$: **Transaction** (原子性と境界の保存)
+5.  $g_5$: **Interface** (外部契約の遵守)
 
 ---
 
-## 4. Geometric Properties
+## 4. 幾何学的特性
 
-1.  **Boundedness**: The space is compact, bounded by $\vec{0}$ (Zero Guarantee) and $\vec{1}$ (Ideal Guarantee).
-2.  **Continuity**: We treat guarantees as continuous variables $[0,1]$ to enable calculus-based optimization (Risk Field gradients), though actual implementation steps may be discrete.
-3.  **Anisotropy**: The space is not isotropic; movement along the *Data* axis may have a different cost/risk profile than movement along the *Interface* axis (handled by the weighted metric $d$).
+1.  **有界性**: 空間はコンパクトであり、$\vec{0}$ (ゼロ保証) と $\vec{1}$ (理想保証) によって有界である。
+2.  **連続性**: 実際の実装ステップは離散的かもしれないが、微積分ベースの最適化（リスク場勾配）を可能にするために、保証を連続変数 $[0,1]$ として扱う。
+3.  **異方性**: 空間は等方的ではない。*Data* 軸に沿った移動は、*Interface* 軸に沿った移動とは異なるコスト/リスクプロファイルを持つ可能性がある（重み付き距離 $d$ によって処理される）。
 
 ---
 
-## 5. Visual Representation
+## 5. 視覚的表現
 
 ```mermaid
 graph TD
@@ -79,16 +79,16 @@ graph TD
 
 ---
 
-## 6. Future Extensions
+## 6. 将来の拡張
 
-While $\mathcal{M}$ uses a Euclidean $[0,1]^n$ basis, future research may explore:
+$\mathcal{M}$ はユークリッド $[0,1]^n$ 基底を使用しているが、将来の研究では以下を探求する可能性がある：
 
-1.  **Non-Orthogonal Space**: Riemannian geometry where $g_{ij}$ metric tensor captures axis dependencies.
-2.  **Lattice Models**: Discrete order theory for guarantees that cannot be continuously relaxed.
-3.  **Topology Optimization**: Homological analysis of the Safe Region $\mathcal{S}$ to find "tunnels" through the Failure Region.
+1.  **非直交空間**: $g_{ij}$ 計量テンソルが軸依存関係を捉えるリーマン幾何学。
+2.  **束モデル**: 連続的に緩和できない保証のための離散順序理論。
+3.  **トポロジー最適化**: 失敗領域を通過する「トンネル」を見つけるための安全領域 $\mathcal{S}$ のホモロジー解析。
 
 ---
 
-## 7. Conclusion
+## 7. 結論
 
-Migration Geometry $\mathcal{M}$ provides the foundational structure. It establishes a rigorous mathematical baseline, separating geometric displacement ($d$) from state utility ($\phi$) and safety constraints ($\mathcal{S}$).
+移行幾何学 $\mathcal{M}$ は基礎的な構造を提供する。これは、幾何学的変位 ($d$) を状態効用 ($\phi$) や安全性制約 ($\mathcal{S}$) から分離し、厳密な数学的ベースラインを確立する。
