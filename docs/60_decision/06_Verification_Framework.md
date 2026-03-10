@@ -1,4 +1,4 @@
-# 06. Verification Framework: Ensuring Correctness of Migration Decisions
+# 06. 検証フレームワーク：移行判断の正当性確保 (Verification Framework)
 
 **Phase 3: Migration Decision Model**  
 **Document ID:** `docs/60_decision/06_Verification_Framework.md`  
@@ -6,117 +6,117 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The **Verification Framework** provides the methodology to validate that the migration decisions derived from the Phase 3 models (Risk, Feasibility, Boundary) are correct and that the execution of the migration adheres to the predicted trajectory.
+**検証フレームワーク（Verification Framework）** は、Phase 3 のモデル（リスク、実現可能性、境界）から導出された移行判断が正しいこと、および移行の実行が予測された軌跡に従っていることを検証するための方法論を提供する。
 
-This framework closes the loop between **Theoretical Prediction** (the Decision Model) and **Practical Reality** (the Migration Project), ensuring that high-stakes decisions are not just made, but continuously verified.
+このフレームワークは、**理論的予測**（判断モデル）と **実践的現実**（移行プロジェクト）の間のループを閉じ、高額な賭けとなる決定が単に行われるだけでなく、継続的に検証されることを保証する。
 
 ---
 
-## 2. Traceability Model
+## 2. トレーサビリティモデル (Traceability Model)
 
-A critical requirement for verification is **Traceability**: every decision must be linked back to the specific structural evidence that justified it.
+検証のための重要な要件は **トレーサビリティ（Traceability）** である：すべての決定は、それを正当化した具体的な構造的証拠にリンクされていなければならない。
 
-### 2.1 The Decision Chain
+### 2.1 決定チェーン
 
-We define a formal traceability chain:
+形式的なトレーサビリティチェーンを定義する：
 
 $$
 Code \xrightarrow{\Phi} Structure \xrightarrow{Risk} Metrics \xrightarrow{Logic} Decision
 $$
 
-1.  **Source Artifact ($C$)**: The specific COBOL paragraph or variable.
-2.  **Structural Element ($E$)**: The AST node, CFG subgraph, or DFG edge.
-3.  **Risk Metric ($M$)**: The calculated value (e.g., $D_{debt}=40, C_{cfg}=15$).
-4.  **Decision Logic ($L$)**: The rule applied (e.g., "If $C_{cfg} > 10$, then Refactor").
-5.  **Final Decision ($D$)**: The strategy selected.
+1.  **ソース成果物 ($C$)**: 特定の COBOL 段落または変数。
+2.  **構造要素 ($E$)**: AST ノード、CFG 部分グラフ、または DFG エッジ。
+3.  **リスクメトリクス ($M$)**: 計算された値（例：$D_{debt}=40, C_{cfg}=15$）。
+4.  **判断ロジック ($L$)**: 適用されたルール（例：「もし $C_{cfg} > 10$ ならば、リファクタリングせよ」）。
+5.  **最終決定 ($D$)**: 選択された戦略。
 
-### 2.2 Verification Requirement
+### 2.2 検証要件
 
-For any decision $D$, the system must be able to produce the **Justification Tuple**:
+任意の決定 $D$ に対して、システムは以下の **正当化タプル（Justification Tuple）** を生成できなければならない：
 $$
 Justify(D) = (L, M, E, C)
 $$
-"We decided to **Refactor** ($D$) because Rule 4 ($L$) triggered on Complexity 15 ($M$) found in the nested loops ($E$) of Paragraph `CALC-TAX` ($C$)."
+「我々は **リファクタリング** ($D$) することを決定した。なぜなら、段落 `CALC-TAX` ($C$) のネストされたループ ($E$) において見つかった複雑性 15 ($M$) に対して、ルール 4 ($L$) がトリガーされたからである。」
 
 ---
 
-## 3. Continuous Verification Process
+## 3. 継続的検証プロセス (Continuous Verification Process)
 
-Migration is a dynamic process. The initial decision is a hypothesis; execution is the experiment. We must verify continuously.
+移行は動的なプロセスである。最初の決定は仮説であり、実行は実験である。我々は継続的に検証しなければならない。
 
-### 3.1 Monitoring Metric ($\Delta(t)$)
+### 3.1 モニタリングメトリクス ($\Delta(t)$)
 
-Let $S_{plan}(t)$ be the expected state at time $t$ in the migration plan.
-Let $S_{actual}(t)$ be the actual state of the code repository at time $t$.
+$S_{plan}(t)$ を移行計画における時刻 $t$ での期待される状態とする。
+$S_{actual}(t)$ を時刻 $t$ でのコードリポジトリの実際のアクティブな状態とする。
 
-We monitor the **Deviation Metric**:
+我々は **逸脱メトリクス（Deviation Metric）** を監視する：
 $$
 \Delta(t) = d_w(S_{plan}(t), S_{actual}(t))
 $$
 
-### 3.2 Verification Gates
+### 3.2 検証ゲート
 
-We establish formal gates at each migration step $S_i \to S_{i+1}$:
+各移行ステップ $S_i \to S_{i+1}$ に形式的なゲートを設置する：
 
-1.  **Pre-Condition Check**: Does $S_i$ satisfy the prerequisites for the transformation?
-2.  **Transformation Execution**: Apply refactoring/translation.
-3.  **Post-Condition Check**:
-    *   Is $S_{i+1} \in \mathcal{G}_{dep}$? (Is the new state valid?)
-    *   Is $S_{i+1} \approx S_{plan}(i+1)$? (Did we reach the target?)
+1.  **事前条件チェック**: $S_i$ は変換の前提条件を満たしているか？
+2.  **変換実行**: リファクタリング/変換を適用する。
+3.  **事後条件チェック**:
+    *   $S_{i+1} \in \mathcal{G}_{dep}$ か？（新しい状態は有効か？）
+    *   $S_{i+1} \approx S_{plan}(i+1)$ か？（目標に到達したか？）
 
-If $\Delta(t) > Threshold$, the process must **Halt** and trigger the **Correction Protocol**.
+もし $\Delta(t) > Threshold$ ならば、プロセスは **停止 (Halt)** し、**修正プロトコル (Correction Protocol)** をトリガーしなければならない。
 
 ---
 
-## 4. Post-Migration Validation
+## 4. 移行後検証 (Post-Migration Validation)
 
-Once the target state $S_{final}$ is reached, we must prove it is safe.
+一旦目標状態 $S_{final}$ に到達したら、それが安全であることを証明しなければならない。
 
-### 4.1 Safety Verification
+### 4.1 安全性検証
 
 $$
 Verify(S_{final}) \iff G_{crit} \subseteq S_{final}
 $$
 
-This is not just a structural check but a **Behavioral Verification**:
-*   **Functional Equivalence**: Run regression tests to prove $Behavior(S_{final}) \equiv Behavior(S_{start})$.
-*   **Structural Compliance**: Static analysis to prove $S_{final}$ respects modern architectural rules (e.g., no cycles, no global state).
+これは単なる構造的チェックではなく、**振る舞いの検証（Behavioral Verification）** である：
+*   **機能的等価性**: 回帰テストを実行し、$Behavior(S_{final}) \equiv Behavior(S_{start})$ を証明する。
+*   **構造的コンプライアンス**: 静的解析を実行し、$S_{final}$ が現代のアーキテクチャルール（例：サイクルなし、グローバル状態なし）を尊重していることを証明する。
 
 ---
 
-## 5. Feedback & Refinement (Bayesian Update)
+## 5. フィードバックと改善（ベイズ更新）
 
-The models in Phase 3 rely on estimated parameters (e.g., risk multiplier $k$, complexity weights $\alpha, \beta$). Real-world data should refine these.
+Phase 3 のモデルは、推定されたパラメータ（例：リスク乗数 $k$、複雑性重み $\alpha, \beta$）に依存している。現実世界のデータはこれらを改善するはずである。
 
-### 5.1 Probability Update
+### 5.1 確率更新
 
-If a transition predicted to succeed ($P_{fail} \approx 0.1$) actually fails, we update our belief about the risk of that specific structure.
+成功すると予測された遷移（$P_{fail} \approx 0.1$）が実際に失敗した場合、その特定の構造のリスクに関する信念を更新する。
 
 $$
 P(Risk \mid Structure, Failure) = \frac{P(Failure \mid Risk, Structure) \cdot P(Risk)}{P(Failure)}
 $$
 
-### 5.2 Model Calibration
+### 5.2 モデル校正
 
-*   If **Monoliths** are consistently harder to migrate than predicted $\to$ Increase weight of $C_{dfg}$.
-*   If **Spaghetti Code** is easier to refactor than predicted $\to$ Decrease weight of $C_{cfg}$.
+*   もし **モノリス** が予測よりも一貫して移行困難である場合 $\to$ $C_{dfg}$ の重みを増やす。
+*   もし **スパゲッティコード** が予測よりもリファクタリング容易である場合 $\to$ $C_{cfg}$ の重みを減らす。
 
-This creates a **Self-Learning Decision Model**.
+これは **自己学習型意思決定モデル（Self-Learning Decision Model）** を作成する。
 
 ---
 
-## 6. Phase 3 Conclusion
+## 6. Phase 3 結論
 
-This document completes **Phase 3: Migration Decision Model**.
+本文書は **Phase 3: Migration Decision Model** を完了する。
 
-We have successfully constructed a comprehensive theoretical framework that:
-1.  **Formalizes** the decision space ($\mathcal{G}$ as Lattice).
-2.  **Quantifies** the danger ($R_{struct}$ as Risk).
-3.  **Determines** possibility ($C_{min}$ as Feasibility).
-4.  **Categorizes** strategies (Boundary Model).
-5.  **Validates** against reality (Case Studies).
-6.  **Ensures** correctness (Verification Framework).
+我々は以下を行う包括的な理論的フレームワークの構築に成功した：
+1.  意思決定空間を **形式化** した（Lattice としての $\mathcal{G}$）。
+2.  危険を **定量化** した（Risk としての $R_{struct}$）。
+3.  可能性を **判定** した（Feasibility としての $C_{min}$）。
+4.  戦略を **分類** した（Boundary Model）。
+5.  現実に対して **検証** した（Case Studies）。
+6.  正しさを **確保** した（Verification Framework）。
 
-The research has transitioned from *describing* legacy systems (Phase 1 & 2) to *deciding their future* (Phase 3). The next logical step would be implementation (Phase 4), building the actual tooling to execute these decisions.
+研究は、レガシーシステムの *記述*（Phase 1 & 2）から、その未来の *決定*（Phase 3）へと移行した。次の論理的なステップは実装（Phase 4）であり、これらの決定を実行するための実際のツールを構築することである。

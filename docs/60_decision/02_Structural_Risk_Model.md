@@ -1,4 +1,4 @@
-# 02. Structural Risk Model
+# 02. 構造的リスクモデル (Structural Risk Model)
 
 **Phase 3: Migration Decision Model**  
 **Document ID:** `docs/60_decision/02_Structural_Risk_Model.md`  
@@ -6,131 +6,131 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The **Structural Risk Model** quantifies the likelihood that a legacy system migration will fail to reach the **Safety Region ($\mathcal{S}$)** defined in `01_Guarantee_Decision_Space.md`.
+**構造的リスクモデル（Structural Risk Model）** は、レガシーシステムの移行が、`01_Guarantee_Decision_Space.md` で定義された **安全領域（Safety Region, $\mathcal{S}$）** に到達できずに失敗する可能性を定量化するものである。
 
-While the Guarantee Space provides the *topological* map of safe states, the Risk Model introduces the *probabilistic* and *metric* dimensions: **How hard** is it to traverse the path to safety, and **what is the probability** of failure?
+保証空間が安全な状態の *位相幾何学的（topological）* 地図を提供するのに対し、リスクモデルは *確率的* および *計量的* 次元を導入する：安全への道のりを進むのは **どれほど困難か**、そして失敗の **確率はどれくらいか**？
 
 ---
 
-## 2. Migration Debt Model
+## 2. 移行負債モデル (Migration Debt Model)
 
-We define **Migration Debt ($D_{debt}$)** as the structural distance between the current system state $S_{current}$ and the nearest safe state in the Safety Region $\mathcal{S}$.
+**移行負債（Migration Debt, $D_{debt}$）** を、現在のシステム状態 $S_{current}$ と、安全領域 $\mathcal{S}$ 内の最も近い安全な状態との間の構造的距離として定義する。
 
-### 2.1 Distance to Safety
+### 2.1 安全への距離
 
-Given the weighted Hamming metric $d_w(S_1, S_2) = \sum_{p \in S_1 \triangle S_2} w(p)$ from Phase 2, the Migration Debt is the minimum cost to acquire all missing critical guarantees:
+Phase 2 からの重み付きハミング距離 $d_w(S_1, S_2) = \sum_{p \in S_1 \triangle S_2} w(p)$ を用いると、移行負債は、欠落しているすべてのクリティカル保証を獲得するための最小コストとなる：
 
 $$
 D_{debt}(S) = \min_{T \in \mathcal{S}} d_w(S, T)
 $$
 
-Since $\mathcal{S}$ is defined by the critical guarantee set $G_{crit}$, and any safe state must contain $G_{crit}$, this simplifies to:
+$\mathcal{S}$ はクリティカル保証集合 $G_{crit}$ によって定義され、任意の安全な状態は $G_{crit}$ を含んでいなければならないため、これは次のように簡略化される：
 
 $$
 D_{debt}(S) = \sum_{p \in G_{crit} \setminus S} w(p)
 $$
 
-This represents the **minimum theoretical effort** required to reach a safe state.
+これは、安全な状態に到達するために必要な **理論上の最小労力** を表す。
 
-### 2.2 Debt Density
+### 2.2 負債密度 (Debt Density)
 
-To normalize across systems of different sizes, we define **Debt Density ($\rho_{debt}$)**:
+異なる規模のシステム間で正規化するために、**負債密度（Debt Density, $\rho_{debt}$）** を定義する：
 
 $$
 \rho_{debt}(S) = \frac{D_{debt}(S)}{\sum_{p \in G_{crit}} w(p)}
 $$
 
-$\rho_{debt} \in [0, 1]$, where 0 implies the system is already safe, and 1 implies total absence of critical guarantees.
+$\rho_{debt} \in [0, 1]$ であり、0 はシステムが既に安全であることを意味し、1 はクリティカル保証が完全に欠如していることを意味する。
 
 ---
 
-## 3. The Structural Risk Function
+## 3. 構造的リスク関数 (The Structural Risk Function)
 
-Migration Debt measures *what* needs to be done. Structural Risk measures the *difficulty* and *uncertainty* of doing it.
-We propose that the risk of a migration step $S \to S'$ is a function of the code's structural complexity.
+移行負債は *何を* なすべきかを測定する。構造的リスクは、それを実行する際の *困難さ* と *不確実性* を測定する。
+我々は、移行ステップ $S \to S'$ のリスクは、コードの構造的複雑性の関数であると提案する。
 
-### 3.1 Probability of Transition Failure
+### 3.1 遷移失敗の確率
 
-Let $T: S \to S'$ be a migration transformation (e.g., refactoring a module).
-We define $P_{fail}(T)$ as the probability that the resulting state $S'$ does not preserve the intended guarantees (i.e., $S' \notin \mathcal{G}_{dep}$ or $S'$ loses properties from $S$).
+$T: S \to S'$ を移行変換（例：モジュールのリファクタリング）とする。
+$P_{fail}(T)$ を、結果として得られる状態 $S'$ が意図した保証を保存しない（すなわち、$S' \notin \mathcal{G}_{dep}$ または $S'$ が $S$ からの特性を失う）確率として定義する。
 
-We hypothesize that $P_{fail}$ is correlated with standard complexity metrics:
+我々は、$P_{fail}$ が標準的な複雑度メトリクスと相関しているという仮説を立てる：
 
 $$
 P_{fail}(T) \approx 1 - e^{- k \cdot C(T)}
 $$
 
-Where:
-*   $C(T)$ is the **Structural Complexity** of the code being transformed.
-*   $k$ is a process capability constant (lower for manual migration, higher for automated tools).
+ここで：
+*   $C(T)$ は、変換されるコードの **構造的複雑性（Structural Complexity）** である。
+*   $k$ はプロセス能力定数である（手動移行の場合は低く、自動化ツールの場合は高い）。
 
-### 3.2 Complexity Factors ($C(T)$)
+### 3.2 複雑性要因 ($C(T)$)
 
-The complexity $C(T)$ is a composite metric derived from the AST, CFG, and DFG:
+複雑性 $C(T)$ は、AST、CFG、DFG から導出される複合メトリクスである：
 
-1.  **Control Flow Complexity ($C_{cfg}$)**:
-    *   Cyclomatic Complexity ($CC$).
-    *   Unstructuredness (Knot Count or number of GOTOs).
-    *   *High $C_{cfg}$ increases the risk of logic errors.*
+1.  **制御フロー複雑性 ($C_{cfg}$)**:
+    *   サイクロマティック複雑度 ($CC$)。
+    *   非構造化度（Knot Count または GOTO の数）。
+    *   *$C_{cfg}$ が高いと、ロジックエラーのリスクが増大する。*
 
-2.  **Data Flow Complexity ($C_{dfg}$)**:
-    *   Halstead Volume ($V$).
-    *   Data Coupling (number of shared variables).
-    *   *High $C_{dfg}$ increases the risk of side-effects.*
+2.  **データフロー複雑性 ($C_{dfg}$)**:
+    *   Halstead Volume ($V$)。
+    *   データ結合度（共有変数の数）。
+    *   *$C_{dfg}$ が高いと、副作用のリスクが増大する。*
 
-3.  **Dependency Depth ($C_{dep}$)**:
-    *   Depth in the dependency graph $D$.
-    *   Fan-in / Fan-out of the module.
-    *   *High $C_{dep}$ increases the risk of cascading failures.*
+3.  **依存関係の深さ ($C_{dep}$)**:
+    *   依存関係グラフ $D$ における深さ。
+    *   モジュールのファンイン / ファンアウト。
+    *   *$C_{dep}$ が高いと、連鎖的障害のリスクが増大する。*
 
 $$
 C(T) = \alpha \cdot C_{cfg} + \beta \cdot C_{dfg} + \gamma \cdot C_{dep}
 $$
 
-### 3.3 The Risk Equation
+### 3.3 リスク方程式
 
-The total **Structural Risk ($R_{struct}$)** of a system $S$ is the product of its Migration Debt and its Structural Complexity:
+システム $S$ の総 **構造的リスク（Structural Risk, $R_{struct}$）** は、その移行負債と構造的複雑性の積である：
 
 $$
 R_{struct}(S) = D_{debt}(S) \times (1 + C(S))
 $$
 
-Alternatively, in a probabilistic formulation:
+あるいは、確率的定式化においては：
 
 $$
 R_{struct}(S) = D_{debt}(S) \times \frac{1}{1 - P_{fail}(S)}
 $$
 
-This formulation implies that:
-*   If Debt is 0 (System is Safe), Risk is 0.
-*   If Complexity is high, Risk is amplified (effectively increasing the "distance").
-*   If Complexity is infinite (unmaintainable code), Risk approaches infinity.
+この定式化は以下を意味する：
+*   もし負債が 0 なら（システムは安全）、リスクは 0 である。
+*   もし複雑性が高ければ、リスクは増幅される（実質的に「距離」が増大する）。
+*   もし複雑性が無限大なら（保守不可能なコード）、リスクは無限大に近づく。
 
 ---
 
-## 4. Risk Classification
+## 4. リスク分類 (Risk Classification)
 
-Based on $R_{struct}$, we classify systems into four zones:
+$R_{struct}$ に基づき、システムを4つのゾーンに分類する：
 
-| Risk Level | Range ($R_{struct}$) | Interpretation | Recommended Strategy |
+| リスクレベル | 範囲 ($R_{struct}$) | 解釈 | 推奨戦略 |
 | :--- | :--- | :--- | :--- |
-| **Low** | $0 \le R < 10$ | Safe to Migrate | **Direct Migration** (Rehost/Automated Refactor) |
-| **Medium** | $10 \le R < 50$ | Manageable Risk | **Refactor then Migrate** (Resolve complexity first) |
-| **High** | $50 \le R < 100$ | Significant Danger | **Partial Rewrite** (Isolate high-risk modules) |
-| **Critical** | $R \ge 100$ | Feasibility Unproven | **Full Redesign** (Migration is likely to fail) |
+| **Low** | $0 \le R < 10$ | 移行しても安全 | **直接移行** (リホスト/自動リファクタリング) |
+| **Medium** | $10 \le R < 50$ | 管理可能なリスク | **リファクタリング後に移行** (先に複雑性を解消) |
+| **High** | $50 \le R < 100$ | 重大な危険 | **部分的書き直し** (高リスクモジュールを隔離) |
+| **Critical** | $R \ge 100$ | 実現可能性未証明 | **完全再設計** (移行は失敗する可能性が高い) |
 
-*(Note: Threshold values 10, 50, 100 are illustrative and must be calibrated in Task 5).*
+*(注: 閾値 10, 50, 100 は例示であり、Task 5 で校正する必要がある)。*
 
 ---
 
-## 5. Conclusion
+## 5. 結論
 
-The Structural Risk Model provides a calculated value $R_{struct}$ derived from:
-1.  **Missing Guarantees** ($G_{crit} \setminus S$)
-2.  **Code Complexity** ($CC$, Halstead, Coupling)
+構造的リスクモデルは、以下から導出される計算値 $R_{struct}$ を提供する：
+1.  **欠落している保証** ($G_{crit} \setminus S$)
+2.  **コード複雑性** ($CC$, Halstead, Coupling)
 
-This model quantitatively explains why "spaghetti code" is risky to migrate: not just because it's hard to read, but because its high $C_{cfg}$ amplifies the probability of transition failure ($P_{fail}$), making the effective distance to the Safety Region insurmountable.
+このモデルは、「スパゲッティコード」の移行がなぜ危険なのかを定量的に説明する。単に読みにくいからではなく、その高い $C_{cfg}$ が遷移失敗確率 ($P_{fail}$) を増幅させ、安全領域への実効的な距離を克服不可能にするからである。
 
-This output feeds directly into the **Migration Feasibility Model** (Task 3), which will determine if a path exists to reduce $R_{struct}$ to an acceptable level.
+この出力は、**移行実現可能性モデル**（Task 3）に直接入力され、そこで $R_{struct}$ を許容レベルまで低減するパスが存在するかどうかが判定される。

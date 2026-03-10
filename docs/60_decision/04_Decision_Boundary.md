@@ -1,4 +1,4 @@
-# 04. Decision Boundary Model
+# 04. 意思決定境界モデル (Decision Boundary Model)
 
 **Phase 3: Migration Decision Model**  
 **Document ID:** `docs/60_decision/04_Decision_Boundary.md`  
@@ -6,57 +6,57 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The **Decision Boundary Model** formalizes the logic for categorizing a legacy system into a specific migration strategy. It synthesizes the outputs of previous tasks:
-*   **Guarantee Decision Space** (Task 1): Is the target state safe?
-*   **Structural Risk** (Task 2): What is the probability of failure? ($R_{struct}$)
-*   **Migration Feasibility** (Task 3): What is the minimum cost? ($C_{min}$)
+**意思決定境界モデル（Decision Boundary Model）** は、レガシーシステムを特定の移行戦略に分類するためのロジックを形式化するものである。これは以前のタスクの出力を統合する：
+*   **保証決定空間** (Task 1): 目標状態は安全か？
+*   **構造的リスク** (Task 2): 失敗の確率はどれくらいか？ ($R_{struct}$)
+*   **移行実現可能性** (Task 3): 最小コストはいくらか？ ($C_{min}$)
 
-This model introduces **Business Context** as a variable, defining thresholds for "Go/No-Go" decisions based on risk tolerance and budget.
+このモデルは **ビジネスコンテキスト** を変数として導入し、リスク許容度と予算に基づいた「Go/No-Go」決定のための閾値を定義する。
 
 ---
 
-## 2. The Decision Space
+## 2. 意思決定空間 (The Decision Space)
 
-We define the **Migration Decision Space ($\mathbb{D}$)** as a 2-dimensional plane defined by Structural Risk and Migration Cost:
+**移行意思決定空間（Migration Decision Space, $\mathbb{D}$）** を、構造的リスクと移行コストによって定義される2次元平面として定義する：
 
 $$
 \mathbb{D} = \{ (r, c) \in \mathbb{R}_{\ge 0} \times \mathbb{R}_{\ge 0} \}
 $$
 
-Where:
-*   $r = R_{struct}(S)$: The quantified structural risk (from Task 2).
-*   $c = C_{min}(S)$: The minimum estimated migration cost (from Task 3).
+ここで：
+*   $r = R_{struct}(S)$: 定量化された構造的リスク（Task 2 より）。
+*   $c = C_{min}(S)$: 推定最小移行コスト（Task 3 より）。
 
-Every legacy system maps to a single point $P(S) = (R_{struct}(S), C_{min}(S))$ in this space.
+すべてのレガシーシステムは、この空間内の単一の点 $P(S) = (R_{struct}(S), C_{min}(S))$ にマッピングされる。
 
 ---
 
-## 3. Risk Tolerance and Context
+## 3. リスク許容度とコンテキスト
 
-A raw risk value of "50" means nothing without context. A mission-critical banking core has a much lower risk tolerance than an internal cafeteria menu system.
+「50」という生のリスク値は、コンテキストなしでは何の意味も持たない。ミッションクリティカルな銀行勘定系システムは、社内食堂のメニューシステムよりもはるかに低いリスク許容度を持つ。
 
-We define a **Context Vector ($\vec{K}$)** representing business constraints:
-*   $K_{budget}$: Maximum allowable cost.
-*   $K_{risk}$: Maximum acceptable risk (probability of failure).
-*   $K_{time}$: Maximum duration.
+ビジネス制約を表す **コンテキストベクトル（Context Vector, $\vec{K}$）** を定義する：
+*   $K_{budget}$: 最大許容コスト。
+*   $K_{risk}$: 最大許容リスク（失敗確率）。
+*   $K_{time}$: 最大期間。
 
-The **Feasible Region** $\mathcal{F}$ is the rectangular area defined by these constraints:
+**実行可能領域（Feasible Region）** $\mathcal{F}$ は、これらの制約によって定義される矩形領域である：
 
 $$
 \mathcal{F}(\vec{K}) = \{ (r, c) \in \mathbb{D} \mid r \le K_{risk} \land c \le K_{budget} \}
 $$
 
-If $P(S) \notin \mathcal{F}(\vec{K})$, the migration is infeasible under current constraints.
+もし $P(S) \notin \mathcal{F}(\vec{K})$ ならば、現在の制約下では移行は実現不可能である。
 
 ---
 
-## 4. Strategy Classification (The 4 Quadrants)
+## 4. 戦略分類 (Strategy Classification - The 4 Quadrants)
 
-Within the decision space, we identify four primary strategic regions. Let $R_{low}, R_{high}$ and $C_{low}, C_{high}$ be thresholds derived from standard industry benchmarks or organizational capability.
+意思決定空間内で、4つの主要な戦略領域を識別する。$R_{low}, R_{high}$ および $C_{low}, C_{high}$ を、標準的な業界ベンチマークまたは組織能力から導出される閾値とする。
 
-### 4.1 Strategy Function
+### 4.1 戦略関数
 
 $$
 Strategy(r, c) = \begin{cases} 
@@ -67,66 +67,66 @@ Strategy(r, c) = \begin{cases}
 \end{cases}
 $$
 
-### 4.2 Detailed Strategy Definitions
+### 4.2 詳細な戦略定義
 
-1.  **Direct Migration (Rehost / Automated Conversion)**
-    *   **Context**: Low Risk, Low Cost.
-    *   **Structure**: Well-structured code, standard dependencies.
-    *   **Action**: Use automated tools to translate code 1-to-1.
+1.  **直接移行 (Direct Migration / Rehost / Automated Conversion)**
+    *   **コンテキスト**: 低リスク、低コスト。
+    *   **構造**: 適切に構造化されたコード、標準的な依存関係。
+    *   **アクション**: 自動化ツールを使用してコードを 1対1 で変換する。
 
-2.  **Refactor First (Phased Migration)**
-    *   **Context**: Medium Risk, Medium Cost.
-    *   **Structure**: Technical debt exists (e.g., some spaghetti code) but is localized.
-    *   **Action**:
-        1.  Refactor within legacy environment to reduce $R_{struct}$ below $R_{low}$.
-        2.  Perform Direct Migration.
+2.  **リファクタリング先行 (Refactor First / Phased Migration)**
+    *   **コンテキスト**: 中リスク、中コスト。
+    *   **構造**: 技術的負債は存在する（例：一部のスパゲッティコード）が、局所的である。
+    *   **アクション**:
+        1.  レガシー環境内でリファクタリングを行い、$R_{struct}$ を $R_{low}$ 以下に下げる。
+        2.  直接移行を実行する。
 
-3.  **Rewrite / Rebuild (Re-architecture)**
-    *   **Context**: High Risk, High Cost (but within budget).
-    *   **Structure**: Blocking structures present (e.g., deep entanglement, irreducible control flow).
-    *   **Action**: Abandon the code structure. Extract business logic specs ($G_{crit}$) and build a new system that satisfies $G_{crit}$.
+3.  **書き直し / 再構築 (Rewrite / Rebuild / Re-architecture)**
+    *   **コンテキスト**: 高リスク、高コスト（ただし予算内）。
+    *   **構造**: ブロッキング構造が存在する（例：深い密結合、既約制御フロー）。
+    *   **アクション**: コード構造を破棄する。ビジネスロジック仕様（$G_{crit}$）を抽出し、$G_{crit}$ を満たす新しいシステムを構築する。
 
-4.  **Retain / Retire (Do Nothing)**
-    *   **Context**: Cost exceeds budget OR Risk exceeds tolerance.
-    *   **Structure**: "Nuclear waste" code—too risky to touch, too expensive to fix.
-    *   **Action**: Encapsulate (wrap) the legacy system or decommission it.
+4.  **現状維持 / 廃棄 (Retain / Retire / Do Nothing)**
+    *   **コンテキスト**: コストが予算を超過、またはリスクが許容度を超過。
+    *   **構造**: 「核廃棄物」コード――触るにはあまりに危険で、修正するにはあまりに高価。
+    *   **アクション**: レガシーシステムをカプセル化（ラップ）するか、廃止する。
 
 ---
 
-## 5. Decision Boundary Definition
+## 5. 意思決定境界の定義
 
-The boundaries between these strategies are not rigid lines but **decision curves**.
+これらの戦略間の境界は、厳密な線ではなく **意思決定曲線（Decision Curves）** である。
 
-### 5.1 The Value-Risk Trade-off
+### 5.1 価値とリスクのトレードオフ
 
-Often, higher risk is acceptable if the business value is high.
-Let $V(S)$ be the Business Value of the system.
-The effective Risk Threshold $K_{risk}$ is a function of Value:
+多くの場合、ビジネス価値が高ければ、より高いリスクが許容される。
+$V(S)$ をシステムのビジネス価値とする。
+実効リスク閾値 $K_{risk}$ は価値の関数である：
 
 $$
 K_{risk}(S) = BaseTolerance + \gamma \cdot V(S)
 $$
 
-### 5.2 The Iso-Utility Curve
+### 5.2 等効用曲線 (The Iso-Utility Curve)
 
-We can define a utility function $U(r, c)$ representing the "net benefit" of migration.
-The decision boundary is the level set where $U(r, c) = 0$.
+移行の「純便益」を表す効用関数 $U(r, c)$ を定義できる。
+意思決定境界は、$U(r, c) = 0$ となる等位集合である。
 
 $$
 U(r, c) = V(S) - (c + \lambda \cdot r)
 $$
-Where $\lambda$ is the "cost of risk" (e.g., potential cost of failure).
+ここで $\lambda$ は「リスクのコスト」（例：失敗時の潜在的コスト）である。
 
-If $U(r, c) > 0$, migration is rational.
+もし $U(r, c) > 0$ ならば、移行は合理的である。
 
 ---
 
-## 6. Conclusion
+## 6. 結論
 
-The Decision Boundary Model provides a rigorous classification mechanism.
-Instead of a vague "it depends," we can now state:
+意思決定境界モデルは、厳密な分類メカニズムを提供する。
+曖昧な「ケースバイケース」ではなく、今や以下のように述べることができる：
 
-> "System X falls into the **Rewrite** quadrant because its Structural Risk ($R=85$) exceeds the Refactoring Threshold ($R=50$), but its Business Value justifies the High Cost ($C=\$2M < B=\$3M$)."
+> 「システム X は **Rewrite** 象限に該当する。なぜなら、その構造的リスク ($R=85$) はリファクタリング閾値 ($R=50$) を超えているが、ビジネス価値が高コスト ($C=\$2M < B=\$3M$) を正当化するからである。」
 
-This concludes the theoretical framework of the Migration Decision Model.
-Task 5 will apply this entire framework (Tasks 1-4) to representative Case Studies to validate the model's predictive power.
+これで移行意思決定モデルの理論的フレームワークは完了である。
+Task 5 では、このフレームワーク全体（Tasks 1-4）を代表的なケーススタディに適用し、モデルの予測力を検証する。

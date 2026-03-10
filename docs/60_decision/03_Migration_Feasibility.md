@@ -1,4 +1,4 @@
-# 03. Migration Feasibility Model
+# 03. 移行実現可能性モデル (Migration Feasibility Model)
 
 **Phase 3: Migration Decision Model**  
 **Document ID:** `docs/60_decision/03_Migration_Feasibility.md`  
@@ -6,73 +6,73 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The **Migration Feasibility Model** determines whether a valid migration path exists from the current system state $S_{start}$ to the Safety Region $\mathcal{S}$ within given resource constraints.
+**移行実現可能性モデル（Migration Feasibility Model）** は、与えられたリソース制約内で、現在のシステム状態 $S_{start}$ から安全領域 $\mathcal{S}$ への有効な移行パスが存在するかどうかを判定する。
 
-While the **Risk Model** (Task 2) quantifies the *difficulty* and *probability of failure*, the **Feasibility Model** addresses the binary question of *possibility*: **Can we get there from here?**
+**リスクモデル**（Task 2）が *困難さ* と *失敗確率* を定量化するのに対し、**実現可能性モデル** は *可能性* という二値的な問いに取り組む：**我々はここからあそこへ行けるのか？**
 
-This involves two distinct checks:
-1.  **Theoretical Reachability**: Does the dependency structure allow a sequence of valid transformations to reach a safe state?
-2.  **Resource Feasibility**: Can this sequence be executed within the project's budget (time, cost, effort)?
+これには2つの異なるチェックが含まれる：
+1.  **理論的到達可能性（Theoretical Reachability）**: 依存関係構造は、安全な状態に到達するための一連の有効な変換を許容するか？
+2.  **リソース実現可能性（Resource Feasibility）**: このシーケンスは、プロジェクトの予算（時間、コスト、労力）内で実行可能か？
 
 ---
 
-## 2. Reachability Theory
+## 2. 到達可能性理論 (Reachability Theory)
 
-We analyze reachability within the **Guarantee Transition Graph** $G_{trans} = (\mathcal{G}_{dep}, E)$ defined in Phase 2.
+Phase 2 で定義された **保証遷移グラフ（Guarantee Transition Graph）** $G_{trans} = (\mathcal{G}_{dep}, E)$ 内での到達可能性を分析する。
 
-### 2.1 The Reachable Set ($\mathcal{R}$)
+### 2.1 到達可能集合 ($\mathcal{R}$)
 
-The set of all states reachable from the initial state $S_{start}$ is defined as the transitive closure of the transition relation:
+初期状態 $S_{start}$ から到達可能なすべての状態の集合は、遷移関係の推移閉包として定義される：
 
 $$
 \mathcal{R}(S_{start}) = \{ S \in \mathcal{G}_{dep} \mid \exists \text{ path } S_{start} \to \dots \to S \}
 $$
 
-### 2.2 Theoretical Feasibility Condition
+### 2.2 理論的実現可能性条件
 
-Migration is **Theoretically Feasible** if and only if the reachable set intersects with the Safety Region:
+移行は、到達可能集合が安全領域と交差する場合にのみ、**理論的に実現可能** である：
 
 $$
 Feasible_{theory}(S_{start}) \iff \mathcal{R}(S_{start}) \cap \mathcal{S} \neq \emptyset
 $$
 
-If this intersection is empty, the system is in a **Dead End** or **Trap State** relative to the required safety criteria. This occurs when the dependency structure inherently prevents the simultaneous satisfaction of all critical guarantees ($G_{crit}$).
+この共通部分が空である場合、システムは要求される安全性基準に対して **行き止まり（Dead End）** または **トラップ状態（Trap State）** にある。これは、依存関係構造がすべてのクリティカル保証（$G_{crit}$）の同時充足を本質的に妨げている場合に発生する。
 
 ---
 
-## 3. Resource Feasibility
+## 3. リソース実現可能性 (Resource Feasibility)
 
-Even if a path exists, it may be too costly. We introduce a cost function to the edges of $G_{trans}$.
+パスが存在しても、コストがかかりすぎる場合がある。$G_{trans}$ のエッジにコスト関数を導入する。
 
-### 3.1 Migration Cost Function ($Cost$)
+### 3.1 移行コスト関数 ($Cost$)
 
-Let $path = (S_0, S_1, \dots, S_n)$ be a migration trajectory where $S_0 = S_{start}$ and $S_n \in \mathcal{S}$.
-The cost of this path is the sum of the costs of individual transitions (atomic migration steps):
+$path = (S_0, S_1, \dots, S_n)$ を、$S_0 = S_{start}$ かつ $S_n \in \mathcal{S}$ である移行軌跡とする。
+このパスのコストは、個々の遷移（原子的な移行ステップ）のコストの総和である：
 
 $$
 Cost(path) = \sum_{i=0}^{n-1} cost(S_i \to S_{i+1})
 $$
 
-Where $cost(S \to S')$ is derived from the **Structural Risk** of the component being transformed:
+ここで $cost(S \to S')$ は、変換されるコンポーネントの **構造的リスク（Structural Risk）** から導出される：
 $$
 cost(S \to S') \approx Effort_{base} \times (1 + R_{struct}(S \to S'))
 $$
-High-risk transformations require exponentially more effort (testing, manual verification).
+高リスクの変換は、指数関数的に多くの労力（テスト、手動検証）を必要とする。
 
-### 3.2 Minimum Migration Cost ($C_{min}$)
+### 3.2 最小移行コスト ($C_{min}$)
 
-The minimum cost to reach safety is the shortest path distance in the weighted graph:
+安全に到達するための最小コストは、重み付きグラフにおける最短パス距離である：
 
 $$
 C_{min}(S_{start}) = \min \{ Cost(path) \mid path \text{ starts at } S_{start}, \text{ ends in } \mathcal{S} \}
 $$
 
-### 3.3 Resource Feasibility Condition
+### 3.3 リソース実現可能性条件
 
-Let $B$ be the project budget (resource constraint).
-Migration is **Resource Feasible** if and only if:
+$B$ をプロジェクト予算（リソース制約）とする。
+移行は、以下の場合にのみ **リソース的に実現可能** である：
 
 $$
 Feasible_{resource}(S_{start}) \iff C_{min}(S_{start}) \le B
@@ -80,36 +80,36 @@ $$
 
 ---
 
-## 4. Blocking Structures
+## 4. ブロッキング構造 (Blocking Structures)
 
-Certain structural patterns act as barriers that make $Cost(S \to S') \to \infty$ or make $\mathcal{R}(S_{start}) \cap \mathcal{S} = \emptyset$. We call these **Blocking Structures**.
+特定の構造パターンは、$Cost(S \to S') \to \infty$ となるか、$\mathcal{R}(S_{start}) \cap \mathcal{S} = \emptyset$ となる障壁として機能する。これらを **ブロッキング構造（Blocking Structures）** と呼ぶ。
 
-### 4.1 Irreducible Control Flow (The "GOTO Knot")
+### 4.1 既約制御フロー ("GOTO Knot")
 
-*   **Definition**: A subgraph of the CFG that cannot be reduced to structured constructs (sequence, selection, iteration) without code duplication or boolean flag variables.
-*   **Impact**: Prevents the decomposition of a monolithic module into smaller, testable units.
-*   **Feasibility Consequence**: To resolve this, one must rewrite the logic, which effectively resets the local guarantee state to $\emptyset$ (high risk). If the rewrite cost exceeds $B$, it is a blocking structure.
+*   **定義**: コードの重複やブールフラグ変数なしには構造化構成要素（順次、選択、反復）に還元できない CFG の部分グラフ。
+*   **影響**: モノリシックなモジュールを、より小さくテスト可能な単位に分解することを妨げる。
+*   **実現可能性への帰結**: これを解決するにはロジックを書き直す必要があり、これは局所的な保証状態を実質的に $\emptyset$ にリセットする（高リスク）。もし書き直しコストが $B$ を超える場合、それはブロッキング構造である。
 
-### 4.2 Data Coupling Cycles (The "God Data")
+### 4.2 データ結合サイクル ("God Data")
 
-*   **Definition**: A set of modules $\{M_1, \dots, M_k\}$ that are mutually dependent on a shared global state $D_{global}$ (e.g., a massive COPYBOOK), forming a cycle in the dependency graph.
-*   **Impact**: $M_i$ cannot be migrated independently. The entire cluster must be migrated atomically.
-*   **Feasibility Consequence**: The "atomic step" size becomes the size of the entire cluster.
-    If $Size(Cluster) > Capacity(Team)$, then $Cost \to \infty$.
+*   **定義**: 共有されたグローバル状態 $D_{global}$（例：巨大な COPYBOOK）に相互依存し、依存関係グラフにおいてサイクルを形成するモジュール群 $\{M_1, \dots, M_k\}$。
+*   **影響**: $M_i$ を独立して移行できない。クラスタ全体を原子的に移行しなければならない。
+*   **実現可能性への帰結**: 「原子的ステップ」のサイズがクラスタ全体のサイズになる。
+    もし $Size(Cluster) > Capacity(Team)$ ならば、$Cost \to \infty$ となる。
 
-### 4.3 Missing Source / Legacy Binary
+### 4.3 ソース喪失 / レガシーバイナリ
 
-*   **Definition**: Parts of the system where source code is lost or written in an unsupported language (Assembler macros), but behavior must be preserved.
-*   **Impact**: $G_{crit}$ cannot be verified.
-*   **Feasibility Consequence**: $\mathcal{R}(S_{start}) \cap \mathcal{S} = \emptyset$ unless reverse engineering is performed (which adds massive cost).
+*   **定義**: ソースコードが失われているか、サポートされていない言語（アセンブラマクロなど）で書かれているが、振る舞いを保存しなければならないシステム部分。
+*   **影響**: $G_{crit}$ を検証できない。
+*   **実現可能性への帰結**: リバースエンジニアリング（莫大なコストがかかる）を行わない限り、$\mathcal{R}(S_{start}) \cap \mathcal{S} = \emptyset$ である。
 
 ---
 
-## 5. The Feasibility Decision Logic
+## 5. 実現可能性判定ロジック (The Feasibility Decision Logic)
 
-We combine the theoretical and resource conditions into a single decision logic.
+理論的条件とリソース条件を単一の判定ロジックに結合する。
 
-### 5.1 The Feasibility Predicate
+### 5.1 実現可能性述語
 
 $$
 IsMigratable(S_{start}, B) = \begin{cases} 
@@ -118,30 +118,30 @@ IsMigratable(S_{start}, B) = \begin{cases}
 \end{cases}
 $$
 
-### 5.2 Feasibility Classification
+### 5.2 実現可能性分類
 
-Based on this, we classify the system:
+これに基づき、システムを分類する：
 
-1.  **Feasible**:
-    *   Path exists, Cost $\le B$.
-    *   **Action**: Proceed to planning.
+1.  **実現可能 (Feasible)**:
+    *   パスが存在し、Cost $\le B$。
+    *   **アクション**: 計画へ進む。
 
-2.  **Resource Infeasible**:
-    *   Path exists, but Cost $> B$.
-    *   **Action**: Descope (reduce $G_{crit}$), Increase Budget, or Accept Technical Debt.
+2.  **リソース的に実現不可能 (Resource Infeasible)**:
+    *   パスは存在するが、Cost $> B$。
+    *   **アクション**: スコープ縮小（$G_{crit}$ の削減）、予算増額、または技術的負債の受容。
 
-3.  **Structurally Infeasible (Blocked)**:
-    *   No path exists to $\mathcal{S}$ (due to Blocking Structures).
-    *   **Action**: Re-architecture (Rewrite) required before migration. The "Migration" paradigm is invalid here.
+3.  **構造的に実現不可能 (Structurally Infeasible / Blocked)**:
+    *   $\mathcal{S}$ へのパスが存在しない（ブロッキング構造のため）。
+    *   **アクション**: 移行前に再アーキテクチャ（書き直し）が必要。「移行」というパラダイムはここでは無効である。
 
 ---
 
-## 6. Conclusion
+## 6. 結論
 
-The Migration Feasibility Model provides the "Go/No-Go" test.
-It highlights that **feasibility is not just about code quality, but about the relationship between Structural Risk and Resource Constraints.**
+移行実現可能性モデルは、「Go/No-Go」テストを提供する。
+これは、**実現可能性が単にコード品質の問題ではなく、構造的リスクとリソース制約の関係性にあること** を浮き彫りにする。
 
-*   A high-risk system *can* be migrated if the budget is infinite.
-*   A low-risk system *cannot* be migrated if blocking structures prevent the preservation of critical guarantees.
+*   高リスクなシステムでも、予算が無限にあれば移行 *できる*。
+*   低リスクなシステムでも、ブロッキング構造がクリティカル保証の保存を妨げるならば、移行 *できない*。
 
-This output feeds into the **Decision Boundary Model** (Task 4), which will define the specific thresholds for these decisions in a business context.
+この出力は、**意思決定境界モデル**（Task 4）に入力され、ビジネスコンテキストにおけるこれらの決定のための具体的な閾値が定義される。

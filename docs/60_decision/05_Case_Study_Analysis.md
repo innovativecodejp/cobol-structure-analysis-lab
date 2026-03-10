@@ -1,4 +1,4 @@
-# 05. Case Study Analysis: Validation of the Migration Decision Model
+# 05. ケーススタディ分析：移行判断モデルの検証 (Case Study Analysis)
 
 **Phase 3: Migration Decision Model**  
 **Document ID:** `docs/60_decision/05_Case_Study_Analysis.md`  
@@ -6,125 +6,125 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-This document validates the **Migration Decision Model** (Tasks 1-4) by applying it to three representative COBOL program archetypes. The objective is to demonstrate that the abstract mathematical framework correctly categorizes distinct structural patterns into appropriate migration strategies.
+本文書は、**移行判断モデル（Migration Decision Model）**（Tasks 1-4）を3つの代表的な COBOL プログラムの原型（アーキタイプ）に適用することで検証する。目的は、抽象的な数学的フレームワークが、異なる構造パターンを適切な移行戦略に正しく分類できることを実証することである。
 
-### Methodology
+### 方法論
 
-For each case study, we perform the following analysis:
-1.  **Structural Characterization**: Describe the AST (logic), CFG (control), and DFG (data) features.
-2.  **Metric Estimation**: Estimate key parameters:
-    *   **Migration Debt ($D_{debt}$)**: Missing critical guarantees ($G_{crit}$).
-    *   **Structural Complexity ($C(S)$)**: The amplification factor for risk.
-3.  **Risk Calculation**: Compute Structural Risk $R_{struct} = D_{debt} \times (1 + C(S))$.
-4.  **Feasibility Check**: Estimate Minimum Cost $C_{min}$.
-5.  **Strategic Decision**: Map the result to the Decision Boundary $\mathbb{D}$.
-
----
-
-## 2. Case Study A: The "God Class" Monolith
-
-### 2.1 Structural Characterization
-*   **Description**: A massive batch program (e.g., 20,000 LOC) that handles multiple business functions (Billing, Reporting, Account Updates) in a single procedural flow.
-*   **AST**: Huge, flat procedure division with thousands of paragraphs.
-*   **CFG**: Low nesting depth but extremely long sequential flow. High fan-in/fan-out for internal paragraphs.
-*   **DFG**: Uses a massive shared `WORKING-STORAGE` and multiple `COPYBOOKS` (e.g., `CUSTOMER-MASTER`, `TRANSACTION-record`). Global state dependency is near 100%.
-
-### 2.2 Metric Estimation
-*   **Migration Debt ($D_{debt}$)**: **High**. The monolithic structure violates modularity guarantees ($P_{mod}$) and data isolation guarantees ($P_{iso}$).
-    *   $D_{debt} \approx 80$ (on a scale of 0-100).
-*   **Structural Complexity ($C(S)$)**: **Very High** (Data Complexity).
-    *   $C_{dfg}$ is extreme due to global state coupling.
-    *   $C(S) \approx 4.0$ (Risk multiplier is 5x).
-
-### 2.3 Risk & Feasibility
-*   **Structural Risk ($R_{struct}$)**: $80 \times (1 + 4.0) = 400$. **Critical Risk**.
-*   **Feasibility ($C_{min}$)**:
-    *   To migrate safely, one must first **decompose** the monolith.
-    *   Decomposition is blocked by the shared Data Coupling Cycle (Blocking Structure).
-    *   $C_{min} \to \text{Very High}$.
-
-### 2.4 Strategic Decision
-*   **Quadrant**: **Rewrite / Rebuild** (or **Retire** if budget is low).
-*   **Rationale**: Direct migration will result in an unmaintainable modern system ("Java Monolith"). Refactoring is too costly due to data entanglement. The best path is to extract business logic specs and rebuild services from scratch.
+各ケーススタディにおいて、以下の分析を行う：
+1.  **構造的特徴付け**: AST（ロジック）、CFG（制御）、DFG（データ）の特徴を記述する。
+2.  **メトリクス推定**: 主要パラメータを推定する：
+    *   **移行負債 ($D_{debt}$)**: 欠落しているクリティカル保証 ($G_{crit}$)。
+    *   **構造的複雑性 ($C(S)$)**: リスクの増幅係数。
+3.  **リスク計算**: 構造的リスク $R_{struct} = D_{debt} \times (1 + C(S))$ を計算する。
+4.  **実現可能性チェック**: 最小コスト $C_{min}$ を推定する。
+5.  **戦略的決定**: 結果を意思決定境界 $\mathbb{D}$ にマッピングする。
 
 ---
 
-## 3. Case Study B: "Spaghetti Code" (Unstructured Logic)
+## 2. ケーススタディ A: "God Class" モノリス
 
-### 3.1 Structural Characterization
-*   **Description**: An older program (1970s style) with heavy use of `GOTO`, `ALTER`, and `PERFORM THRU`.
-*   **AST**: unstructured paragraph sequences.
-*   **CFG**: **Irreducible**. Contains multiple overlapping loops and entry/exit points that cannot be mapped to structured programming constructs (Sequence, Selection, Iteration).
-*   **DFG**: Moderate. Local variables are often reused for different purposes (aliasing).
+### 2.1 構造的特徴付け
+*   **記述**: 単一の手続きフロー内で複数の業務機能（請求、レポート、口座更新）を処理する巨大なバッチプログラム（例：20,000 LOC）。
+*   **AST**: 数千の段落（Paragraph）を持つ巨大でフラットな手続き部。
+*   **CFG**: ネスト深度は低いが、極めて長い順次フロー。内部段落へのファンイン/ファンアウトが高い。
+*   **DFG**: 巨大な共有 `WORKING-STORAGE` と複数の `COPYBOOKS`（例：`CUSTOMER-MASTER`, `TRANSACTION-record`）を使用。グローバル状態への依存度はほぼ 100% である。
 
-### 3.2 Metric Estimation
-*   **Migration Debt ($D_{debt}$)**: **Medium**. The logic might be simple, but Control Flow Guarantees ($P_{flow}$) are absent.
-    *   $D_{debt} \approx 40$.
-*   **Structural Complexity ($C(S)$)**: **High** (Control Complexity).
-    *   $C_{cfg}$ is high due to knots.
-    *   $C(S) \approx 2.5$ (Risk multiplier is 3.5x).
+### 2.2 メトリクス推定
+*   **移行負債 ($D_{debt}$)**: **高 (High)**。モノリシックな構造は、モジュール性保証 ($P_{mod}$) およびデータ分離保証 ($P_{iso}$) に違反している。
+    *   $D_{debt} \approx 80$ (0-100 のスケールで)。
+*   **構造的複雑性 ($C(S)$)**: **極めて高い (Very High)** (データ複雑性)。
+    *   グローバル状態結合により $C_{dfg}$ が極端に高い。
+    *   $C(S) \approx 4.0$ (リスク乗数は 5倍)。
 
-### 3.3 Risk & Feasibility
-*   **Structural Risk ($R_{struct}$)**: $40 \times (1 + 2.5) = 140$. **High Risk**.
-*   **Feasibility ($C_{min}$)**:
-    *   Automated translation tools often fail on irreducible CFGs or produce "goto-ridden" Java/C#.
-    *   Structure-preserving migration is **Blocked**.
+### 2.3 リスクと実現可能性
+*   **構造的リスク ($R_{struct}$)**: $80 \times (1 + 4.0) = 400$。**クリティカルリスク (Critical Risk)**。
+*   **実現可能性 ($C_{min}$)**:
+    *   安全に移行するには、まずモノリスを **分解** しなければならない。
+    *   分解は、共有されたデータ結合サイクル（ブロッキング構造）によってブロックされている。
+    *   $C_{min} \to \text{Very High}$。
 
-### 3.4 Strategic Decision
-*   **Quadrant**: **Refactor First**.
-*   **Rationale**: The logic is likely valuable and isolated enough to save.
-    1.  **Step 1 (Refactor)**: Use automated restructuring tools (e.g., Rye's algorithm) to resolve GOTOs into structured loops/conditionals *within the COBOL environment*.
-    2.  **Step 2**: Once $C_{cfg}$ is reduced, re-evaluate. Likely moves to **Direct Migration**.
-
----
-
-## 4. Case Study C: Well-Structured Module
-
-### 4.1 Structural Characterization
-*   **Description**: A sub-program designed in the 1990s using structured COBOL (COBOL-85). Performs a specific calculation (e.g., Tax Calculation).
-*   **AST**: Clean hierarchy of `PERFORM` sections.
-*   **CFG**: **Reducible**. Matches standard structured programming patterns.
-*   **DFG**: Explicit `LINKAGE SECTION` for inputs/outputs. No global side effects.
-
-### 4.2 Metric Estimation
-*   **Migration Debt ($D_{debt}$)**: **Low**. Most guarantees ($P_{mod}, P_{flow}, P_{iso}$) are already satisfied.
-    *   $D_{debt} \approx 10$.
-*   **Structural Complexity ($C(S)$)**: **Low**.
-    *   $C(S) \approx 0.2$ (Risk multiplier is 1.2x).
-
-### 4.3 Risk & Feasibility
-*   **Structural Risk ($R_{struct}$)**: $10 \times (1 + 0.2) = 12$. **Low Risk**.
-*   **Feasibility ($C_{min}$)**:
-    *   Path to safety is short and clear.
-    *   $C_{min} \approx \text{Low}$.
-
-### 4.4 Strategic Decision
-*   **Quadrant**: **Direct Migration**.
-*   **Rationale**: The code structure is already compatible with modern paradigms. Automated translation will produce clean, maintainable code.
+### 2.4 戦略的決定
+*   **象限**: **書き直し / 再構築 (Rewrite / Rebuild)**（または予算が低い場合は **廃棄 (Retire)**）。
+*   **根拠**: 直接移行は、保守不可能な現代のシステム（「Java モノリス」）を生む結果となる。データのもつれにより、リファクタリングはコストがかかりすぎる。最善のパスは、ビジネスロジック仕様 ($G_{crit}$) を抽出し、ゼロからサービスを再構築することである。
 
 ---
 
-## 5. Comparative Summary
+## 3. ケーススタディ B: "スパゲッティコード" (非構造化ロジック)
 
-| Metric | Case A (Monolith) | Case B (Spaghetti) | Case C (Clean) |
+### 3.1 構造的特徴付け
+*   **記述**: `GOTO`, `ALTER`, `PERFORM THRU` を多用する古いプログラム（1970年代スタイル）。
+*   **AST**: 非構造化段落シーケンス。
+*   **CFG**: **既約 (Irreducible)**。複数の重複するループや、構造化プログラミング構成要素（順次、選択、反復）にマッピングできない入口/出口ポイントを含む。
+*   **DFG**: 中程度。ローカル変数が異なる目的で再利用されることが多い（エイリアシング）。
+
+### 3.2 メトリクス推定
+*   **移行負債 ($D_{debt}$)**: **中 (Medium)**。ロジックは単純かもしれないが、制御フロー保証 ($P_{flow}$) が欠如している。
+    *   $D_{debt} \approx 40$。
+*   **構造的複雑性 ($C(S)$)**: **高 (High)** (制御複雑性)。
+    *   結び目（Knots）により $C_{cfg}$ が高い。
+    *   $C(S) \approx 2.5$ (リスク乗数は 3.5倍)。
+
+### 3.3 リスクと実現可能性
+*   **構造的リスク ($R_{struct}$)**: $40 \times (1 + 2.5) = 140$。**高リスク (High Risk)**。
+*   **実現可能性 ($C_{min}$)**:
+    *   自動変換ツールは、既約 CFG で失敗するか、「GOTO だらけの」Java/C# を生成することが多い。
+    *   構造を保存したままの移行は **ブロック** されている。
+
+### 3.4 戦略的決定
+*   **象限**: **リファクタリング先行 (Refactor First)**。
+*   **根拠**: ロジックには価値があり、救出するのに十分なほど隔離されている可能性が高い。
+    1.  **Step 1 (Refactor)**: 自動再構築ツール（例：Ryeのアルゴリズム）を使用して、*COBOL環境内で* GOTO を構造化ループ/条件分岐に解決する。
+    2.  **Step 2**: $C_{cfg}$ が低減されたら再評価する。おそらく **直接移行** へ移行する。
+
+---
+
+## 4. ケーススタディ C: 適切に構造化されたモジュール
+
+### 4.1 構造的特徴付け
+*   **記述**: 構造化 COBOL (COBOL-85) を使用して1990年代に設計されたサブプログラム。特定の計算（例：税計算）を実行する。
+*   **AST**: `PERFORM` セクションのきれいな階層構造。
+*   **CFG**: **可約 (Reducible)**。標準的な構造化プログラミングパターンに一致する。
+*   **DFG**: 入出力のための明示的な `LINKAGE SECTION`。グローバルな副作用なし。
+
+### 4.2 メトリクス推定
+*   **移行負債 ($D_{debt}$)**: **低 (Low)**。ほとんどの保証 ($P_{mod}, P_{flow}, P_{iso}$) は既に満たされている。
+    *   $D_{debt} \approx 10$。
+*   **構造的複雑性 ($C(S)$)**: **低 (Low)**。
+    *   $C(S) \approx 0.2$ (リスク乗数は 1.2倍)。
+
+### 4.3 リスクと実現可能性
+*   **構造的リスク ($R_{struct}$)**: $10 \times (1 + 0.2) = 12$。**低リスク (Low Risk)**。
+*   **実現可能性 ($C_{min}$)**:
+    *   安全へのパスは短く明確である。
+    *   $C_{min} \approx \text{Low}$。
+
+### 4.4 戦略的決定
+*   **象限**: **直接移行 (Direct Migration)**。
+*   **根拠**: コード構造は既に現代のパラダイムと互換性がある。自動変換により、クリーンで保守可能なコードが生成される。
+
+---
+
+## 5. 比較サマリ
+
+| メトリクス | Case A (Monolith) | Case B (Spaghetti) | Case C (Clean) |
 | :--- | :--- | :--- | :--- |
-| **Primary Structural Issue** | Data Coupling ($C_{dfg}$) | Control Flow ($C_{cfg}$) | None |
-| **Migration Debt ($D_{debt}$)** | 80 (High) | 40 (Medium) | 10 (Low) |
-| **Complexity ($C(S)$)** | 4.0 (Very High) | 2.5 (High) | 0.2 (Low) |
-| **Structural Risk ($R_{struct}$)** | **400 (Critical)** | **140 (High)** | **12 (Low)** |
-| **Feasibility Constraint** | Data Cycle (Blocking) | Irreducible CFG (Blocking) | None |
-| **Optimal Strategy** | **Rewrite / Rebuild** | **Refactor First** | **Direct Migration** |
+| **主要な構造的問題** | データ結合 ($C_{dfg}$) | 制御フロー ($C_{cfg}$) | なし |
+| **移行負債 ($D_{debt}$)** | 80 (High) | 40 (Medium) | 10 (Low) |
+| **複雑性 ($C(S)$)** | 4.0 (Very High) | 2.5 (High) | 0.2 (Low) |
+| **構造的リスク ($R_{struct}$)** | **400 (Critical)** | **140 (High)** | **12 (Low)** |
+| **実現可能性制約** | データサイクル (Blocking) | 既約 CFG (Blocking) | なし |
+| **最適戦略** | **書き直し / 再構築** | **リファクタリング先行** | **直接移行** |
 
 ---
 
-## 6. Conclusion
+## 6. 結論
 
-The application of the **Migration Decision Model** to these case studies demonstrates its validity:
+**移行判断モデル** をこれらのケーススタディに適用することで、その妥当性が実証された：
 
-1.  **Discrimination**: The model correctly distinguishes between "hard due to size" (Monolith) and "hard due to logic" (Spaghetti), assigning different mitigation strategies (Rewrite vs. Refactor).
-2.  **Quantification**: It replaces vague terms like "messy code" with calculable metrics ($R_{struct}$), enabling objective comparison.
-3.  **Actionability**: The model points directly to the specific blocking factor ($C_{dfg}$ vs $C_{cfg}$) that must be addressed.
+1.  **識別能力**: モデルは、「規模による困難さ」（Monolith）と「ロジックによる困難さ」（Spaghetti）を正しく区別し、異なる緩和戦略（Rewrite vs. Refactor）を割り当てた。
+2.  **定量化**: 「汚いコード」のような曖昧な用語を計算可能なメトリクス ($R_{struct}$) に置き換え、客観的な比較を可能にした。
+3.  **アクション可能性**: モデルは、対処すべき具体的なブロッキング要因 ($C_{dfg}$ vs $C_{cfg}$) を直接指し示す。
 
-This confirms that the theoretical framework (Tasks 1-4) is practically applicable to real-world COBOL migration scenarios.
+これは、理論的フレームワーク（Tasks 1-4）が現実世界の COBOL 移行シナリオに実際に適用可能であることを確認するものである。
