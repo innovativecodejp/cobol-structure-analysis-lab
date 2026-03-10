@@ -2,52 +2,10 @@
 
 This document defines concepts related to decision making.
 
----
-
-## Migration Decision
-
-**Layer**: Decision
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: 移行に関する意思決定)
-
----
-
-## Migration Feasibility
-
-**Layer**: Decision
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: 移行が技術的・コスト的に実行可能かどうかの指標)
-
----
-
-## Structural Risk
-
-**Layer**: Decision
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: 構造的要因（複雑度、結合度など）に起因する移行リスク)
-
----
-
-## Redesign Requirement
-
-**Layer**: Decision
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: 現状の構造維持が不可能または不適切で、再設計が必要となる要件)
-
----
-
-## Migration Failure Pattern
-
-**Layer**: Decision
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: 移行が失敗する典型的または構造的なパターン)
+| Term | Layer | Definition | Formal Description | Related Concepts |
+| :--- | :--- | :--- | :--- | :--- |
+| **Migration Decision** | Decision | 評価されたメトリクスに基づいて、移行戦略を選択する形式的な行為。 | - | [[Migration Feasibility]] |
+| **Migration Feasibility** | Decision | 制約条件下で、特定の移行パスが実行可能かどうかの評価。 | - | [[Structural Risk]] |
+| **Structural Risk** | Decision | 既存システム（Legacy System）の内部構造（スパゲッティコード、密結合など）に起因する移行リスク。 | - | [[Migration Failure Pattern]] |
+| **Redesign Requirement** | Decision | 目標状態（Target State）を達成するために、システム構造を変更する必要性。 | - | [[Migration Decision]] |
+| **Migration Failure Pattern** | Decision | 移行失敗につながることが知られているアンチパターンや構造的条件。 | - | [[Structural Risk]] |

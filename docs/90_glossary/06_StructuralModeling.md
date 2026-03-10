@@ -2,56 +2,10 @@
 
 This document defines concepts for modeling software structure.
 
----
-
-## Scope
-
-**Layer**: Structure
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: 解析や移行の対象となる範囲。プログラム、サブシステム、またはデータセット)
-
-**Related Concepts**: Scope Boundary
-
----
-
-## Scope Boundary
-
-**Layer**: Structure
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: Scopeの内と外を分ける境界線)
-
----
-
-## Granularity
-
-**Layer**: Structure
-**Status**: Defined
-
-**Definition**:
-構造解析や移行を行う際の「粒度」。ASTノードレベルからサブシステムレベルまで。
-
-**Related Concepts**: AST, Guarantee Unit
-
----
-
-## Structural Dependency
-
-**Layer**: Structure
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: プログラム要素間の構造的な依存関係)
-
----
-
-## Responsibility Boundary
-
-**Layer**: Structure
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: モジュールやコンポーネントが責務を持つ範囲の境界)
+| Term | Layer | Definition | Formal Description | Related Concepts |
+| :--- | :--- | :--- | :--- | :--- |
+| **Scope** | Structure | 特定の解析や移行ステップにおいて検討対象となるコードやシステム機能の範囲。 | $Scope \subseteq System$ | [[Scope Boundary]], [[Granularity]] |
+| **Scope Boundary** | Structure | Scopeの内側と外側を分ける境界線またはインターフェース。 | $\partial Scope$ | [[Scope]], [[Responsibility Boundary]] |
+| **Granularity** | Structure | 構造解析や移行を行う際の詳細レベルや単位の大きさ（例：ファイル、セクション、パラグラフ、文）。 | - | [[Guarantee Unit]] |
+| **Structural Dependency** | Structure | ある構造要素が別の要素に依存している関係（例：AがBを呼ぶ、Aが変数Xを使用する）。 | $A \to B$ | [[Data Dependency]], [[Control Dependency]] |
+| **Responsibility Boundary** | Structure / Decision | システム内の異なる機能的責務を分ける概念的な境界線。移行では構造的境界をこの責務境界に一致させることが目指される。 | - | [[Scope Boundary]] |

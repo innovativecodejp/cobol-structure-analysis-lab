@@ -2,46 +2,9 @@
 
 This document defines concepts related to data.
 
----
-
-## Data Structure
-
-**Layer**: Data
-**Status**: Defined
-
-**Definition**:
-データの形式、配置、関係性の定義。COBOLでは `DATA DIVISION` で定義される階層構造。
-
-**Related Concepts**: DFG
-
----
-
-## Data Dependency
-
-**Layer**: Data
-**Status**: Defined
-
-**Definition**:
-データ間の依存関係。あるデータの値が別のデータから導出される関係。
-
-**Related Concepts**: DFG
-
----
-
-## Data Lifetime
-
-**Layer**: Data
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: データが有効な値を保持している期間)
-
----
-
-## Data Scope
-
-**Layer**: Data
-**Status**: Placeholder
-
-**Definition**:
-(定義待ち: データが参照可能な範囲)
+| Term | Layer | Definition | Formal Description | Related Concepts |
+| :--- | :--- | :--- | :--- | :--- |
+| **Data Structure** | Structure | システム内のデータ要素（変数、レコード、ファイル）の構成と配置。 | - | [[DFG]] |
+| **Data Dependency** | Structure | あるデータ要素が別のデータ要素から導出される、あるいは影響を与える関係。 | - | [[Structural Dependency]] |
+| **Data Lifetime** | Structure | データ要素が有効な値を保持している期間またはスコープ。 | - | [[Data Scope]] |
+| **Data Scope** | Structure | コード内でデータ要素が参照可能（可視）である範囲。 | - | [[Scope]] |
