@@ -1,4 +1,4 @@
-# 00. Semantic Guarantee Definition
+# 00. 意味論的保証定義 (Semantic Guarantee Definition)
 
 **Phase 3.5: Migration Planning Theory**  
 **Document ID:** `docs/70_planning/00_Semantic_Guarantee_Definition.md`  
@@ -6,117 +6,117 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-Phase 3 established the **Migration Decision Model** using a Guarantee Space $\mathcal{G}$ built from preservation properties $\mathbb{P}$. Phase 3.5 extends this into **Migration Planning Theory**, which requires a more precise foundation: guarantees must be defined as **semantic invariants** rather than abstract properties.
+Phase 3 では、保存特性 $\mathbb{P}$ から構築された保証空間 $\mathcal{G}$ を用いて **移行判断モデル** を確立した。Phase 3.5 はこれを **移行計画理論** へと拡張するが、これにはより精密な基盤が必要となる。すなわち、保証は抽象的な特性ではなく、**意味論的不変条件（Semantic Invariants）** として定義されなければならない。
 
-This document formalizes the **Semantic Guarantee Model**, connecting program structure to migration trajectories.
+本文書は、プログラム構造を移行軌跡に接続する **意味論的保証モデル** を形式化する。
 
 ---
 
-## 2. Semantic Invariant Definition
+## 2. 意味論的不変条件の定義
 
-### 2.1 Formal Definition
+### 2.1 形式的定義
 
-A **Guarantee** $p$ is a **semantic invariant preserved during system migration**.
+**保証** $p$ は、**システム移行中に保存される意味論的不変条件** である。
 
 $$
 p \in I \iff p \text{ is a predicate on program behavior that must hold before and after migration}
 $$
 
-Let $I$ be the finite set of all semantic invariants relevant to migration analysis.
+$I$ を、移行分析に関連するすべての意味論的不変条件の有限集合とする。
 
 $$
 I = \{ p \mid p \text{ is a semantic invariant} \}
 $$
 
-### 2.2 Invariant vs. Property
+### 2.2 不変条件 vs. 特性
 
-The Phase 3 Guarantee Space used $\mathbb{P}$ (preservation properties). The relation is:
+Phase 3 の保証空間では $\mathbb{P}$（保存特性）を使用した。その関係は以下の通りである：
 
 $$
 \mathbb{P} \subseteq I \quad \text{or} \quad I \text{ refines } \mathbb{P}
 $$
 
-Each invariant $p \in I$ corresponds to a **verifiable behavioral constraint** (e.g., "Variable X is never modified in this scope"), whereas $\mathbb{P}$ may include coarser categories (e.g., $P_{flow}$, $P_{data}$).
+各不変条件 $p \in I$ は、**検証可能な振る舞いの制約**（例：「変数 X はこのスコープ内で変更されない」）に対応するのに対し、$\mathbb{P}$ はより粗いカテゴリ（例：$P_{flow}$, $P_{data}$）を含む場合がある。
 
-### 2.3 Guarantee Space (Revisited)
+### 2.3 保証空間 (再訪)
 
 $$
 \mathcal{G} = \mathcal{P}(I)
 $$
 
-The Guarantee Space is the power set of invariants. A state $S \subseteq I$ represents the set of invariants currently satisfied by the system.
+保証空間は不変条件のべき集合である。状態 $S \subseteq I$ は、システムによって現在満たされている不変条件の集合を表す。
 
 ---
 
-## 3. Guarantee Taxonomy
+## 3. 保証の分類
 
-We classify invariants into four categories, each with distinct structural indicators and migration relevance.
+不変条件を4つのカテゴリに分類する。それぞれが異なる構造的指標と移行への関連性を持つ。
 
-### 3.1 Control Flow Invariants ($I_{flow}$)
+### 3.1 制御フロー不変条件 ($I_{flow}$)
 
-| Aspect | Description |
+| 側面 | 説明 |
 | :--- | :--- |
-| **Formal** | Predicates on execution paths: "Path P is reachable," "Loop L terminates," "Branch B is deterministic." |
-| **Structural** | CFG reducibility, absence of irreducible loops, bounded nesting depth. |
-| **Extraction** | CFG analysis: detect GOTOs, ALTER, PERFORM THRU; compute cyclomatic complexity. |
-| **Migration** | High relevance. Unstructured control flow blocks automated translation. |
+| **形式** | 実行パスに関する述語：「パス P は到達可能である」、「ループ L は停止する」、「分岐 B は決定的である」。 |
+| **構造** | CFG の可約性、既約ループの不在、有界なネスト深度。 |
+| **抽出** | CFG 解析：GOTO, ALTER, PERFORM THRU の検出、サイクロマティック複雑度の計算。 |
+| **移行** | 関連性高。非構造化制御フローは自動変換を妨げる。 |
 
-**Examples:**
-- $p_{seq}$: "Statements execute in sequential order."
-- $p_{loop}$: "Loop has single entry and exit."
-- $p_{no\_goto}$: "No GOTO crosses procedure boundary."
+**例:**
+- $p_{seq}$: 「文は順序通りに実行される。」
+- $p_{loop}$: 「ループは単一の入口と出口を持つ。」
+- $p_{no\_goto}$: 「GOTO は手続き境界を越えない。」
 
-### 3.2 Data Integrity Invariants ($I_{data}$)
+### 3.2 データ整合性不変条件 ($I_{data}$)
 
-| Aspect | Description |
+| 側面 | 説明 |
 | :--- | :--- |
-| **Formal** | Predicates on data: "Variable V is read-only in scope S," "No aliasing between X and Y." |
-| **Structural** | DFG: def-use chains, shared variables, COPYBOOK usage. |
-| **Extraction** | DFG analysis: identify global state, coupling, data dependencies. |
-| **Migration** | Critical for data isolation. Shared state blocks modularization. |
+| **形式** | データに関する述語：「変数 V はスコープ S 内で読み取り専用である」、「X と Y の間にエイリアシングがない」。 |
+| **構造** | DFG：定義-使用チェーン、共有変数、COPYBOOK 使用。 |
+| **抽出** | DFG 解析：グローバル状態、結合度、データ依存関係の特定。 |
+| **移行** | データ分離に不可欠。共有状態はモジュール化を妨げる。 |
 
-**Examples:**
-- $p_{scope}$: "Variable is local to module."
-- $p_{immutable}$: "Input parameters are not modified."
-- $p_{no\_alias}$: "No overlapping storage (REDEFINES) in critical path."
+**例:**
+- $p_{scope}$: 「変数はモジュールに対してローカルである。」
+- $p_{immutable}$: 「入力パラメータは変更されない。」
+- $p_{no\_alias}$: 「クリティカルパスにおいて重複するストレージ（REDEFINES）がない。」
 
-### 3.3 State Transition Invariants ($I_{state}$)
+### 3.3 状態遷移不変条件 ($I_{state}$)
 
-| Aspect | Description |
+| 側面 | 説明 |
 | :--- | :--- |
-| **Formal** | Predicates on state machine: "State S is reachable only after event E," "No invalid state transitions." |
-| **Structural** | State variables, file status, transaction boundaries. |
-| **Extraction** | Trace state variables through CFG; identify COMMIT/ROLLBACK points. |
-| **Migration** | Relevant for transactional systems. |
+| **形式** | 状態機械に関する述語：「状態 S はイベント E の後にのみ到達可能である」、「無効な状態遷移がない」。 |
+| **構造** | 状態変数、ファイルステータス、トランザクション境界。 |
+| **抽出** | CFG を通じた状態変数の追跡、COMMIT/ROLLBACK ポイントの特定。 |
+| **移行** | トランザクションシステムに関連。 |
 
-**Examples:**
-- $p_{tx}$: "Transaction is atomic."
-- $p_{file}$: "File is opened before read."
-- $p_{order}$: "State transitions follow valid sequence."
+**例:**
+- $p_{tx}$: 「トランザクションは原子的である。」
+- $p_{file}$: 「ファイルは読み取り前に開かれる。」
+- $p_{order}$: 「状態遷移は有効な順序に従う。」
 
-### 3.4 Interface / I/O Invariants ($I_{io}$)
+### 3.4 インターフェース / I/O 不変条件 ($I_{io}$)
 
-| Aspect | Description |
+| 側面 | 説明 |
 | :--- | :--- |
-| **Formal** | Predicates on interfaces: "Input format F is respected," "Output O is produced for input I." |
-| **Structural** | CALL interface, COPYBOOK layout, file record structure. |
-| **Extraction** | Parse PROCEDURE DIVISION USING; analyze LINKAGE SECTION; trace I/O operations. |
-| **Migration** | Defines contract boundaries. Essential for incremental migration. |
+| **形式** | インターフェースに関する述語：「入力フォーマット F が尊重される」、「入力 I に対して出力 O が生成される」。 |
+| **構造** | CALL インターフェース、COPYBOOK レイアウト、ファイルレコード構造。 |
+| **抽出** | PROCEDURE DIVISION USING の解析、LINKAGE SECTION の分析、I/O 操作の追跡。 |
+| **移行** | 契約境界を定義する。段階的移行に不可欠。 |
 
-**Examples:**
-- $p_{call}$: "CALL parameters match callee signature."
-- $p_{copybook}$: "COPYBOOK layout is stable."
-- $p_{io}$: "I/O operations are deterministic for given input."
+**例:**
+- $p_{call}$: 「CALL パラメータは呼び出し先のシグネチャと一致する。」
+- $p_{copybook}$: 「COPYBOOK レイアウトは安定的である。」
+- $p_{io}$: 「I/O 操作は与えられた入力に対して決定的である。」
 
 ---
 
-## 4. Structural Extraction Model
+## 4. 構造的抽出モデル
 
-### 4.1 Mapping Function $\Phi$
+### 4.1 マッピング関数 $\Phi$
 
-We define the extraction function:
+抽出関数を定義する：
 
 $$
 \Phi: (AST, CFG, DFG) \to \mathcal{P}(I)
@@ -126,106 +126,106 @@ $$
 S = \Phi(CodeStructure)
 $$
 
-Where $S \subseteq I$ is the set of invariants satisfied by the current code.
+ここで $S \subseteq I$ は、現在のコードによって満たされる不変条件の集合である。
 
-### 4.2 Extraction Rules (Pattern-Based)
+### 4.2 抽出ルール (パターンベース)
 
-| Invariant Type | Structural Pattern | Detection Method |
+| 不変条件タイプ | 構造パターン | 検出方法 |
 | :--- | :--- | :--- |
-| $p_{no\_goto}$ | No GOTO/ALTER in CFG | CFG: count GOTO edges |
-| $p_{reducible}$ | CFG is reducible | CFG: apply reducibility test |
-| $p_{scope}$ | Variable only in LOCAL-STORAGE | DFG: scope analysis |
-| $p_{immutable}$ | Parameter in LINKAGE, no MOVE to it | DFG: def-use on parameters |
-| $p_{call}$ | CALL matches COPYBOOK | AST: compare CALL args to PROCEDURE USING |
-| $p_{tx}$ | COMMIT/ROLLBACK bracket operations | CFG: trace control flow |
+| $p_{no\_goto}$ | CFG 内に GOTO/ALTER がない | CFG：GOTO エッジをカウント |
+| $p_{reducible}$ | CFG が可約である | CFG：可約性テストを適用 |
+| $p_{scope}$ | 変数が LOCAL-STORAGE にのみ存在する | DFG：スコープ分析 |
+| $p_{immutable}$ | パラメータが LINKAGE にあり、MOVE されない | DFG：パラメータの定義-使用分析 |
+| $p_{call}$ | CALL が COPYBOOK と一致する | AST：CALL 引数と PROCEDURE USING を比較 |
+| $p_{tx}$ | COMMIT/ROLLBACK が操作を括弧で囲む | CFG：制御フローを追跡 |
 
-### 4.3 Partial Extraction
+### 4.3 部分的抽出
 
-Extraction may be **partial**: some invariants are undecidable from static analysis. We denote:
+抽出は **部分的** である可能性がある：一部の不変条件は静的解析からは決定不能である。以下のように表記する：
 
 $$
 S = \Phi(C) \cup S_{unknown}
 $$
 
-Where $S_{unknown}$ represents invariants that require runtime verification or manual annotation.
+ここで $S_{unknown}$ は、実行時検証または手動アノテーションを必要とする不変条件を表す。
 
 ---
 
-## 5. Guarantee Dependency Model
+## 5. 保証依存関係モデル
 
-### 5.1 Dependency Relation $D$
+### 5.1 依存関係 $D$
 
 $$
 D \subseteq I \times I
 $$
 
-$(p, q) \in D$ means: **$q$ depends on $p$** (i.e., $q$ cannot hold unless $p$ holds).
+$(p, q) \in D$ は、**$q$ は $p$ に依存する**（すなわち、$p$ が成立しない限り $q$ は成立し得ない）ことを意味する。
 
-### 5.2 Dependency-Closed Sets
+### 5.2 依存関係閉集合
 
-A set $S \subseteq I$ is **dependency-closed** (an ideal) if:
+集合 $S \subseteq I$ は、以下の場合に **依存関係で閉じている**（イデアルである）：
 
 $$
 \forall q \in S, \forall p \in I: (p, q) \in D \implies p \in S
 $$
 
-### 5.3 Valid Guarantee Space $\mathcal{G}_{dep}$
+### 5.3 有効保証空間 $\mathcal{G}_{dep}$
 
 $$
 \mathcal{G}_{dep} = \{ S \subseteq I \mid S \text{ is dependency-closed} \}
 $$
 
-$\mathcal{G}_{dep}$ is a **Distributive Sublattice** of $\mathcal{G} = \mathcal{P}(I)$. This aligns with Phase 3's definition.
+$\mathcal{G}_{dep}$ は $\mathcal{G} = \mathcal{P}(I)$ の **分配部分束** である。これは Phase 3 の定義と整合する。
 
-### 5.4 Example Dependencies
+### 5.4 依存関係の例
 
-- $p_{no\_goto}$ depends on $p_{reducible}$ (reducibility implies structured flow).
-- $p_{tx}$ depends on $p_{file}$ (transaction implies file handling).
-- $p_{call}$ depends on $p_{copybook}$ (interface depends on data layout).
+- $p_{no\_goto}$ は $p_{reducible}$ に依存する（可約性は構造化フローを含意する）。
+- $p_{tx}$ は $p_{file}$ に依存する（トランザクションはファイル操作を含意する）。
+- $p_{call}$ は $p_{copybook}$ に依存する（インターフェースはデータレイアウトに依存する）。
 
 ---
 
-## 6. Guarantee Weighting Model
+## 6. 保証重み付けモデル
 
-### 6.1 Weight Function
+### 6.1 重み関数
 
 $$
 w: I \to \mathbb{R}^+
 $$
 
-Weights represent:
-- **Business criticality**: Higher for core business logic.
-- **Verification difficulty**: Higher for invariants hard to test.
-- **Migration impact**: Higher for invariants that block transformations.
+重みは以下を表す：
+- **ビジネス重要度**: コアビジネスロジックほど高い。
+- **検証困難度**: テストが難しい不変条件ほど高い。
+- **移行影響度**: 変換をブロックする不変条件ほど高い。
 
-### 6.2 Composite Weight
+### 6.2 複合重み
 
-For a state $S \subseteq I$:
+状態 $S \subseteq I$ に対して：
 
 $$
 \mu(S) = \sum_{p \in S} w(p)
 $$
 
-This is the **Guarantee Measure** from Phase 2.
+これは Phase 2 の **保証尺度（Guarantee Measure）** である。
 
-### 6.3 Influence on Planning
+### 6.3 計画への影響
 
-| Concept | Role of $w$ |
+| 概念 | $w$ の役割 |
 | :--- | :--- |
-| **Migration Debt** | $D_{debt}(S) = \sum_{p \in G_{crit} \setminus S} w(p)$ |
-| **Risk Amplification** | High $w(p)$ for missing $p$ increases $R_{struct}$ |
-| **Migration Cost** | $Cost(S \to S')$ scales with $w$ of newly acquired invariants |
+| **移行負債** | $D_{debt}(S) = \sum_{p \in G_{crit} \setminus S} w(p)$ |
+| **リスク増幅** | 欠落している $p$ の $w(p)$ が高いと $R_{struct}$ が増加する |
+| **移行コスト** | $Cost(S \to S')$ は新しく獲得された不変条件の $w$ に比例する |
 
 ---
 
-## 7. Implications for Migration Planning
+## 7. 移行計画への含意
 
-1. **Trajectory Definition**: A migration path $S_0 \to S_1 \to \dots \to S_n$ is a sequence of dependency-closed invariant sets. Each step adds invariants (or preserves them).
+1. **軌跡の定義**: 移行パス $S_0 \to S_1 \to \dots \to S_n$ は、依存関係で閉じた不変条件集合のシーケンスである。各ステップは不変条件を追加する（または維持する）。
 
-2. **Safety Region**: $S_{target} \in \mathcal{S}$ iff $G_{crit} \subseteq S_{target}$, where $G_{crit} \subseteq I$ is the critical invariant set.
+2. **安全領域**: $S_{target} \in \mathcal{S}$ であるための必要十分条件は $G_{crit} \subseteq S_{target}$ である。ここで $G_{crit} \subseteq I$ はクリティカルな不変条件集合である。
 
-3. **Extraction as Initialization**: $\Phi(AST, CFG, DFG)$ provides $S_0$, the starting state for planning.
+3. **初期化としての抽出**: $\Phi(AST, CFG, DFG)$ は、計画の開始状態 $S_0$ を提供する。
 
-4. **Foundation for P3.5-1**: The Guarantee State Graph $G_{state} = (V, E)$ will use $V = \mathcal{G}_{dep}$ and $E$ as valid transformations between states.
+4. **P3.5-1 の基礎**: 保証状態グラフ $G_{state} = (V, E)$ は、$V = \mathcal{G}_{dep}$ とし、$E$ を状態間の有効な変換として使用する。
 
-This document establishes the semantic foundation for Phase 3.5 Migration Planning Theory.
+本文書は、Phase 3.5 移行計画理論の意味論的基礎を確立する。

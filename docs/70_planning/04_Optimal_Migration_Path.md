@@ -1,4 +1,4 @@
-# 04. Optimal Migration Path
+# 04. 最適移行パス (Optimal Migration Path)
 
 **Phase 3.5: Migration Planning Theory**  
 **Document ID:** `docs/70_planning/04_Optimal_Migration_Path.md`  
@@ -6,129 +6,129 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-Given the Guarantee State Graph $G_{state}$ (P3.5-1) with edge weights from the Migration Cost Model (P3.5-3), migration planning reduces to a **shortest-path problem**. This document defines the graph formulation, suitable algorithms, and planning implications.
+移行コストモデル (P3.5-3) からのエッジ重みを持つ保証状態グラフ $G_{state}$ (P3.5-1) が与えられたとき、移行計画は **最短経路問題** に帰着する。本文書は、グラフの定式化、適切なアルゴリズム、および計画への含意を定義する。
 
 ---
 
-## 2. Graph Formulation
+## 2. グラフ定式化
 
-### 2.1 Weighted Graph
+### 2.1 重み付きグラフ
 
 $$
 G_{state}^{w} = (V, E, c)
 $$
 
-- **$V$**: Guarantee states (dependency-closed subsets of $I$).
-- **$E$**: Valid transitions $(S, S')$ where $S \lessdot S'$.
-- **$c: E \to \mathbb{R}_{\ge 0}$**: Edge weight $c(S, S') = Cost(S \to S')$.
+- **$V$**: 保証状態（$I$ の依存関係閉包部分集合）。
+- **$E$**: 有効な遷移 $(S, S')$ ここで $S \lessdot S'$。
+- **$c: E \to \mathbb{R}_{\ge 0}$**: エッジ重み $c(S, S') = Cost(S \to S')$。
 
-### 2.2 Problem Instance
+### 2.2 問題インスタンス
 
-- **Source**: $S_{start} = \Phi(AST, CFG, DFG)$ (initial state from code).
-- **Target set**: $\mathcal{S}$ (Safety Region).
-- **Goal**: Find a path $S_{start} \to \dots \to S_{target}$ with $S_{target} \in \mathcal{S}$ that minimizes total cost.
+- **ソース**: $S_{start} = \Phi(AST, CFG, DFG)$ （コードからの初期状態）。
+- **ターゲット集合**: $\mathcal{S}$ （安全領域）。
+- **ゴール**: 総コストを最小化するパス $S_{start} \to \dots \to S_{target}$ （$S_{target} \in \mathcal{S}$）を見つける。
 
-### 2.3 Single vs. Multiple Targets
+### 2.3 単一ターゲット vs. 複数ターゲット
 
-Since $\mathcal{S}$ is a filter, any $S \in \mathcal{S}$ is acceptable. We can:
-- **Option A**: Add a virtual sink node connected to all $S \in \mathcal{S}$ with weight 0.
-- **Option B**: Treat the first state in $\mathcal{S}$ reached as the target (Dijkstra/A* naturally handle this).
+$\mathcal{S}$ はフィルターであるため、任意の $S \in \mathcal{S}$ が許容される。以下の方法がある：
+- **オプション A**: すべての $S \in \mathcal{S}$ に重み 0 で接続された仮想シンクノードを追加する。
+- **オプション B**: 到達した最初の $\mathcal{S}$ 内の状態をターゲットとして扱う（ダイクストラ法/A* は自然にこれを処理する）。
 
 ---
 
-## 3. Optimization Algorithms
+## 3. 最適化アルゴリズム
 
-### 3.1 Dijkstra's Algorithm
+### 3.1 ダイクストラ法
 
-**When to use**: General case. Non-negative edge weights. No heuristic available.
+**使用場面**: 一般的なケース。非負のエッジ重み。ヒューリスティックが利用できない場合。
 
-**Procedure**:
-1. Initialize $dist[S_{start}] = 0$, $dist[S] = \infty$ for $S \neq S_{start}$.
-2. Use a priority queue (min-heap) keyed by $dist$.
-3. Extract minimum, relax outgoing edges.
-4. Terminate when a state $S \in \mathcal{S}$ is extracted (first time we reach safety).
+**手順**:
+1. $dist[S_{start}] = 0$, $S \neq S_{start}$ に対して $dist[S] = \infty$ で初期化。
+2. $dist$ をキーとする優先度付きキュー（最小ヒープ）を使用。
+3. 最小値を抽出し、出ていくエッジを緩和（relax）する。
+4. 状態 $S \in \mathcal{S}$ が抽出されたときに終了する（初めて安全領域に到達）。
 
-**Complexity**: $O(|V| \log |V| + |E|)$ with binary heap. $|V|$ can be exponential in $|I|$; practical use may require state-space pruning.
+**計算量**: バイナリヒープで $O(|V| \log |V| + |E|)$。$|V|$ は $|I|$ に対して指数関数的になり得るため、実用には状態空間の枝刈りが必要になる場合がある。
 
-### 3.2 A* Algorithm
+### 3.2 A* アルゴリズム
 
-**When to use**: When a **heuristic** $h(S)$ underestimates the cost from $S$ to $\mathcal{S}$.
+**使用場面**: $S$ から $\mathcal{S}$ へのコストを過小評価する **ヒューリスティック** $h(S)$ がある場合。
 
-**Admissible heuristic**:
+**許容ヒューリスティック**:
 $$
 h(S) \le d^*(S, \mathcal{S}) \quad \forall S
 $$
 
-**Example heuristic**:
+**ヒューリスティック例**:
 $$
 h(S) = \sum_{p \in G_{crit} \setminus S} w(p)
 $$
 
-This is the Migration Debt $D_{debt}(S)$. It is admissible if edge costs are at least $w(p)$ for acquiring $p$ (which holds when $R_{factor} \ge 1$).
+これは移行負債 $D_{debt}(S)$ である。エッジコストが $p$ を獲得するために少なくとも $w(p)$ である場合（$R_{factor} \ge 1$ の場合に成立）、これは許容可能である。
 
-**Procedure**: Same as Dijkstra, but priority = $dist[S] + h(S)$.
+**手順**: ダイクストラ法と同じだが、優先度 = $dist[S] + h(S)$ とする。
 
-**Benefit**: Expands fewer nodes when $h$ is informative.
+**利点**: $h$ が有益な場合、展開されるノード数が少なくなる。
 
-### 3.3 Dynamic Programming (Topological Order)
+### 3.3 動的計画法 (トポロジカル順序)
 
-**When to use**: $G_{state}$ is a DAG. We can process states in topological order (e.g., by $\mu(S)$ or $|S|$).
+**使用場面**: $G_{state}$ が DAG である場合。状態をトポロジカル順序（例：$\mu(S)$ または $|S|$ 順）で処理できる。
 
-**Procedure**:
-1. Topologically sort $V$.
-2. For each $S$ in order: $dist[S] = \min_{(T,S) \in E} \{ dist[T] + c(T, S) \}$.
-3. Base: $dist[S_{start}] = 0$.
+**手順**:
+1. $V$ をトポロジカルソートする。
+2. 順序に従って各 $S$ について: $dist[S] = \min_{(T,S) \in E} \{ dist[T] + c(T, S) \}$。
+3. 基底: $dist[S_{start}] = 0$。
 
-**Benefit**: No priority queue; single pass. Suitable when the state space is small or structured.
+**利点**: 優先度付きキューが不要。シングルパス。状態空間が小さいか構造化されている場合に適している。
 
-### 3.4 Algorithm Selection
+### 3.4 アルゴリズム選択
 
-| Scenario | Algorithm |
+| シナリオ | アルゴリズム |
 | :--- | :--- |
-| Small state space, no heuristic | Dijkstra |
-| Large state space, good heuristic | A* |
-| DAG with clear topological order | DP |
-| Need all shortest paths to $\mathcal{S}$ | Dijkstra (run to completion) |
+| 状態空間が小さい、ヒューリスティックなし | ダイクストラ法 |
+| 状態空間が大きい、良いヒューリスティックあり | A* |
+| 明確なトポロジカル順序を持つ DAG | DP |
+| $\mathcal{S}$ へのすべての最短パスが必要 | ダイクストラ法（完了まで実行） |
 
 ---
 
-## 4. Path Interpretation
+## 4. パスの解釈
 
-### 4.1 Optimal Path as Migration Plan
+### 4.1 移行計画としての最適パス
 
-An optimal path $S_0 \to S_1 \to \dots \to S_n$ ($S_n \in \mathcal{S}$) specifies:
-1. **Sequence of invariants** to acquire: $S_{i+1} \setminus S_i = \{p_i\}$.
-2. **Order**: Respects dependency relation $D$ (implicit in $G_{state}$).
-3. **Cost**: Total effort and risk exposure.
+最適パス $S_0 \to S_1 \to \dots \to S_n$ ($S_n \in \mathcal{S}$) は以下を指定する：
+1. **獲得する不変条件のシーケンス**: $S_{i+1} \setminus S_i = \{p_i\}$。
+2. **順序**: 依存関係 $D$ を尊重する（$G_{state}$ に暗黙的に含まれる）。
+3. **コスト**: 総労力とリスク露出。
 
-### 4.2 Transformation Sequence
+### 4.2 変換シーケンス
 
-Each edge $(S_i, S_{i+1})$ maps to a transformation from the Transformation Model (P3.5-2):
-- Control flow restructuring (if $p_i \in I_{flow}$).
-- Module decomposition (if $p_i \in I_{data}$ or $I_{io}$).
-- etc.
+各エッジ $(S_i, S_{i+1})$ は、変換モデル (P3.5-2) からの変換にマッピングされる：
+- 制御フロー再構築（もし $p_i \in I_{flow}$ なら）。
+- モジュール分解（もし $p_i \in I_{data}$ または $I_{io}$ なら）。
+- など。
 
-### 4.3 Non-Uniqueness
+### 4.3 非一意性
 
-Multiple paths may have the same cost. Tie-breaking (e.g., prefer fewer steps, or lower peak risk) can be added.
-
----
-
-## 5. Migration Planning Implications
-
-1. **Feasibility**: If no path exists from $S_{start}$ to $\mathcal{S}$, the system is structurally infeasible (Phase 3).
-2. **Budget**: If $Cost(path_{opt}) > Budget$, the project is resource-infeasible.
-3. **Sensitivity**: Small changes in $c$ (e.g., revised complexity estimates) may change the optimal path; re-run when estimates update.
-4. **Incremental planning**: The path can be executed step-by-step; after each step, $S_{start}$ updates and the plan can be recomputed.
+同じコストを持つ複数のパスが存在する場合がある。タイブレーク（例：ステップ数を少なくする、またはピークリスクを低くする）を追加できる。
 
 ---
 
-## 6. Conclusion
+## 5. 移行計画への含意
 
-The Optimal Migration Path:
-1. Formulates migration as a weighted shortest-path problem on $G_{state}^{w}$.
-2. Supports Dijkstra, A*, and DP depending on state-space size and heuristic availability.
-3. Produces a sequence of transformations that minimize total cost.
-4. Integrates with the Migration Strategy Synthesis (P3.5-5) for full plan generation.
+1. **実現可能性**: もし $S_{start}$ から $\mathcal{S}$ へのパスが存在しない場合、システムは構造的に実現不可能である（Phase 3）。
+2. **予算**: もし $Cost(path_{opt}) > Budget$ ならば、プロジェクトはリソース的に実現不可能である。
+3. **感度**: $c$ の小さな変化（例：複雑性見積もりの修正）が最適パスを変える可能性がある。見積もりが更新されたら再実行する。
+4. **段階的計画**: パスはステップごとに実行できる。各ステップの後、$S_{start}$ が更新され、計画を再計算できる。
+
+---
+
+## 6. 結論
+
+最適移行パスは：
+1. 移行を $G_{state}^{w}$ 上の重み付き最短経路問題として定式化する。
+2. 状態空間のサイズとヒューリスティックの可用性に応じて、ダイクストラ法、A*、DP をサポートする。
+3. 総コストを最小化する変換シーケンスを生成する。
+4. 完全な計画生成のために、移行戦略合成 (P3.5-5) と統合される。

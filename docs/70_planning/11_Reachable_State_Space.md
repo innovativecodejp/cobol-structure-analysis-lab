@@ -1,4 +1,4 @@
-# 11. Reachable State Space
+# 11. 到達可能状態空間 (Reachable State Space)
 
 **Phase 3.5: Migration Planning Theory (Strengthening)**  
 **Document ID:** `docs/70_planning/11_Reachable_State_Space.md`  
@@ -6,140 +6,140 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The Guarantee State Graph $G_{state}$ can have up to $2^{|I|}$ nodes, leading to **state explosion** for large invariant sets. This document defines the **Reachable State Space** $V_{reachable}$ and **pruning rules** to keep the graph tractable for migration planning.
+保証状態グラフ $G_{state}$ は最大 $2^{|I|}$ のノードを持つ可能性があり、大規模な不変条件集合に対して **状態爆発** を引き起こす。本文書は、移行計画のためにグラフを扱いやすく保つための **到達可能状態空間** $V_{reachable}$ と **枝刈りルール** を定義する。
 
 ---
 
-## 2. Reachable States
+## 2. 到達可能状態
 
-### 2.1 Definition
+### 2.1 定義
 
 $$
 V_{reachable} \subseteq \mathcal{G}_{dep}
 $$
 
-$V_{reachable}$ is the set of guarantee states that are **reachable** from the initial state $S_{start}$ via valid transformations.
+$V_{reachable}$ は、初期状態 $S_{start}$ から有効な変換を通じて **到達可能** な保証状態の集合である。
 
-### 2.2 Transition Closure
+### 2.2 遷移閉包
 
 $$
 V_{reachable} = closure(S_{start}, Transformations)
 $$
 
-Where $closure$ is the reflexive-transitive closure of the transition relation:
+ここで $closure$ は遷移関係の反射推移閉包である：
 
 $$
 closure(S, T) = \{ S' \mid \exists n \ge 0, \exists path: S \to S_1 \to \dots \to S_n = S' \}
 $$
 
-$V_{reachable}$ is the smallest set containing $S_{start}$ and closed under applying transformations from the Transformation Model (P3.5-2).
+$V_{reachable}$ は、$S_{start}$ を含み、変換モデル (P3.5-2) からの変換の適用下で閉じている最小の集合である。
 
 ---
 
-## 3. Pruning Rules
+## 3. 枝刈りルール
 
-### 3.1 Dependency Pruning
+### 3.1 依存関係枝刈り
 
-**Rule**: If $S \cup \{p\} \notin \mathcal{G}_{dep}$ (i.e., adding $p$ violates dependency closure), do not explore $S \cup \{p\}$.
+**ルール**: もし $S \cup \{p\} \notin \mathcal{G}_{dep}$ （すなわち、$p$ の追加が依存関係閉包に違反する）ならば、$S \cup \{p\}$ を探索しない。
 
-**Effect**: Only dependency-closed states are considered. This is already enforced by $G_{state}$; dependency pruning is implicit in the edge definition.
+**効果**: 依存関係で閉じた状態のみが考慮される。これは既に $G_{state}$ によって強制されており、依存関係枝刈りはエッジ定義に暗黙的に含まれている。
 
-### 3.2 Dominance Pruning (Safe Rule)
+### 3.2 支配枝刈り (安全ルール)
 
-**Rule**: Dominance pruning is allowed **only if** all three conditions hold:
+**ルール**: 支配枝刈りは、以下の3つの条件がすべて成立する場合に **のみ** 許可される：
 
-1. $S_1 \subseteq S_2$ (strict subset: $S_2$ has at least as many invariants).
-2. $Cost(path_{S_1}) \ge Cost(path_{S_2})$ (path to $S_2$ is cheaper or equal).
-3. $S_2$ can reach the Safety Region $\mathcal{S}$ (feasibility is preserved).
+1. $S_1 \subseteq S_2$ （真部分集合：$S_2$ は少なくとも同数の不変条件を持つ）。
+2. $Cost(path_{S_1}) \ge Cost(path_{S_2})$ （$S_2$ へのパスの方が安いか等しい）。
+3. $S_2$ は安全領域 $\mathcal{S}$ に到達できる（実現可能性が保存される）。
 
-If all three hold, $S_1$ is **dominated** by $S_2$. Prune $S_1$ from further expansion.
+3つすべてが成立する場合、$S_1$ は $S_2$ に **支配** されている。$S_1$ をそれ以上の展開から枝刈りする。
 
-**Rationale**: Reaching $S_2$ is strictly better than $S_1$ (more invariants, lower or equal cost, and $S_2$ leads to a feasible solution). No optimal path goes through $S_1$.
+**根拠**: $S_2$ に到達することは $S_1$ よりも厳密に優れている（より多くの不変条件、より低いか等しいコスト、そして $S_2$ は実行可能な解につながる）。最適パスが $S_1$ を通ることはない。
 
-**Caveat**: Condition 3 is critical. Pruning $S_1$ when $S_2$ cannot reach $\mathcal{S}$ would incorrectly eliminate feasible solutions.
+**注意**: 条件3は重要である。$S_2$ が $\mathcal{S}$ に到達できない場合に $S_1$ を枝刈りすると、実行可能な解を誤って排除してしまう可能性がある。
 
-### 3.3 Equivalent State Merging
+### 3.3 等価状態マージ
 
-**Rule**: If $S_1$ and $S_2$ are **equivalent** for planning purposes (e.g., same $G_{crit} \cap S$, same distance to $\mathcal{S}$), merge them into a single representative state.
+**ルール**: もし $S_1$ と $S_2$ が計画目的において **等価** である場合（例：同じ $G_{crit} \cap S$、$\mathcal{S}$ への距離が同じ）、それらを単一の代表状態にマージする。
 
-**Definition of equivalence**:
+**等価性の定義**:
 $$
 S_1 \equiv S_2 \iff (G_{crit} \setminus S_1) = (G_{crit} \setminus S_2) \land \text{same structural complexity}
 $$
 
-**Effect**: Reduces state count when multiple paths lead to "equivalent" configurations.
+**効果**: 複数のパスが「等価な」構成につながる場合の状態数を削減する。
 
-### 3.4 Budget Pruning
+### 3.4 予算枝刈り
 
-**Rule**: If $Cost(path to S) > Budget$, prune $S$ and all descendants.
+**ルール**: もし $Cost(path to S) > Budget$ ならば、$S$ とそのすべての子孫を枝刈りする。
 
-**Effect**: Enforces resource feasibility early; avoids exploring infeasible regions.
+**効果**: リソース実現可能性を早期に強制し、実行不可能な領域の探索を回避する。
 
-### 3.5 Feasibility-Preserving Dominance
+### 3.5 実現可能性保存支配
 
-Dominance pruning carries a **risk**: if we prune state $S_1$ because $S_2$ dominates it, but $S_2$ later turns out to be a dead end (cannot reach $\mathcal{S}$), we may have incorrectly discarded $S_1$, which could have led to a feasible path.
+支配枝刈りには **リスク** が伴う：$S_2$ が $S_1$ を支配しているために $S_1$ を枝刈りしたが、後で $S_2$ が行き止まり（$\mathcal{S}$ に到達できない）であることが判明した場合、実行可能なパスにつながっていたかもしれない $S_1$ を誤って破棄したことになる。
 
-**Mitigation**: Condition 3 of the safe dominance rule requires that $S_2$ can reach $\mathcal{S}$. In practice, this may require:
-- **Reachability check**: Verify that $\mathcal{R}(S_2) \cap \mathcal{S} \neq \emptyset$ before pruning $S_1$.
-- **Conservative pruning**: When reachability is expensive to verify, avoid dominance pruning or apply it only when $S_2 \in \mathcal{S}$ (i.e., $S_2$ is already safe).
+**緩和策**: 安全な支配ルールの条件3は、$S_2$ が $\mathcal{S}$ に到達できることを要求する。実際には、これには以下が必要になる場合がある：
+- **到達可能性チェック**: $S_1$ を枝刈りする前に $\mathcal{R}(S_2) \cap \mathcal{S} \neq \emptyset$ を確認する。
+- **保守的な枝刈り**: 到達可能性の確認が高価な場合、支配枝刈りを避けるか、$S_2 \in \mathcal{S}$ （すなわち $S_2$ が既に安全）である場合にのみ適用する。
 
-**Implication**: Pruning states that lead to feasible solutions is a critical error. The safe dominance rule is designed to prevent this.
+**含意**: 実行可能な解につながる状態を枝刈りすることは重大なエラーである。安全な支配ルールはこれを防ぐように設計されている。
 
 ---
 
-## 4. Complexity Bounds
+## 4. 複雑性境界
 
-### 4.1 Worst Case
+### 4.1 最悪ケース
 
-Without pruning: $|V_{reachable}| \le |\mathcal{G}_{dep}| \le 2^{|I|}$.
+枝刈りなし：$|V_{reachable}| \le |\mathcal{G}_{dep}| \le 2^{|I|}$。
 
-### 4.2 With Pruning
+### 4.2 枝刈りあり
 
-- **Dependency pruning**: Reduces to $|\mathcal{G}_{dep}|$, which can be much smaller than $2^{|I|}$ for structured dependency graphs.
-- **Dominance pruning**: Can reduce explored states by 50% or more in practice.
-- **Equivalent state merging**: Reduces by a factor depending on equivalence granularity.
-- **Budget pruning**: Eliminates states beyond cost threshold.
+- **依存関係枝刈り**: $|\mathcal{G}_{dep}|$ に削減される。構造化された依存関係グラフの場合、$2^{|I|}$ よりもはるかに小さくなり得る。
+- **支配枝刈り**: 実際には探索される状態を50%以上削減できる可能性がある。
+- **等価状態マージ**: 等価性の粒度に応じた係数で削減する。
+- **予算枝刈り**: コスト閾値を超える状態を排除する。
 
-### 4.3 Practical Bound
+### 4.3 実用的境界
 
-For typical COBOL migration with $|I| \approx 20$–50 and strong dependencies:
+典型的な COBOL 移行（$|I| \approx 20$–50、強い依存関係）の場合：
 $$
 |V_{reachable}| \approx O(|I|^d)
 $$
-Where $d$ is the dependency depth. Often $d \ll |I|$.
+ここで $d$ は依存関係の深さ。多くの場合 $d \ll |I|$。
 
 ---
 
-## 5. Relationship to Migration Feasibility
+## 5. 移行実現可能性との関係
 
-### 5.1 Feasibility as Reachability
+### 5.1 到達可能性としての実現可能性
 
-Migration is **feasible** iff:
+移行は以下の場合に **実現可能** である：
 $$
 V_{reachable} \cap \mathcal{S} \neq \emptyset
 $$
 
-i.e., at least one safe state is reachable from $S_{start}$.
+すなわち、$S_{start}$ から少なくとも1つの安全な状態が到達可能である。
 
-### 5.2 Pruning and Feasibility
+### 5.2 枝刈りと実現可能性
 
-- Pruning must **preserve feasibility**: If $S \in \mathcal{S}$ is reachable, it must not be pruned.
-- **Dominance pruning** is safe: dominated states are suboptimal, not feasibility-relevant.
-- **Equivalent state merging** is safe if equivalence preserves "can reach $\mathcal{S}$."
-- **Budget pruning** may hide feasible but expensive paths; use only when budget is a hard constraint.
+- 枝刈りは **実現可能性を保存** しなければならない：もし $S \in \mathcal{S}$ が到達可能なら、それは枝刈りされてはならない。
+- **支配枝刈り** は安全である：支配された状態は準最適であり、実現可能性には関連しない。
+- **等価状態マージ** は、等価性が「$\mathcal{S}$ に到達できる」ことを保存する場合に安全である。
+- **予算枝刈り** は、実行可能だが高価なパスを隠す可能性がある。予算がハード制約である場合にのみ使用する。
 
-### 5.3 Dead-End Detection
+### 5.3 行き止まり検出
 
-A state $S$ is a **dead end** if $S \notin \mathcal{S}$ and no outgoing edges exist. Dead ends can be pruned from future expansion (they will never reach $\mathcal{S}$).
+状態 $S$ は、$S \notin \mathcal{S}$ かつ出ていくエッジが存在しない場合、**行き止まり** である。行き止まりは将来の展開から枝刈りできる（決して $\mathcal{S}$ に到達しないため）。
 
 ---
 
-## 6. Conclusion
+## 6. 結論
 
-The Reachable State Space:
-1. Defines $V_{reachable}$ as the closure of $S_{start}$ under transformations.
-2. Introduces pruning rules (dependency, dominance, equivalence, budget) to control state explosion.
-3. Provides complexity bounds for practical planning.
-4. Connects to migration feasibility (Phase 3 Task 3).
+到達可能状態空間は：
+1. $V_{reachable}$ を変換の下での $S_{start}$ の閉包として定義する。
+2. 状態爆発を制御するための枝刈りルール（依存関係、支配、等価性、予算）を導入する。
+3. 実用的な計画のための複雑性境界を提供する。
+4. 移行実現可能性（Phase 3 Task 3）に接続する。

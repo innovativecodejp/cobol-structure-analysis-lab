@@ -1,4 +1,4 @@
-# 13. Invariant Algebra
+# 13. 不変条件代数 (Invariant Algebra)
 
 **Phase 3.5: Migration Planning Theory (Strengthening)**  
 **Document ID:** `docs/70_planning/13_Invariant_Algebra.md`  
@@ -6,60 +6,60 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-This document defines the **algebraic structure** of invariants: a lattice, a dependency poset, join/meet operations, and a distance metric. These structures support migration planning (e.g., comparing states, measuring progress).
+本文書は、不変条件の **代数的構造** を定義する：束、依存関係半順序集合、結び/交わり操作、および距離メトリクス。これらの構造は移行計画（例：状態の比較、進捗の測定）をサポートする。
 
 ---
 
-## 2. Invariant Lattice $(I, \leq)$
+## 2. 不変条件束 $(I, \leq)$
 
-### 2.1 Partial Order
+### 2.1 半順序
 
-We define a partial order $\leq$ on the **invariant set** $I$ (not on states). For $p, q \in I$:
+**不変条件集合** $I$ 上に半順序 $\leq$ を定義する（状態上ではない）。$p, q \in I$ に対して：
 
 $$
 p \leq q \iff q \text{ implies } p \text{ (or } p \text{ is a weakening of } q)
 $$
 
-**Interpretation**: $p \leq q$ means $q$ is **stronger** than $p$. If a system satisfies $q$, it satisfies $p$.
+**解釈**: $p \leq q$ は、$q$ が $p$ よりも **強い** ことを意味する。システムが $q$ を満たすなら、$p$ も満たす。
 
-**Example**: $p_{scope}$ (variable is local) $\leq$ $p_{modular}$ (module has clear interface). Modularity implies scope.
+**例**: $p_{scope}$ (変数はローカル) $\leq$ $p_{modular}$ (モジュールは明確なインターフェースを持つ)。モジュール性はスコープを含意する。
 
-### 2.2 Lattice Structure
+### 2.2 束構造
 
-$(I, \leq)$ forms a **lattice** when join $\vee$ and meet $\wedge$ are defined:
+$(I, \leq)$ は、結び $\vee$ と交わり $\wedge$ が定義されるとき、**束** を形成する：
 
-- **Join** $p \vee q$: The weakest invariant implied by both $p$ and $q$.
-- **Meet** $p \wedge q$: The strongest invariant that implies both $p$ and $q$.
+- **結び** $p \vee q$: $p$ と $q$ の両方によって含意される最も弱い不変条件。
+- **交わり** $p \wedge q$: $p$ と $q$ の両方を含意する最も強い不変条件。
 
-For migration, the **state lattice** $\mathcal{G} = \mathcal{P}(I)$ (with $\subseteq$) is more directly used; $(I, \leq)$ provides structure within each invariant.
+移行においては、**状態束** $\mathcal{G} = \mathcal{P}(I)$ （$\subseteq$ を伴う）がより直接的に使用される；$(I, \leq)$ は各不変条件内の構造を提供する。
 
 ---
 
-## 3. Dependency Poset
+## 3. 依存関係半順序集合
 
-### 3.1 Dependency Relation $D$
+### 3.1 依存関係 $D$
 
 $$
 D \subseteq I \times I
 $$
 
-$(p, q) \in D$ means $q$ **depends on** $p$: $q$ cannot hold unless $p$ holds.
+$(p, q) \in D$ は、$q$ が $p$ に **依存する** ことを意味する：$p$ が成立しない限り $q$ は成立し得ない。
 
-### 3.2 Poset $(I, \leq_D)$
+### 3.2 半順序集合 $(I, \leq_D)$
 
-The reflexive-transitive closure of $D$ defines a partial order $\leq_D$:
+$D$ の反射推移閉包は半順序 $\leq_D$ を定義する：
 
 $$
 p \leq_D q \iff (p, q) \in D^* \quad \text{(transitive closure)}
 $$
 
-$(I, \leq_D)$ is a **poset** (partially ordered set). It may have cycles only if $D$ is ill-formed (we assume $D$ is acyclic).
+$(I, \leq_D)$ は **半順序集合 (poset)** である。$D$ が悪形式（サイクルを持つ）でない限り、サイクルは持たない（$D$ は非巡回であると仮定する）。
 
-### 3.3 Ideals and $\mathcal{G}_{dep}$
+### 3.3 イデアルと $\mathcal{G}_{dep}$
 
-The **ideals** (downward-closed sets) of $(I, \leq_D)$ are exactly the dependency-closed subsets:
+$(I, \leq_D)$ の **イデアル**（下方閉集合）は、まさに依存関係閉集合である：
 
 $$
 \mathcal{G}_{dep} = Idl(I, \leq_D)
@@ -67,100 +67,100 @@ $$
 
 ---
 
-## 4. Join and Meet Operations
+## 4. 結びと交わり操作
 
-### 4.1 On States (Guarantee Sets)
+### 4.1 状態（保証集合）上
 
-For states $S_1, S_2 \subseteq I$:
+状態 $S_1, S_2 \subseteq I$ に対して：
 
-- **Join** (in $\mathcal{G}$): $S_1 \vee S_2 = S_1 \cup S_2$ (union). The strongest state implied by both (contains all invariants from both).
-- **Meet** (in $\mathcal{G}$): $S_1 \wedge S_2 = S_1 \cap S_2$ (intersection). The weakest state that implies both.
+- **結び** ($\mathcal{G}$ 内): $S_1 \vee S_2 = S_1 \cup S_2$ (和集合)。両方によって含意される最も強い状態（両方のすべての不変条件を含む）。
+- **交わり** ($\mathcal{G}$ 内): $S_1 \wedge S_2 = S_1 \cap S_2$ (積集合)。両方を含意する最も弱い状態。
 
-### 4.2 In $\mathcal{G}_{dep}$
+### 4.2 $\mathcal{G}_{dep}$ 内
 
-For $S_1, S_2 \in \mathcal{G}_{dep}$:
-- $S_1 \vee S_2 = Cl_D(S_1 \cup S_2)$ (dependency closure of union).
-- $S_1 \wedge S_2 = S_1 \cap S_2$ (intersection of ideals is an ideal).
+$S_1, S_2 \in \mathcal{G}_{dep}$ に対して：
+- $S_1 \vee S_2 = Cl_D(S_1 \cup S_2)$ (和集合の依存関係閉包)。
+- $S_1 \wedge S_2 = S_1 \cap S_2$ (イデアルの積集合はイデアル)。
 
-$\mathcal{G}_{dep}$ is a **distributive lattice** with these operations.
+$\mathcal{G}_{dep}$ はこれらの操作を持つ **分配束** である。
 
-### 4.3 Interpretation for Planning
+### 4.3 計画のための解釈
 
-- **Join**: Combining two migration paths (e.g., parallel work on different modules) yields the union of acquired invariants (with closure).
-- **Meet**: The common invariants of two states represent the "shared progress" of two alternative paths.
+- **結び**: 2つの移行パス（例：異なるモジュールでの並行作業）を結合すると、獲得された不変条件の和集合（閉包付き）が得られる。
+- **交わり**: 2つの状態の共通の不変条件は、2つの代替パスの「共有された進捗」を表す。
 
 ---
 
-## 5. Invariant Distance Metric
+## 5. 不変条件距離メトリクス
 
-### 5.1 Symmetric Difference Metric
+### 5.1 対称差メトリクス
 
-For states $S_1, S_2 \subseteq I$:
+状態 $S_1, S_2 \subseteq I$ に対して：
 
 $$
 d(S_1, S_2) = |S_1 \triangle S_2| = |(S_1 \setminus S_2) \cup (S_2 \setminus S_1)|
 $$
 
-This is the **Hamming distance** (number of invariants that differ).
+これは **ハミング距離**（異なる不変条件の数）である。
 
-### 5.2 Weighted Distance
+### 5.2 重み付き距離
 
 $$
 d_w(S_1, S_2) = \sum_{p \in S_1 \triangle S_2} w(p)
 $$
 
-This is the **weighted Hamming metric** from Phase 2. It accounts for invariant importance.
+これは Phase 2 の **重み付きハミングメトリクス** である。不変条件の重要性を考慮する。
 
-### 5.3 Directed Distance (Migration Debt)
+### 5.3 有向距離 (移行負債)
 
-For planning, we often care about **distance to safety**:
+計画のために、しばしば **安全への距離** に関心がある：
 
 $$
 d_{safety}(S) = d_w(G_{crit} \setminus S, \emptyset) = \sum_{p \in G_{crit} \setminus S} w(p)
 $$
 
-This is the Migration Debt (Phase 3 Task 2).
+これは移行負債（Phase 3 Task 2）である。
 
-### 5.4 Metric Axioms
+### 5.4 メトリクス公理
 
-$d_w$ satisfies:
+$d_w$ は以下を満たす：
 1. $d_w(S_1, S_2) \ge 0$
 2. $d_w(S_1, S_2) = 0 \iff S_1 = S_2$
 3. $d_w(S_1, S_2) = d_w(S_2, S_1)$
-4. $d_w(S_1, S_3) \le d_w(S_1, S_2) + d_w(S_2, S_3)$ (triangle inequality)
+4. $d_w(S_1, S_3) \le d_w(S_1, S_2) + d_w(S_2, S_3)$ (三角不等式)
 
-### 5.5 Dependency-Weighted Migration Distance
+### 5.5 依存関係重み付き移行距離
 
-We define a **dependency-aware distance** that accounts for the depth of invariants in the dependency poset:
+依存関係半順序集合における不変条件の深さを考慮した **依存関係認識距離** を定義する：
 
 $$
 d_{dep}(S_1, S_2) = \sum_{p \in S_1 \triangle S_2} depth(p)
 $$
 
-Where $depth(p)$ is the **level** of $p$ in the dependency poset $(I, \leq_D)$ (e.g., the length of the longest chain from a minimal element to $p$).
+ここで $depth(p)$ は依存関係半順序集合 $(I, \leq_D)$ における $p$ の **レベル** である（例：最小要素から $p$ への最長チェーンの長さ）。
 
-**Interpretation**: Removing or losing a **deep** invariant (high $depth(p)$) costs more, because many derived invariants depend on it. Conversely, acquiring a deep invariant may unlock many others. The dependency-weighted metric reflects this structural impact.
+**解釈**: **深い** 不変条件（高い $depth(p)$）を削除または失うことは、多くの派生不変条件がそれに依存しているため、よりコストがかかる。逆に、深い不変条件を獲得すると、他の多くの不変条件がアンロックされる可能性がある。依存関係重み付きメトリクスは、この構造的影響を反映する。
 
-**Use in planning**: When comparing migration states or estimating effort, $d_{dep}$ can complement $d_w$ by emphasizing invariants that are foundational in the dependency structure.
-
----
-
-## 6. Implications for Migration Planning
-
-1. **State comparison**: $d_w(S_1, S_2)$ measures how "far" two migration states are. Useful for clustering, equivalence (Task 11), and progress tracking.
-
-2. **A* heuristic**: $h(S) = d_{safety}(S)$ is admissible for shortest-path search (Task 4).
-
-3. **Lattice structure**: Join/meet support combining parallel migration efforts and comparing alternative paths.
-
-4. **Dependency poset**: $(I, \leq_D)$ determines valid state sequences (linear extensions) and enables topological algorithms.
+**計画での使用**: 移行状態を比較したり労力を推定したりする際、$d_{dep}$ は依存関係構造において基礎的な不変条件を強調することで、$d_w$ を補完できる。
 
 ---
 
-## 7. Conclusion
+## 6. 移行計画への含意
 
-The Invariant Algebra:
-1. Defines $(I, \leq)$ and $(I, \leq_D)$ as lattice and poset.
-2. Defines join and meet on states ($\mathcal{G}_{dep}$).
-3. Defines distance metrics ($d$, $d_w$, $d_{safety}$).
-4. Connects to migration planning (heuristics, state comparison, path synthesis).
+1. **状態比較**: $d_w(S_1, S_2)$ は2つの移行状態がどれだけ「離れている」かを測定する。クラスタリング、等価性（Task 11）、進捗追跡に有用。
+
+2. **A* ヒューリスティック**: $h(S) = d_{safety}(S)$ は最短経路探索（Task 4）のための許容ヒューリスティックである。
+
+3. **束構造**: 結び/交わりは、並行移行作業の結合や代替パスの比較をサポートする。
+
+4. **依存関係半順序集合**: $(I, \leq_D)$ は有効な状態シーケンス（線形拡張）を決定し、トポロジカルアルゴリズムを可能にする。
+
+---
+
+## 7. 結論
+
+不変条件代数は：
+1. $(I, \leq)$ と $(I, \leq_D)$ を束および半順序集合として定義する。
+2. 状態上の結びと交わりを定義する ($\mathcal{G}_{dep}$)。
+3. 距離メトリクス ($d$, $d_w$, $d_{safety}$) を定義する。
+4. 移行計画（ヒューリスティック、状態比較、パス合成）に接続する。

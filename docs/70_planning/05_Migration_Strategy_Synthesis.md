@@ -1,4 +1,4 @@
-# 05. Migration Strategy Synthesis
+# 05. 移行戦略合成 (Migration Strategy Synthesis)
 
 **Phase 3.5: Migration Planning Theory**  
 **Document ID:** `docs/70_planning/05_Migration_Strategy_Synthesis.md`  
@@ -6,93 +6,93 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-This document synthesizes the outputs of Phase 3.5 (P3.5-0 through P3.5-4) into a **complete migration plan**. The plan specifies the sequence of transformations, estimated risk and cost, and verification checkpoints, integrating with the Phase 3 Verification Framework.
+本文書は、Phase 3.5 の出力 (P3.5-0 から P3.5-4) を **完全な移行計画** に統合する。計画は、変換のシーケンス、推定リスクとコスト、および検証チェックポイントを指定し、Phase 3 検証フレームワークと統合する。
 
 ---
 
-## 2. Planning Framework
+## 2. 計画フレームワーク
 
-### 2.1 Inputs
+### 2.1 入力
 
-| Input | Source | Role |
+| 入力 | ソース | 役割 |
 | :--- | :--- | :--- |
-| Guarantee State Graph | P3.5-1 | Defines possible states and transitions. |
-| Transformation Model | P3.5-2 | Maps edges to concrete code changes. |
-| Migration Cost Model | P3.5-3 | Provides edge weights. |
-| Optimal Path | P3.5-4 | Yields the minimal-cost trajectory. |
+| 保証状態グラフ | P3.5-1 | 可能な状態と遷移を定義する。 |
+| 変換モデル | P3.5-2 | エッジを具体的なコード変更にマッピングする。 |
+| 移行コストモデル | P3.5-3 | エッジの重みを提供する。 |
+| 最適パス | P3.5-4 | 最小コスト軌跡を産出する。 |
 
-### 2.2 Planning Structure
+### 2.2 計画構造
 
-A **Migration Plan** $\mathcal{P}$ has four components:
+**移行計画** $\mathcal{P}$ は4つのコンポーネントを持つ：
 
-1.  **Initial System Analysis**
-2.  **Transformation Sequence**
-3.  **Intermediate States**
-4.  **Verification Gates**
+1.  **初期システム分析**
+2.  **変換シーケンス**
+3.  **中間状態**
+4.  **検証ゲート**
 
 ---
 
-## 3. Plan Components
+## 3. 計画コンポーネント
 
-### 3.1 Initial System Analysis
+### 3.1 初期システム分析
 
-- **Extract structure**: $(AST, CFG, DFG)$ from the legacy codebase.
-- **Compute initial state**: $S_0 = \Phi(AST, CFG, DFG)$.
-- **Assess feasibility**: Check $S_0 \in \mathcal{G}_{dep}$ and $\mathcal{R}(S_0) \cap \mathcal{S} \neq \emptyset$ (Phase 3).
-- **Compute metrics**: $D_{debt}(S_0)$, $R_{struct}(S_0)$, $C_{min}(S_0)$.
+- **構造抽出**: レガシーコードベースから $(AST, CFG, DFG)$ を抽出。
+- **初期状態計算**: $S_0 = \Phi(AST, CFG, DFG)$。
+- **実現可能性評価**: $S_0 \in \mathcal{G}_{dep}$ および $\mathcal{R}(S_0) \cap \mathcal{S} \neq \emptyset$ をチェック（Phase 3）。
+- **メトリクス計算**: $D_{debt}(S_0)$, $R_{struct}(S_0)$, $C_{min}(S_0)$。
 
-**Output**: Analysis report with $S_0$, risk/cost summary, and go/no-go decision.
+**出力**: $S_0$、リスク/コストサマリ、Go/No-Go 判断を含む分析レポート。
 
-### 3.2 Transformation Sequence
+### 3.2 変換シーケンス
 
-From the Optimal Path algorithm (P3.5-4), we obtain:
+最適パスアルゴリズム (P3.5-4) から以下を得る：
 
 $$
 path = (S_0, S_1, \dots, S_n)
 $$
 
-Where $S_n \in \mathcal{S}$.
+ここで $S_n \in \mathcal{S}$。
 
-For each step $i = 0, \dots, n-1$:
-- **Invariant acquired**: $p_i = S_{i+1} \setminus S_i$ (singleton for atomic steps).
-- **Transformation type**: From P3.5-2 taxonomy (control flow, module, data, interface, state).
-- **Concrete action**: Refactoring or translation task (e.g., "Restructure PARA-X to remove GOTOs").
+各ステップ $i = 0, \dots, n-1$ について：
+- **獲得される不変条件**: $p_i = S_{i+1} \setminus S_i$ （原子的ステップの場合は単集合）。
+- **変換タイプ**: P3.5-2 の分類より（制御フロー、モジュール、データ、インターフェース、状態）。
+- **具体的アクション**: リファクタリングまたは変換タスク（例：「GOTO を削除するために PARA-X を再構築する」）。
 
-**Output**: Ordered list of transformations $T_1, T_2, \dots, T_n$.
+**出力**: 順序付けられた変換リスト $T_1, T_2, \dots, T_n$。
 
-### 3.3 Intermediate States
+### 3.3 中間状態
 
-After each transformation $T_i$, the system is in state $S_i$.
+各変換 $T_i$ の後、システムは状態 $S_i$ にある。
 
-| Step | State $S_i$ | Invariants Added | Cumulative Cost |
+| ステップ | 状態 $S_i$ | 追加される不変条件 | 累積コスト |
 | :--- | :--- | :--- | :--- |
 | 0 | $S_0$ | — | 0 |
 | 1 | $S_1$ | $\{p_1\}$ | $Cost(S_0 \to S_1)$ |
 | … | … | … | … |
 | n | $S_n \in \mathcal{S}$ | $\{p_n\}$ | $Cost(path)$ |
 
-**Output**: State trajectory table with cost roll-up.
+**出力**: コスト積み上げを含む状態軌跡テーブル。
 
-### 3.4 Verification Gates
+### 3.4 検証ゲート
 
-At each step $S_i \to S_{i+1}$, apply the Verification Framework (Phase 3 Task 6):
+各ステップ $S_i \to S_{i+1}$ において、検証フレームワーク（Phase 3 Task 6）を適用する：
 
-1.  **Pre-condition**: Verify $S_i$ matches expected state (or $\Delta < Threshold$).
-2.  **Execute**: Apply transformation $T_i$.
-3.  **Post-condition**: Verify $S_{i+1} = \Phi(AST', CFG', DFG')$ and $S_{i+1} \in \mathcal{G}_{dep}$.
-4.  **Regression**: Run tests to ensure $G_{crit}$ (and existing invariants) are preserved.
+1.  **事前条件**: $S_i$ が期待される状態と一致することを確認（または $\Delta < Threshold$）。
+2.  **実行**: 変換 $T_i$ を適用。
+3.  **事後条件**: $S_{i+1} = \Phi(AST', CFG', DFG')$ および $S_{i+1} \in \mathcal{G}_{dep}$ を確認。
+4.  **回帰**: $G_{crit}$（および既存の不変条件）が保存されていることを確認するためにテストを実行。
 
-If any gate fails, **Halt** and trigger the Correction Protocol (re-plan or fix deviation).
+いずれかのゲートが失敗した場合、**停止** し、修正プロトコル（再計画または逸脱修正）をトリガーする。
 
-**Output**: Verification checklist per step.
+**出力**: ステップごとの検証チェックリスト。
 
 ---
 
-## 4. Plan Output Schema
+## 4. 計画出力スキーマ
 
-### 4.1 Migration Plan Document
+### 4.1 移行計画ドキュメント
 
 ```
 Migration Plan: [System Name]
@@ -116,55 +116,55 @@ Total Estimated Risk: [Aggregate]
 Verification Gates: n
 ```
 
-### 4.2 Risk and Cost Summary
+### 4.2 リスクとコストのサマリ
 
-- **Estimated cost**: $Cost(path) = \sum_{i=0}^{n-1} Cost(S_i \to S_{i+1})$.
-- **Estimated risk**: Peak $R_{struct}(S_i)$ along the path, or aggregate $P_{fail}$.
-- **Contingency**: Recommend $(1 + \epsilon) \times Cost(path)$ for budget (e.g., $\epsilon = 0.2$).
+- **推定コスト**: $Cost(path) = \sum_{i=0}^{n-1} Cost(S_i \to S_{i+1})$。
+- **推定リスク**: パスに沿ったピーク $R_{struct}(S_i)$、または集計 $P_{fail}$。
+- **予備費**: 予算として $(1 + \epsilon) \times Cost(path)$ を推奨（例：$\epsilon = 0.2$）。
 
 ---
 
-## 5. Example Migration Plan
+## 5. 移行計画の例
 
-### 5.1 Scenario: Spaghetti Code → Direct Migration
+### 5.1 シナリオ: スパゲッティコード → 直接移行
 
-**Initial analysis**:
-- $S_0 = \{p_{scope}\}$ (data is local; control flow is unstructured).
-- $G_{crit} = \{p_{scope}, p_{no\_goto}, p_{call}\}$.
-- $D_{debt}(S_0) = w(p_{no\_goto}) + w(p_{call}) = 7$.
+**初期分析**:
+- $S_0 = \{p_{scope}\}$ （データはローカル、制御フローは非構造化）。
+- $G_{crit} = \{p_{scope}, p_{no\_goto}, p_{call}\}$。
+- $D_{debt}(S_0) = w(p_{no\_goto}) + w(p_{call}) = 7$。
 
-**Transformation sequence**:
+**変換シーケンス**:
 
-| Step | Transformation | Invariant | Action | Cost |
+| ステップ | 変換 | 不変条件 | アクション | コスト |
 | :--- | :--- | :--- | :--- | :--- |
-| 1 | Control flow restructuring | $p_{no\_goto}$ | Resolve GOTOs in PARA-A, PARA-B | 46 |
-| 2 | Interface extraction | $p_{call}$ | Define CALL interface for subprogram | 8 |
-| — | **Total** | — | — | **54** |
+| 1 | 制御フロー再構築 | $p_{no\_goto}$ | PARA-A, PARA-B の GOTO を解決 | 46 |
+| 2 | インターフェース抽出 | $p_{call}$ | サブプログラムの CALL インターフェースを定義 | 8 |
+| — | **合計** | — | — | **54** |
 
-**Verification gates**:
-- After Step 1: Run CFG analysis; confirm $p_{no\_goto} \in \Phi(CFG)$.
-- After Step 2: Run interface tests; confirm $p_{call} \in \Phi(Structure)$.
-- Final: $S_2 \in \mathcal{S}$, regression tests pass.
-
----
-
-## 6. Integration with Verification Framework
-
-The Migration Plan feeds directly into the Phase 3 Verification Framework:
-
-1.  **Traceability**: Each step links to $(L, M, E, C)$ — the rule, metric, structural element, and code artifact.
-2.  **Continuous verification**: $\Delta(t) = d_w(S_{plan}(t), S_{actual}(t))$ is monitored at each gate.
-3.  **Post-migration validation**: $Verify(S_{final}) \iff G_{crit} \subseteq S_{final}$.
-4.  **Feedback**: If $P_{fail}$ is observed higher than estimated, update cost model parameters (Bayesian refinement).
+**検証ゲート**:
+- Step 1 後: CFG 解析を実行；$p_{no\_goto} \in \Phi(CFG)$ を確認。
+- Step 2 後: インターフェーステストを実行；$p_{call} \in \Phi(Structure)$ を確認。
+- 最終: $S_2 \in \mathcal{S}$、回帰テスト合格。
 
 ---
 
-## 7. Conclusion
+## 6. 検証フレームワークとの統合
 
-The Migration Strategy Synthesis:
-1. Combines Guarantee State Graph, Transformation Model, Cost Model, and Optimal Path into a single plan.
-2. Produces a transformation sequence with cost, risk, and verification gates.
-3. Integrates with the Verification Framework for correctness assurance.
-4. Provides a template for executable migration projects.
+移行計画は Phase 3 検証フレームワークに直接入力される：
 
-Phase 3.5 thus completes the **Migration Planning Framework**: from "Can we migrate?" (Phase 3) to "How do we migrate optimally?" (Phase 3.5).
+1.  **トレーサビリティ**: 各ステップは $(L, M, E, C)$ — ルール、メトリクス、構造要素、コード成果物 — にリンクする。
+2.  **継続的検証**: $\Delta(t) = d_w(S_{plan}(t), S_{actual}(t))$ が各ゲートで監視される。
+3.  **移行後検証**: $Verify(S_{final}) \iff G_{crit} \subseteq S_{final}$。
+4.  **フィードバック**: 推定よりも高い $P_{fail}$ が観測された場合、コストモデルパラメータを更新する（ベイズ改善）。
+
+---
+
+## 7. 結論
+
+移行戦略合成は：
+1. 保証状態グラフ、変換モデル、コストモデル、最適パスを単一の計画に結合する。
+2. コスト、リスク、検証ゲートを含む変換シーケンスを生成する。
+3. 正当性保証のために検証フレームワークと統合する。
+4. 実行可能な移行プロジェクトのためのテンプレートを提供する。
+
+Phase 3.5 はこうして **移行計画フレームワーク** を完了する：「移行できるか？」（Phase 3）から「どうすれば最適に移行できるか？」（Phase 3.5）へ。

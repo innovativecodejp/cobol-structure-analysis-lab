@@ -1,4 +1,4 @@
-# 01. Guarantee State Graph
+# 01. 保証状態グラフ (Guarantee State Graph)
 
 **Phase 3.5: Migration Planning Theory**  
 **Document ID:** `docs/70_planning/01_Guarantee_State_Graph.md`  
@@ -6,45 +6,45 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-Phase 3.5-0 defined **Semantic Guarantees** as invariants $I$ and the Valid Guarantee Space $\mathcal{G}_{dep}$. This document constructs the **Guarantee State Graph** $G_{state}$, which represents migration as a **state-transition system**. Migration planning becomes a **graph traversal problem**.
+Phase 3.5-0 では、**意味論的保証** を不変条件 $I$ および有効保証空間 $\mathcal{G}_{dep}$ として定義した。本文書では、移行を **状態遷移システム** として表現する **保証状態グラフ** $G_{state}$ を構築する。これにより、移行計画は **グラフ探索問題** となる。
 
 ---
 
-## 2. Formal Graph Definition
+## 2. 形式的グラフ定義
 
-### 2.1 Definition
+### 2.1 定義
 
 $$
 G_{state} = (V, E)
 $$
 
-Where:
-- **$V$**: Set of guarantee states (nodes).
-- **$E$**: Set of valid migration transformations (edges).
+ここで：
+- **$V$**: 保証状態の集合（ノード）。
+- **$E$**: 有効な移行変換の集合（エッジ）。
 
-### 2.2 Relation to Phase 2
+### 2.2 Phase 2 との関係
 
-$G_{state}$ is the **Guarantee Transition Graph** $G_{trans}$ from Phase 2, instantiated with semantic invariants $I$ instead of properties $\mathbb{P}$. The structure is identical; the interpretation is refined for planning.
+$G_{state}$ は、Phase 2 の **保証遷移グラフ** $G_{trans}$ を、特性 $\mathbb{P}$ の代わりに意味論的不変条件 $I$ でインスタンス化したものである。構造は同一であるが、解釈は計画のために洗練されている。
 
 ---
 
-## 3. Node Representation
+## 3. ノード表現
 
-### 3.1 Node as Guarantee Set
+### 3.1 保証集合としてのノード
 
-Each node $S \in V$ represents a **guarantee configuration**:
+各ノード $S \in V$ は **保証構成** を表す：
 
 $$
 S \subseteq I
 $$
 
-Where $I$ is the set of semantic invariants (Phase 3.5-0).
+ここで $I$ は意味論的不変条件の集合である（Phase 3.5-0）。
 
-### 3.2 Dependency Closure Rule
+### 3.2 依存関係閉包ルール
 
-Every node must be **dependency-closed** (an ideal of $(I, D)$):
+すべてのノードは **依存関係で閉じて** いなければならない（$(I, D)$ のイデアル）：
 
 $$
 S \in V \iff S \in \mathcal{G}_{dep}
@@ -54,22 +54,22 @@ $$
 \mathcal{G}_{dep} = \{ S \subseteq I \mid \forall q \in S, \forall p \in I: (p,q) \in D \implies p \in S \}
 $$
 
-### 3.3 Example States
+### 3.3 状態の例
 
-| State | Invariants | Interpretation |
+| 状態 | 不変条件 | 解釈 |
 | :--- | :--- | :--- |
-| $S_0$ | $\{p_{scope}\}$ | Data is local to module. |
-| $S_1$ | $\{p_{scope}, p_{no\_goto}\}$ | + Structured control flow. |
-| $S_2$ | $\{p_{scope}, p_{no\_goto}, p_{call}\}$ | + Valid CALL interface. |
-| $S_{target}$ | $G_{crit} \subseteq S_{target}$ | Safe state (in $\mathcal{S}$). |
+| $S_0$ | $\{p_{scope}\}$ | データはモジュールに対してローカル。 |
+| $S_1$ | $\{p_{scope}, p_{no\_goto}\}$ | + 構造化された制御フロー。 |
+| $S_2$ | $\{p_{scope}, p_{no\_goto}, p_{call}\}$ | + 有効な CALL インターフェース。 |
+| $S_{target}$ | $G_{crit} \subseteq S_{target}$ | 安全な状態（$\mathcal{S}$ 内）。 |
 
 ---
 
-## 4. Edge / Transformation Definition
+## 4. エッジ / 変換定義
 
-### 4.1 Cover Relation
+### 4.1 被覆関係 (Cover Relation)
 
-An edge exists from $S$ to $S'$ if and only if $S'$ is obtained by adding a **single** invariant $p$ such that the result remains dependency-closed:
+$S$ から $S'$ へのエッジが存在するための必要十分条件は、$S'$ が $S$ に **単一の** 不変条件 $p$ を追加して得られ、かつその結果が依存関係で閉じていることである：
 
 $$
 (S, S') \in E \iff S \lessdot S'
@@ -79,117 +79,117 @@ $$
 S \lessdot S' \iff S' = S \cup \{p\} \land p \notin S \land S' \in \mathcal{G}_{dep}
 $$
 
-### 4.2 Atomic Transformation
+### 4.2 原子的変換
 
-Each edge corresponds to an **atomic migration step**: one invariant is acquired (e.g., by refactoring, restructuring, or encapsulation).
+各エッジは **原子的な移行ステップ** に対応する：1つの不変条件が獲得される（例：リファクタリング、再構築、またはカプセル化による）。
 
-### 4.3 Transformation Examples
+### 4.3 変換の例
 
-| Transformation | Structural Change | Invariant Added |
+| 変換 | 構造的変更 | 追加される不変条件 |
 | :--- | :--- | :--- |
-| Control flow restructuring | Resolve GOTOs | $p_{no\_goto}$, $p_{reducible}$ |
-| Module decomposition | Split procedure | $p_{scope}$, $p_{modular}$ |
-| Data encapsulation | Introduce LINKAGE | $p_{immutable}$, $p_{call}$ |
-| Interface extraction | Define COPYBOOK contract | $p_{copybook}$, $p_{io}$ |
+| 制御フロー再構築 | GOTO の解決 | $p_{no\_goto}$, $p_{reducible}$ |
+| モジュール分解 | 手続きの分割 | $p_{scope}$, $p_{modular}$ |
+| データカプセル化 | LINKAGE の導入 | $p_{immutable}$, $p_{call}$ |
+| インターフェース抽出 | COPYBOOK 契約の定義 | $p_{copybook}$, $p_{io}$ |
 
-### 4.4 Edge Constraints
+### 4.4 エッジ制約
 
-1. **Dependency validity**: $S' = S \cup \{p\}$ must be in $\mathcal{G}_{dep}$.
-2. **No invariant violation**: The transformation must not remove any $q \in S$ (edges only add invariants).
-
----
-
-## 5. Graph Properties
-
-### 5.1 DAG (Directed Acyclic Graph)
-
-$G_{state}$ is a **DAG**.
-
-*Proof*: For every edge $(S, S')$, $S \subset S'$ (strict inclusion). Thus $|S'| > |S|$. No cycle can return to a smaller set. $\square$
-
-### 5.2 Reachability of Safety Region
-
-The Safety Region $\mathcal{S} = \{ S \in \mathcal{G}_{dep} \mid G_{crit} \subseteq S \}$ is a **filter** (upward-closed). If $S \in \mathcal{S}$ and $S \subseteq T$, then $T \in \mathcal{S}$.
-
-**Reachability condition**: $S_{target} \in \mathcal{S}$ is reachable from $S_{start}$ iff there exists a path $S_{start} \to \dots \to S_{target}$ in $G_{state}$.
-
-### 5.3 No Cycles
-
-By the DAG property, there are **no cycles** in the transformation space. Migration is inherently monotonic (invariants are only added).
-
-### 5.4 Dead-End States
-
-A state $S$ is a **dead end** if:
-- $S \notin \mathcal{S}$ (unsafe), and
-- No outgoing edge exists: $\nexists p$ such that $S \cup \{p\} \in \mathcal{G}_{dep}$.
-
-This occurs when the dependency structure prevents further progress (e.g., a blocking structure from Phase 3 Task 3).
-
-### 5.5 Minimal Transformation Paths
-
-A path from $S_{start}$ to $S_{target} \in \mathcal{S}$ is **minimal** (in number of steps) if it has length $|S_{target} \setminus S_{start}|$. Each step adds exactly one invariant. Minimal paths exist when the dependency order allows a linear extension.
+1. **依存関係の妥当性**: $S' = S \cup \{p\}$ は $\mathcal{G}_{dep}$ に含まれなければならない。
+2. **不変条件違反なし**: 変換はいかなる $q \in S$ も削除してはならない（エッジは不変条件を追加するのみ）。
 
 ---
 
-## 6. Migration Trajectory Interpretation
+## 5. グラフの特性
 
-### 6.1 Trajectory Definition
+### 5.1 DAG (有向非巡回グラフ)
 
-A **migration trajectory** is a path in $G_{state}$:
+$G_{state}$ は **DAG** である。
+
+*証明*: すべてのエッジ $(S, S')$ について、$S \subset S'$ （真部分集合）である。したがって $|S'| > |S|$ となる。より小さな集合に戻るサイクルは存在し得ない。 $\square$
+
+### 5.2 安全領域の到達可能性
+
+安全領域 $\mathcal{S} = \{ S \in \mathcal{G}_{dep} \mid G_{crit} \subseteq S \}$ は **フィルター**（上方閉集合）である。もし $S \in \mathcal{S}$ かつ $S \subseteq T$ ならば、$T \in \mathcal{S}$ である。
+
+**到達可能性条件**: $S_{target} \in \mathcal{S}$ が $S_{start}$ から到達可能であるための必要十分条件は、$G_{state}$ 内にパス $S_{start} \to \dots \to S_{target}$ が存在することである。
+
+### 5.3 サイクルなし
+
+DAG 特性により、変換空間には **サイクルがない**。移行は本質的に単調である（不変条件は追加されるのみ）。
+
+### 5.4 行き止まり状態 (Dead-End States)
+
+状態 $S$ は以下の場合に **行き止まり** である：
+- $S \notin \mathcal{S}$ （不安全）、かつ
+- 出ていくエッジが存在しない：$S \cup \{p\} \in \mathcal{G}_{dep}$ となる $p$ が存在しない。
+
+これは、依存関係構造がさらなる進捗を妨げる場合に発生する（例：Phase 3 Task 3 のブロッキング構造）。
+
+### 5.5 最小変換パス
+
+$S_{start}$ から $S_{target} \in \mathcal{S}$ へのパスは、その長さが $|S_{target} \setminus S_{start}|$ である場合、（ステップ数において）**最小** である。各ステップは正確に1つの不変条件を追加する。依存関係順序が線形拡張を許容する場合、最小パスが存在する。
+
+---
+
+## 6. 移行軌跡の解釈
+
+### 6.1 軌跡の定義
+
+**移行軌跡** は $G_{state}$ 内のパスである：
 
 $$
 S_{start} \to S_1 \to S_2 \to \dots \to S_{target}
 $$
 
-Where $S_{target} \in \mathcal{S}$.
+ここで $S_{target} \in \mathcal{S}$ である。
 
-### 6.2 Planning Objective
+### 6.2 計画の目的
 
-**Migration planning** seeks trajectories that:
-1. Reach $\mathcal{S}$ (feasibility).
-2. Minimize total cost (optimality, P3.5-4).
+**移行計画** は以下の軌跡を求める：
+1. $\mathcal{S}$ に到達する（実現可能性）。
+2. 総コストを最小化する（最適性、P3.5-4）。
 
-### 6.3 Trajectory as Linear Extension
+### 6.3 線形拡張としての軌跡
 
-Each trajectory corresponds to a **linear extension** of the poset $(I \setminus S_{start}, \leq_D)$: an ordering of the invariants to be acquired that respects dependencies.
+各軌跡は、半順序集合 $(I \setminus S_{start}, \leq_D)$ の **線形拡張** に対応する：依存関係を尊重した、獲得すべき不変条件の順序付けである。
 
 ---
 
-## 7. Connection to Program Structure
+## 7. プログラム構造との接続
 
-### 7.1 Initial State from Code
+### 7.1 コードからの初期状態
 
-The mapping $\Phi$ from Phase 3.5-0 extracts the initial state:
+Phase 3.5-0 のマッピング $\Phi$ が初期状態を抽出する：
 
 $$
 S_{start} = \Phi(AST, CFG, DFG)
 $$
 
-Each codebase maps to a unique node $S_{start} \in V$.
+各コードベースは一意のノード $S_{start} \in V$ にマッピングされる。
 
-### 7.2 Code ↔ State Correspondence
+### 7.2 コード ↔ 状態の対応
 
-| Code Change | Graph Interpretation |
+| コード変更 | グラフ解釈 |
 | :--- | :--- |
-| Refactor paragraph | $S \to S'$ where $S' = S \cup \{p_{no\_goto}\}$ |
-| Extract module | $S \to S'$ where $S' = S \cup \{p_{scope}\}$ |
-| Add interface | $S \to S'$ where $S' = S \cup \{p_{call}\}$ |
+| 段落のリファクタリング | $S \to S'$ ここで $S' = S \cup \{p_{no\_goto}\}$ |
+| モジュール抽出 | $S \to S'$ ここで $S' = S \cup \{p_{scope}\}$ |
+| インターフェース追加 | $S \to S'$ ここで $S' = S \cup \{p_{call}\}$ |
 
-### 7.3 Structural Feasibility
+### 7.3 構造的実現可能性
 
-If $S_{start}$ is in a dead-end state, no code transformation can reach $\mathcal{S}$ without first breaking the blocking structure (e.g., full rewrite). This aligns with Phase 3's **Structurally Infeasible** classification.
+もし $S_{start}$ が行き止まり状態にある場合、ブロッキング構造を壊さない限り（例：完全な書き直し）、いかなるコード変換も $\mathcal{S}$ に到達できない。これは Phase 3 の **構造的実現不可能** 分類と一致する。
 
 ---
 
-## 8. Conclusion
+## 8. 結論
 
-The Guarantee State Graph $G_{state}$:
-1. Represents migration as a graph of dependency-closed invariant sets.
-2. Uses cover relations as edges (atomic invariant acquisition).
-3. Is a DAG with reachability, dead-ends, and minimal paths.
-4. Connects code structure to nodes via $\Phi$.
+保証状態グラフ $G_{state}$ は：
+1. 移行を、依存関係で閉じた不変条件集合のグラフとして表現する。
+2. 被覆関係をエッジとして使用する（原子的不変条件獲得）。
+3. 到達可能性、行き止まり、最小パスを持つ DAG である。
+4. $\Phi$ を通じてコード構造をノードに接続する。
 
-This model is the foundation for:
-- **P3.5-2**: Transformation Model (formalizing the edge semantics).
-- **P3.5-3**: Migration Cost Model (weighting edges).
-- **P3.5-4**: Optimal Migration Path (shortest path in $G_{state}$).
+このモデルは以下の基礎となる：
+- **P3.5-2**: 変換モデル（エッジの意味論の形式化）。
+- **P3.5-3**: 移行コストモデル（エッジの重み付け）。
+- **P3.5-4**: 最適移行パス（$G_{state}$ における最短パス）。

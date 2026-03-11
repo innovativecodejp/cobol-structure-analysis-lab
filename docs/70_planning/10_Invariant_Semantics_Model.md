@@ -1,4 +1,4 @@
-# 10. Invariant Semantics Model
+# 10. 不変条件意味論モデル (Invariant Semantics Model)
 
 **Phase 3.5: Migration Planning Theory (Strengthening)**  
 **Document ID:** `docs/70_planning/10_Invariant_Semantics_Model.md`  
@@ -6,182 +6,182 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-This document defines the formal relationship between **program semantics** and **semantic invariants**. It grounds the invariant concept (Phase 3.5-0) in observable behavior, and explains how structural representations (AST, CFG, DFG) approximate semantics.
+本文書は、**プログラム意味論** と **意味論的不変条件** の間の形式的な関係を定義する。これは不変条件の概念（Phase 3.5-0）を観測可能な振る舞いに基づかせ、構造的表現（AST, CFG, DFG）がどのように意味論を近似するかを説明する。
 
 ---
 
-## 2. Program Semantics Representation
+## 2. プログラム意味論表現
 
-### 2.1 Definition
+### 2.1 定義
 
-Let $C$ be a program (code artifact). We define **Program Semantics** as a formal representation of its observable behavior:
+$C$ をプログラム（コード成果物）とする。**プログラム意味論** をその観測可能な振る舞いの形式的表現として定義する：
 
 $$
 Semantics(C) = \langle \mathcal{B}, \mathcal{T}, \mathcal{O} \rangle
 $$
 
-Where:
-- **$\mathcal{B}$**: Set of possible behaviors (execution traces, state sequences).
-- **$\mathcal{T}$**: Set of traces (finite or infinite sequences of states/events).
-- **$\mathcal{O}$**: Observable interface (inputs, outputs, side effects).
+ここで：
+- **$\mathcal{B}$**: 可能な振る舞いの集合（実行トレース、状態シーケンス）。
+- **$\mathcal{T}$**: トレースの集合（状態/イベントの有限または無限シーケンス）。
+- **$\mathcal{O}$**: 観測可能なインターフェース（入力、出力、副作用）。
 
-### 2.2 Behavioral Semantics
+### 2.2 振る舞い意味論
 
-A behavior $b \in \mathcal{B}$ is a predicate or trace that describes what the program can do. For migration, we care about:
-- **Control flow semantics**: Which paths are executable.
-- **Data flow semantics**: How values propagate.
-- **State transition semantics**: How internal state evolves.
-- **I/O semantics**: What inputs produce what outputs.
+振る舞い $b \in \mathcal{B}$ は、プログラムができることを記述する述語またはトレースである。移行のために、以下に関心がある：
+- **制御フロー意味論**: どのパスが実行可能か。
+- **データフロー意味論**: 値がどのように伝播するか。
+- **状態遷移意味論**: 内部状態がどのように進化するか。
+- **I/O 意味論**: どの入力がどの出力を生成するか。
 
 ---
 
-## 3. Invariant Extraction
+## 3. 不変条件抽出
 
-### 3.1 Extraction Function
+### 3.1 抽出関数
 
 $$
 I = invariants(Semantics(C))
 $$
 
-The invariant set $I$ is derived from the semantics of $C$. Each invariant $p \in I$ is a predicate on $\mathcal{B}$:
+不変条件集合 $I$ は $C$ の意味論から導出される。各不変条件 $p \in I$ は $\mathcal{B}$ 上の述語である：
 
 $$
 p: \mathcal{B} \to \{true, false\}
 $$
 
-### 3.2 Invariant as Predicate
+### 3.2 述語としての不変条件
 
-An invariant $p$ holds for program $C$ iff:
+不変条件 $p$ がプログラム $C$ に対して成立するための必要十分条件は：
 
 $$
 \forall b \in \mathcal{B}(C): p(b) = true
 $$
 
-i.e., every possible behavior of $C$ satisfies $p$.
+すなわち、$C$ のすべての可能な振る舞いが $p$ を満たすことである。
 
 ---
 
-## 4. Invariant Predicate Structure
+## 4. 不変条件述語構造
 
-### 4.1 Predicate Structure
+### 4.1 述語構造
 
 $$
 p: Behavior \to \{true, false\}
 $$
 
-Each invariant $p$ is a **predicate** on program behavior. Examples:
+各不変条件 $p$ はプログラムの振る舞いに関する **述語** である。例：
 
-| Invariant | Predicate | Interpretation |
+| 不変条件 | 述語 | 解釈 |
 | :--- | :--- | :--- |
-| $p_{seq}$ | $\forall$ traces $t$: statements in $t$ are ordered | Control flow is sequential. |
-| $p_{no\_goto}$ | $\forall$ traces $t$: no GOTO crosses procedure boundary | Structured control flow. |
-| $p_{scope}$ | $\forall$ traces $t$: variable $V$ is only accessed in scope $S$ | Data locality. |
-| $p_{immutable}$ | $\forall$ traces $t$: input param $P$ is never written | No input mutation. |
+| $p_{seq}$ | $\forall$ traces $t$: $t$ 内の文は順序付けられている | 制御フローは順次的である。 |
+| $p_{no\_goto}$ | $\forall$ traces $t$: 手続き境界を越える GOTO がない | 構造化された制御フロー。 |
+| $p_{scope}$ | $\forall$ traces $t$: 変数 $V$ はスコープ $S$ 内でのみアクセスされる | データ局所性。 |
+| $p_{immutable}$ | $\forall$ traces $t$: 入力パラメータ $P$ は決して書き込まれない | 入力変更なし。 |
 
-### 4.2 Observable Behavior
+### 4.2 観測可能な振る舞い
 
-Invariants must be **observable** (or statically inferable). We cannot define invariants on unobservable internal state unless we have instrumentation.
-
----
-
-## 5. Connection to Observable Behavior
-
-### 5.1 Control Flow Semantics
-
-- **Semantics**: The set of execution paths (paths in the CFG).
-
-- **Invariants**: $p_{reducible}$ (CFG is reducible), $p_{loop}$ (loops have single entry/exit), $p_{no\_goto}$ (no unstructured jumps).
-
-- **Connection**: CFG structure constrains paths. Reducibility implies paths can be described by structured constructs.
-
-### 5.2 Data Flow Semantics
-
-- **Semantics**: Def-use chains, value propagation, aliasing.
-
-- **Invariants**: $p_{scope}$, $p_{immutable}$, $p_{no\_alias}$.
-
-- **Connection**: DFG def-use structure determines whether variables are local, immutable, or aliased.
-
-### 5.3 State Transition Semantics
-
-- **Semantics**: State machine (file status, transaction state, session state).
-
-- **Invariants**: $p_{tx}$, $p_{file}$, $p_{order}$.
-
-- **Connection**: State variables and transitions define valid sequences; invariants assert constraints (e.g., atomicity).
-
-### 5.4 I/O Semantics
-
-- **Semantics**: Input-output relation (input → output mapping).
-
-- **Invariants**: $p_{call}$, $p_{copybook}$, $p_{io}$ (deterministic I/O for given input).
-
-- **Connection**: Interface contracts define observable behavior at boundaries.
+不変条件は **観測可能**（または静的に推論可能）でなければならない。計測手段がない限り、観測不可能な内部状態に関する不変条件を定義することはできない。
 
 ---
 
-## 6. AST / CFG / DFG as Approximations
+## 5. 観測可能な振る舞いとの接続
 
-### 6.1 Static Approximation
+### 5.1 制御フロー意味論
 
-We do not have full $Semantics(C)$ at analysis time. We approximate it with **structural representations**:
+- **意味論**: 実行パスの集合（CFG 内のパス）。
 
-- **AST**: Syntactic structure. Approximates *what* the program does (statements, expressions).
-- **CFG**: Control flow. Approximates *which paths* are possible.
-- **DFG**: Data flow. Approximates *how values* move.
+- **不変条件**: $p_{reducible}$ (CFG は可約), $p_{loop}$ (ループは単一の入口/出口を持つ), $p_{no\_goto}$ (非構造化ジャンプなし)。
 
-### 6.2 Extraction Mapping
+- **接続**: CFG 構造はパスを制約する。可約性は、パスが構造化構成要素によって記述できることを含意する。
+
+### 5.2 データフロー意味論
+
+- **意味論**: 定義-使用チェーン、値の伝播、エイリアシング。
+
+- **不変条件**: $p_{scope}$, $p_{immutable}$, $p_{no\_alias}$。
+
+- **接続**: DFG 定義-使用構造は、変数がローカルか、不変か、またはエイリアスされているかを決定する。
+
+### 5.3 状態遷移意味論
+
+- **意味論**: 状態機械（ファイルステータス、トランザクション状態、セッション状態）。
+
+- **不変条件**: $p_{tx}$, $p_{file}$, $p_{order}$。
+
+- **接続**: 状態変数と遷移は有効なシーケンスを定義する；不変条件は制約（例：原子性）を主張する。
+
+### 5.4 I/O 意味論
+
+- **意味論**: 入出力関係（入力 → 出力マッピング）。
+
+- **不変条件**: $p_{call}$, $p_{copybook}$, $p_{io}$ (与えられた入力に対して決定的な I/O)。
+
+- **接続**: インターフェース契約は境界での観測可能な振る舞いを定義する。
+
+---
+
+## 6. 近似としての AST / CFG / DFG
+
+### 6.1 静的近似
+
+分析時には完全な $Semantics(C)$ を持っていない。**構造的表現** で近似する：
+
+- **AST**: 構文構造。プログラムが *何を* するか（文、式）を近似する。
+- **CFG**: 制御フロー。*どのパス* が可能かを近似する。
+- **DFG**: データフロー。*値がどう* 動くかを近似する。
+
+### 6.2 抽出マッピング
 
 $$
 \Phi: (AST, CFG, DFG) \to \mathcal{P}(I)
 $$
 
-$\Phi$ extracts invariants from structure. The extraction is **sound but incomplete**:
+$\Phi$ は構造から不変条件を抽出する。抽出は **健全だが不完全** である：
 
-**Soundness**:
+**健全性 (Soundness)**:
 $$
 \Phi(C) \subseteq invariants(Semantics(C))
 $$
-(i.e., we only claim invariants that truly hold).
+（すなわち、真に成立する不変条件のみを主張する）。
 
-**Incompleteness**:
+**不完全性 (Incompleteness)**:
 $$
 \exists p \in invariants(Semantics(C)): p \notin \Phi(C)
 $$
-Some invariants that hold for $C$ are not derivable from AST/CFG/DFG alone.
+$C$ に対して成立するが、AST/CFG/DFG だけからは導出できない不変条件が存在する。
 
-AST/CFG/DFG-based extraction is thus a **sound but incomplete semantic approximation**.
+したがって、AST/CFG/DFG ベースの抽出は **健全だが不完全な意味論的近似** である。
 
-### 6.3 Approximation Limits
+### 6.3 近似の限界
 
-| Structure | Approximates | Limitation |
+| 構造 | 近似対象 | 限界 |
 | :--- | :--- | :--- |
-| AST | Syntax | No semantics of expressions. |
-| CFG | Paths | May over-approximate (infeasible paths). |
-| DFG | Data flow | May miss dynamic aliasing. |
+| AST | 構文 | 式の意味論がない。 |
+| CFG | パス | 過剰近似する可能性がある（実行不可能なパス）。 |
+| DFG | データフロー | 動的エイリアシングを見逃す可能性がある。 |
 
 ---
 
-## 7. Soundness and Incompleteness of Structural Analysis
+## 7. 構造解析の健全性と不完全性
 
-Static analysis (AST, CFG, DFG) **approximates** program semantics. It cannot capture full behavioral semantics, which would require:
-- **Runtime observation**: Some invariants (e.g., "loop terminates") need execution traces.
-- **Theorem proving**: Some invariants (e.g., "output equals input squared") need formal verification.
+静的解析（AST, CFG, DFG）はプログラム意味論を **近似** する。完全な振る舞い意味論を捉えることはできない。それには以下が必要となる：
+- **実行時観察**: 一部の不変条件（例：「ループが停止する」）は実行トレースを必要とする。
+- **定理証明**: 一部の不変条件（例：「出力は入力の二乗に等しい」）は形式検証を必要とする。
 
-Therefore:
-- **Soundness**: Every invariant extracted by $\Phi$ is correct. We never claim false invariants.
-- **Incompleteness**: We may miss invariants that hold. Migration planning is conservative: we plan based on what we can prove, and may need runtime verification for the rest.
+したがって：
+- **健全性**: $\Phi$ によって抽出されたすべての不変条件は正しい。偽の不変条件を主張することはない。
+- **不完全性**: 成立する不変条件を見逃す可能性がある。移行計画は保守的である：証明できることに基づいて計画し、残りは実行時検証が必要になる場合がある。
 
 ---
 
-## 8. Conclusion
+## 8. 結論
 
-The Invariant Semantics Model:
-1. Defines $Semantics(C)$ as behavioral representation.
-2. Defines $invariants(Semantics(C))$ as predicates on behavior.
-3. Connects invariants to control, data, state, and I/O semantics.
-4. Explains AST/CFG/DFG as static approximations of semantics for invariant extraction.
+不変条件意味論モデルは：
+1. $Semantics(C)$ を振る舞い表現として定義する。
+2. $invariants(Semantics(C))$ を振る舞いに関する述語として定義する。
+3. 不変条件を制御、データ、状態、I/O 意味論に接続する。
+4. 不変条件抽出のための意味論の静的近似として AST/CFG/DFG を説明する。
 
-This grounds the Phase 3.5 planning model in program semantics. The sound-but-incomplete nature of structural analysis is a fundamental limitation that migration planners must account for.
+これは Phase 3.5 計画モデルをプログラム意味論に基礎づける。構造解析の「健全だが不完全」な性質は、移行計画者が考慮しなければならない根本的な制約である。

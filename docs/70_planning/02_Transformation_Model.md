@@ -1,4 +1,4 @@
-# 02. Transformation Model
+# 02. 変換モデル (Transformation Model)
 
 **Phase 3.5: Migration Planning Theory**  
 **Document ID:** `docs/70_planning/02_Transformation_Model.md`  
@@ -6,143 +6,143 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-The Guarantee State Graph (P3.5-1) defines edges as state transitions $S \to S'$. This document formalizes the **Transformation Model** that maps concrete program modifications to those transitions. Each transformation is a structural change to the code that acquires one or more semantic invariants.
+保証状態グラフ (P3.5-1) はエッジを状態遷移 $S \to S'$ として定義した。本文書は、具体的なプログラム修正をそれらの遷移にマッピングする **変換モデル** を形式化する。各変換は、1つ以上の意味論的不変条件を獲得するコードへの構造的変更である。
 
 ---
 
-## 2. Formal Definition
+## 2. 形式的定義
 
-### 2.1 Transformation
+### 2.1 変換
 
-A **Transformation** $T$ is a mapping:
+**変換** $T$ は以下のマッピングである：
 
 $$
 T: S \mapsto S'
 $$
 
-Where:
-- $S \subseteq I$: Initial guarantee set (pre-condition).
-- $S' \subseteq I$: Resulting guarantee set (post-condition).
+ここで：
+- $S \subseteq I$: 初期保証集合（事前条件）。
+- $S' \subseteq I$: 結果の保証集合（事後条件）。
 
-### 2.2 Atomic vs. Composite
+### 2.2 原子的 vs. 複合的
 
-- **Atomic transformation**: $S' = S \cup \{p\}$ for a single $p \in I \setminus S$. Corresponds to one edge in $G_{state}$.
-- **Composite transformation**: A sequence of atomic transformations. Corresponds to a path in $G_{state}$.
-
----
-
-## 3. Transformation Taxonomy
-
-### 3.1 Control Flow Restructuring
-
-| Aspect | Description |
-| :--- | :--- |
-| **Structural change** | Replace GOTOs with structured constructs (IF/ELSE, PERFORM/UNTIL). Apply reducibility algorithms (e.g., node splitting). |
-| **Affected guarantees** | Adds $p_{no\_goto}$, $p_{reducible}$, $p_{loop}$. |
-| **Risks** | Logic errors if restructuring is incorrect; possible performance change. |
-
-### 3.2 Module Decomposition
-
-| Aspect | Description |
-| :--- | :--- |
-| **Structural change** | Split a large paragraph/procedure into smaller units. Extract cohesive logic into separate programs. |
-| **Affected guarantees** | Adds $p_{scope}$, $p_{modular}$, $p_{call}$. |
-| **Risks** | Interface mismatches; increased CALL overhead; shared state may block decomposition. |
-
-### 3.3 Data Encapsulation
-
-| Aspect | Description |
-| :--- | :--- |
-| **Structural change** | Move global WORKING-STORAGE into LOCAL-STORAGE or LINKAGE. Introduce parameter passing instead of shared COPYBOOKs. |
-| **Affected guarantees** | Adds $p_{scope}$, $p_{immutable}$, $p_{no\_alias}$. |
-| **Risks** | Data flow errors; performance impact from parameter copying. |
-
-### 3.4 Interface Extraction
-
-| Aspect | Description |
-| :--- | :--- |
-| **Structural change** | Define explicit CALL interface (PROCEDURE USING). Standardize COPYBOOK layout. Document I/O contracts. |
-| **Affected guarantees** | Adds $p_{call}$, $p_{copybook}$, $p_{io}$. |
-| **Risks** | Contract violations if callers are not updated; versioning issues. |
-
-### 3.5 State Isolation
-
-| Aspect | Description |
-| :--- | :--- |
-| **Structural change** | Isolate file state, transaction state, or session state into dedicated modules. Reduce global mutable state. |
-| **Affected guarantees** | Adds $p_{tx}$, $p_{file}$, $p_{order}$. |
-| **Risks** | Transaction boundaries may be hard to preserve; concurrency issues. |
+- **原子的変換**: 単一の $p \in I \setminus S$ に対して $S' = S \cup \{p\}$。$G_{state}$ の1つのエッジに対応する。
+- **複合的変換**: 原子的変換のシーケンス。$G_{state}$ のパスに対応する。
 
 ---
 
-## 4. Validity Constraints
+## 3. 変換の分類
 
-### 4.1 Dependency Rules
+### 3.1 制御フロー再構築
 
-A transformation $T: S \mapsto S'$ is **dependency-valid** if:
+| 側面 | 説明 |
+| :--- | :--- |
+| **構造的変更** | GOTO を構造化構成要素（IF/ELSE, PERFORM/UNTIL）に置換する。可約性アルゴリズム（例：ノード分割）を適用する。 |
+| **影響を受ける保証** | $p_{no\_goto}$, $p_{reducible}$, $p_{loop}$ を追加。 |
+| **リスク** | 再構築が不正確な場合のロジックエラー。パフォーマンス変化の可能性。 |
+
+### 3.2 モジュール分解
+
+| 側面 | 説明 |
+| :--- | :--- |
+| **構造的変更** | 大きな段落/手続きをより小さな単位に分割する。凝集度の高いロジックを別プログラムに抽出する。 |
+| **影響を受ける保証** | $p_{scope}$, $p_{modular}$, $p_{call}$ を追加。 |
+| **リスク** | インターフェースの不一致。CALL オーバーヘッドの増加。共有状態が分解を妨げる可能性。 |
+
+### 3.3 データカプセル化
+
+| 側面 | 説明 |
+| :--- | :--- |
+| **構造的変更** | グローバルな WORKING-STORAGE を LOCAL-STORAGE または LINKAGE に移動する。共有 COPYBOOK の代わりにパラメータ渡しを導入する。 |
+| **影響を受ける保証** | $p_{scope}$, $p_{immutable}$, $p_{no\_alias}$ を追加。 |
+| **リスク** | データフローエラー。パラメータコピーによるパフォーマンスへの影響。 |
+
+### 3.4 インターフェース抽出
+
+| 側面 | 説明 |
+| :--- | :--- |
+| **構造的変更** | 明示的な CALL インターフェース（PROCEDURE USING）を定義する。COPYBOOK レイアウトを標準化する。I/O 契約を文書化する。 |
+| **影響を受ける保証** | $p_{call}$, $p_{copybook}$, $p_{io}$ を追加。 |
+| **リスク** | 呼び出し元が更新されない場合の契約違反。バージョニングの問題。 |
+
+### 3.5 状態分離
+
+| 側面 | 説明 |
+| :--- | :--- |
+| **構造的変更** | ファイル状態、トランザクション状態、またはセッション状態を専用モジュールに分離する。グローバルな可変状態を削減する。 |
+| **影響を受ける保証** | $p_{tx}$, $p_{file}$, $p_{order}$ を追加。 |
+| **リスク** | トランザクション境界の保存が困難な場合がある。並行性の問題。 |
+
+---
+
+## 4. 妥当性制約
+
+### 4.1 依存関係ルール
+
+変換 $T: S \mapsto S'$ は、以下の場合に **依存関係的に妥当** である：
 
 $$
 S' \in \mathcal{G}_{dep}
 $$
 
-i.e., $S'$ is dependency-closed. Acquiring $q$ requires that all $p$ with $(p,q) \in D$ are already in $S$.
+すなわち、$S'$ は依存関係で閉じている。$q$ を獲得するには、$(p,q) \in D$ であるすべての $p$ が既に $S$ に存在する必要がある。
 
-### 4.2 No Invariant Violation
+### 4.2 不変条件違反なし
 
 $$
 S \subseteq S'
 $$
 
-A valid transformation **never removes** invariants. Migration is monotonic.
+有効な変換は不変条件を **決して削除しない**。移行は単調である。
 
-### 4.3 Reachability Preservation
+### 4.3 到達可能性の保存
 
-If $S \notin \mathcal{S}$, then $T$ must not create a dead-end. Formally: there must exist some path from $S'$ to $\mathcal{S}$ in $G_{state}$. (This is automatically satisfied for atomic transformations that add a single invariant, unless $S'$ is maximal and still unsafe.)
+もし $S \notin \mathcal{S}$ ならば、$T$ は行き止まりを作成してはならない。形式的には、$G_{state}$ において $S'$ から $\mathcal{S}$ へのパスが存在しなければならない。（これは、単一の不変条件を追加する原子的変換の場合、$S'$ が極大かつ依然として不安全でない限り、自動的に満たされる。）
 
 ---
 
-## 5. Mapping from Code
+## 5. コードからのマッピング
 
-### 5.1 Chain
+### 5.1 チェーン
 
 $$
 \text{Code change} \to \text{AST/CFG/DFG modification} \to \text{Guarantee update}
 $$
 
-### 5.2 Example: Control Flow Restructuring
+### 5.2 例: 制御フロー再構築
 
-1. **Code change**: Replace `GOTO PARA-X` with `PERFORM PARA-X UNTIL exit-flag`.
-2. **CFG modification**: Remove back-edge; add loop structure.
-3. **Guarantee update**: $\Phi(CFG_{new})$ now includes $p_{no\_goto}$, $p_{reducible}$.
+1. **コード変更**: `GOTO PARA-X` を `PERFORM PARA-X UNTIL exit-flag` に置換。
+2. **CFG 修正**: バックエッジを削除し、ループ構造を追加。
+3. **保証更新**: $\Phi(CFG_{new})$ が $p_{no\_goto}$, $p_{reducible}$ を含むようになる。
 
-### 5.3 Example: Module Decomposition
+### 5.3 例: モジュール分解
 
-1. **Code change**: Extract paragraphs 100–200 into a new program `SUBPROG`.
-2. **AST/DFG modification**: New program node; LINKAGE SECTION for parameters.
-3. **Guarantee update**: $\Phi(Structure_{new})$ includes $p_{scope}$, $p_{call}$.
+1. **コード変更**: 段落 100–200 を新しいプログラム `SUBPROG` に抽出。
+2. **AST/DFG 修正**: 新しいプログラムノード、パラメータのための LINKAGE SECTION。
+3. **保証更新**: $\Phi(Structure_{new})$ が $p_{scope}$, $p_{call}$ を含む。
 
 ---
 
-## 6. Structural Interpretation
+## 6. 構造的解釈
 
-| Transformation | AST | CFG | DFG |
+| 変換 | AST | CFG | DFG |
 | :--- | :--- | :--- | :--- |
-| Control flow restructuring | Minor (replace nodes) | Major (topology change) | Minor |
-| Module decomposition | New program nodes | New entry/exit | New def-use boundaries |
-| Data encapsulation | DATA DIVISION change | Minor | Major (scope change) |
-| Interface extraction | PROCEDURE USING change | Minor | Parameter flow |
-| State isolation | New modules | New control paths | State variable scoping |
+| 制御フロー再構築 | 小 (ノード置換) | 大 (トポロジー変更) | 小 |
+| モジュール分解 | 新規プログラムノード | 新規入口/出口 | 新規定義-使用境界 |
+| データカプセル化 | DATA DIVISION 変更 | 小 | 大 (スコープ変更) |
+| インターフェース抽出 | PROCEDURE USING 変更 | 小 | パラメータフロー |
+| 状態分離 | 新規モジュール | 新規制御パス | 状態変数スコープ |
 
 ---
 
-## 7. Conclusion
+## 7. 結論
 
-The Transformation Model:
-1. Maps code modifications to state transitions $S \to S'$.
-2. Classifies transformations by type (control, module, data, interface, state).
-3. Enforces validity (dependency, monotonicity, reachability).
-4. Connects to structural analysis (AST, CFG, DFG).
+変換モデルは：
+1. コード修正を状態遷移 $S \to S'$ にマッピングする。
+2. 変換をタイプ別に分類する（制御、モジュール、データ、インターフェース、状態）。
+3. 妥当性を強制する（依存関係、単調性、到達可能性）。
+4. 構造解析（AST, CFG, DFG）に接続する。
 
-This model provides the semantic basis for weighting transformations in the Migration Cost Model (P3.5-3).
+このモデルは、移行コストモデル (P3.5-3) において変換を重み付けするための意味論的基礎を提供する。

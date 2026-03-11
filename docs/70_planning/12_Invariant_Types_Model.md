@@ -1,4 +1,4 @@
-# 12. Invariant Types Model (Hard / Soft Invariants)
+# 12. 不変条件タイプモデル (Hard / Soft Invariants)
 
 **Phase 3.5: Migration Planning Theory (Strengthening)**  
 **Document ID:** `docs/70_planning/12_Invariant_Types_Model.md`  
@@ -6,169 +6,169 @@
 
 ---
 
-## 1. Introduction
+## 1. はじめに
 
-Not all invariants are equally critical. Some **must** be preserved (Hard); others **may** be relaxed or traded for migration benefits (Soft). This document defines the **Hard / Soft Invariant Model** and its effect on migration planning.
+すべての不変条件が等しく重要であるわけではない。いくつかは保存され **なければならない**（Hard）。他は、移行の利益のために緩和またはトレードオフされる **可能性がある**（Soft）。本文書は、**ハード/ソフト不変条件モデル** とその移行計画への影響を定義する。
 
 ---
 
-## 2. Invariant Categories
+## 2. 不変条件カテゴリ
 
-### 2.1 Hard Invariants ($I_{hard}$)
+### 2.1 ハード不変条件 ($I_{hard}$)
 
-**Definition**: Invariants that **must** be preserved. Violation implies migration failure.
+**定義**: 保存され **なければならない** 不変条件。違反は移行の失敗を意味する。
 
 $$
 I_{hard} \subseteq I
 $$
 
-**Examples**:
-- Correctness of business logic (e.g., interest calculation formula).
-- Data integrity (e.g., no loss of critical records).
-- Regulatory compliance (e.g., audit trail).
+**例**:
+- ビジネスロジックの正しさ（例：利息計算式）。
+- データ整合性（例：クリティカルなレコードの損失なし）。
+- 規制遵守（例：監査証跡）。
 
-**Preservation rule**: $\forall p \in I_{hard}: p \in S_{start} \implies p \in S_{target}$.
+**保存ルール**: $\forall p \in I_{hard}: p \in S_{start} \implies p \in S_{target}$。
 
-### 2.2 Soft Invariants ($I_{soft}$)
+### 2.2 ソフト不変条件 ($I_{soft}$)
 
-**Definition**: Invariants that **may** change during migration if justified. Relaxation can reduce cost or enable otherwise blocked transformations.
+**定義**: 正当化される場合、移行中に変更される **可能性がある** 不変条件。緩和によりコストを削減したり、他の方法ではブロックされる変換を可能にしたりできる。
 
 $$
 I_{soft} = I \setminus I_{hard}
 $$
 
-**Examples**:
-- Performance characteristics (e.g., response time may change).
-- Code structure (e.g., modularity can improve).
-- Implementation detail (e.g., file format may change if interface is preserved).
+**例**:
+- パフォーマンス特性（例：応答時間が変わる可能性がある）。
+- コード構造（例：モジュール性が向上する可能性がある）。
+- 実装詳細（例：インターフェースが保存されればファイル形式は変わる可能性がある）。
 
-**Preservation rule**: Optional. May be relaxed with explicit justification.
+**保存ルール**: オプション。明示的な正当化があれば緩和可能。
 
 ---
 
-## 3. Preservation Rules
+## 3. 保存ルール
 
-### 3.1 Hard Invariant Preservation
+### 3.1 ハード不変条件の保存
 
-For any migration path $S_0 \to \dots \to S_n$:
+任意の移行パス $S_0 \to \dots \to S_n$ に対して：
 
 $$
 \forall p \in I_{hard} \cap S_0: p \in S_i \quad \forall i \in \{0, \dots, n\}
 $$
 
-Hard invariants are **monotonic**: once present, they must never be removed.
+ハード不変条件は **単調** である：一度存在すれば、決して削除されてはならない。
 
-### 3.2 Soft Invariant Relaxation
+### 3.2 ソフト不変条件の緩和
 
-A transformation $T: S \mapsto S'$ may **relax** a soft invariant $p \in I_{soft}$ if:
-1. $p \in S$ and $p \notin S'$ (invariant is dropped).
-2. There exists a **justification** (e.g., "Replaced with equivalent $p'$" or "Acceptable trade-off for cost reduction").
-3. No hard invariant depends on $p$ (i.e., $(p, q) \in D$ and $q \in I_{hard}$ implies $p$ cannot be relaxed).
+変換 $T: S \mapsto S'$ は、以下の場合にソフト不変条件 $p \in I_{soft}$ を **緩和** してもよい：
+1. $p \in S$ かつ $p \notin S'$ （不変条件がドロップされる）。
+2. **正当化** が存在する（例：「等価な $p'$ に置換」または「コスト削減のための許容可能なトレードオフ」）。
+3. $p$ に依存するハード不変条件がない（すなわち、$(p, q) \in D$ かつ $q \in I_{hard}$ ならば、$p$ は緩和できない）。
 
-### 3.3 Critical Set Alignment
+### 3.3 クリティカル集合との整合
 
-$G_{crit}$ (Phase 3) is typically a subset of $I_{hard}$:
+$G_{crit}$ (Phase 3) は通常、$I_{hard}$ の部分集合である：
 $$
 G_{crit} \subseteq I_{hard}
 $$
 
-Reaching $\mathcal{S}$ requires $G_{crit} \subseteq S_{target}$; all critical invariants are hard.
+$\mathcal{S}$ に到達するには $G_{crit} \subseteq S_{target}$ が必要である。すべてのクリティカルな不変条件はハードである。
 
-### 3.4 Relaxation Decision Model
+### 3.4 緩和決定モデル
 
-We introduce a **relaxation function** $\rho: I \to \{0, 1\}$:
+**緩和関数** $\rho: I \to \{0, 1\}$ を導入する：
 
-- $\rho(p) = 1$: Preserve invariant $p$ during migration.
-- $\rho(p) = 0$: Relax invariant $p$ (allow it to change or be dropped).
+- $\rho(p) = 1$: 移行中に不変条件 $p$ を保存する。
+- $\rho(p) = 0$: 不変条件 $p$ を緩和する（変更またはドロップを許可する）。
 
-**Constraint**: Hard invariants must always be preserved:
+**制約**: ハード不変条件は常に保存されなければならない：
 $$
 \forall p \in I_{hard}: \rho(p) = 1
 $$
 
-**Migration planning** becomes an optimization problem:
+**移行計画** は最適化問題となる：
 
-**Minimize**:
+**最小化**:
 $$
 MigrationCost + RiskPenalty(\rho)
 $$
 
-**Subject to**:
+**制約条件**:
 $$
 \forall p \in I_{hard}: \rho(p) = 1
 $$
 
-Where $RiskPenalty(\rho)$ quantifies the risk of relaxing soft invariants (e.g., $\sum_{p \in I_{soft}, \rho(p)=0} risk(p)$). The planner trades off migration cost against the risk of relaxing soft invariants.
+ここで $RiskPenalty(\rho)$ は、ソフト不変条件を緩和するリスクを定量化する（例：$\sum_{p \in I_{soft}, \rho(p)=0} risk(p)$）。計画者は、移行コストとソフト不変条件緩和のリスクをトレードオフする。
 
 ---
 
-## 4. Allowed Invariant Relaxation
+## 4. 許可される不変条件緩和
 
-### 4.1 Relaxation Conditions
+### 4.1 緩和条件
 
-Soft invariant $p$ may be relaxed if:
-1. **Replacement**: $p$ is replaced by an equivalent or stronger invariant $p'$ (e.g., $p$ = "sequential file access", $p'$ = "indexed file access" with same logical behavior).
-2. **Explicit acceptance**: Stakeholder accepts the loss of $p$ (e.g., "Performance may degrade 10%").
-3. **Dependency safety**: No hard invariant depends on $p$.
+ソフト不変条件 $p$ は以下の場合に緩和できる：
+1. **置換**: $p$ が等価またはより強い不変条件 $p'$ に置換される（例：$p$ = "順次ファイルアクセス"、$p'$ = "索引付きファイルアクセス"、論理的振る舞いは同じ）。
+2. **明示的受容**: ステークホルダーが $p$ の損失を受け入れる（例：「パフォーマンスが10%低下する可能性がある」）。
+3. **依存関係の安全性**: $p$ に依存するハード不変条件がない。
 
-### 4.2 Relaxation Cost
+### 4.2 緩和コスト
 
-Relaxing $p$ may reduce migration cost (fewer transformations needed) but incurs **risk** or **technical debt**. We can model this as a negative cost (savings) with an associated risk penalty.
+$p$ を緩和すると移行コストが削減される（必要な変換が減る）可能性があるが、**リスク** や **技術的負債** を招く。これを関連するリスクペナルティを伴う負のコスト（節約）としてモデル化できる。
 
 ---
 
-## 5. Effect on Planning Graph
+## 5. 計画グラフへの影響
 
-### 5.1 Extended State Space
+### 5.1 拡張状態空間
 
-With soft invariants, the state space allows **backward edges** (invariant removal) for soft invariants only:
+ソフト不変条件がある場合、状態空間はソフト不変条件に対してのみ **後方エッジ**（不変条件の削除）を許可する：
 
 $$
 (S, S') \in E \iff S' = S \cup \{p\} \lor (S' = S \setminus \{p\} \land p \in I_{soft})
 $$
 
-**Caveat**: This may introduce cycles. Planning becomes more complex; dominance pruning must account for possible relaxation.
+**注意**: これはサイクルを導入する可能性がある。計画はより複雑になる。支配枝刈りは緩和の可能性を考慮しなければならない。
 
-### 5.2 Simplified Model (Recommended)
+### 5.2 簡易モデル (推奨)
 
-**Alternative**: Keep the graph monotonic (only add invariants). Model soft invariant relaxation as a **separate decision** at each step: "For transformation $T$, we accept relaxing $p$." The state still only adds invariants; relaxation is an annotation, not a graph edge.
+**代替案**: グラフを単調に保つ（不変条件の追加のみ）。ソフト不変条件の緩和を、各ステップでの **個別の決定** としてモデル化する：「変換 $T$ に対して、$p$ の緩和を受け入れる」。状態は依然として不変条件を追加するのみであり、緩和はグラフのエッジではなくアノテーションである。
 
-This preserves DAG structure and simplifies optimal path algorithms.
+これは DAG 構造を保存し、最適パスアルゴリズムを簡素化する。
 
-### 5.3 Planning Implications
+### 5.3 計画への含意
 
-- **Hard invariants**: Define the Safety Region. $S \in \mathcal{S} \iff G_{crit} \subseteq S$ and $G_{crit} \subseteq I_{hard}$.
-- **Soft invariants**: Influence cost (acquiring them may be optional) and path selection (paths that preserve more soft invariants may be preferred if cost is similar).
-
----
-
-## 6. Examples for Legacy Migration
-
-### 6.1 COBOL Batch → Modern Batch
-
-| Invariant | Type | Rationale |
-| :--- | :--- | :--- |
-| Calculation correctness | Hard | Business requirement. |
-| File record format | Hard | Downstream systems depend on it. |
-| Execution order (paragraph sequence) | Soft | May reorder if logic preserved. |
-| GOTO structure | Soft | Will be removed (restructured). |
-| Response time | Soft | May change with new platform. |
-
-### 6.2 COBOL → Microservices
-
-| Invariant | Type | Rationale |
-| :--- | :--- | :--- |
-| Business logic | Hard | Core value. |
-| Transaction atomicity | Hard | Data integrity. |
-| Monolithic deployment | Soft | Explicitly changing to distributed. |
-| Shared COPYBOOK | Soft | Replaced by API contracts. |
+- **ハード不変条件**: 安全領域を定義する。$S \in \mathcal{S} \iff G_{crit} \subseteq S$ かつ $G_{crit} \subseteq I_{hard}$。
+- **ソフト不変条件**: コスト（獲得は任意かもしれない）およびパス選択（コストが同程度なら、より多くのソフト不変条件を保存するパスが好まれるかもしれない）に影響を与える。
 
 ---
 
-## 7. Conclusion
+## 6. レガシー移行の例
 
-The Invariant Types Model:
-1. Distinguishes Hard (must preserve) vs. Soft (may relax) invariants.
-2. Defines preservation rules and allowed relaxation conditions.
-3. Explains effect on planning graph (simplified: keep DAG, annotate relaxation).
-4. Provides examples for legacy migration scenarios.
+### 6.1 COBOL バッチ → モダンバッチ
+
+| 不変条件 | タイプ | 根拠 |
+| :--- | :--- | :--- |
+| 計算の正しさ | Hard | ビジネス要件。 |
+| ファイルレコードフォーマット | Hard | 下流システムが依存している。 |
+| 実行順序（段落シーケンス） | Soft | ロジックが保存されれば並べ替え可能。 |
+| GOTO 構造 | Soft | 削除される（再構築）。 |
+| 応答時間 | Soft | 新しいプラットフォームで変わる可能性がある。 |
+
+### 6.2 COBOL → マイクロサービス
+
+| 不変条件 | タイプ | 根拠 |
+| :--- | :--- | :--- |
+| ビジネスロジック | Hard | コア価値。 |
+| トランザクション原子性 | Hard | データ整合性。 |
+| モノリシックデプロイ | Soft | 分散型へ明示的に変更。 |
+| 共有 COPYBOOK | Soft | API 契約に置換。 |
+
+---
+
+## 7. 結論
+
+不変条件タイプモデルは：
+1. ハード（保存必須）vs ソフト（緩和可能）不変条件を区別する。
+2. 保存ルールと許可される緩和条件を定義する。
+3. 計画グラフへの影響を説明する（簡易化：DAG を維持し、緩和を注釈する）。
+4. レガシー移行シナリオの例を提供する。
