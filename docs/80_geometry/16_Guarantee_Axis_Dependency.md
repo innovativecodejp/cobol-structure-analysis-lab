@@ -55,7 +55,7 @@ flowchart LR
     end
     
     subgraph GS
-        GSspace[GS = [0,1]^5]
+        GSspace["GS = [0,1]^5"]
     end
     
     Data --> GSspace

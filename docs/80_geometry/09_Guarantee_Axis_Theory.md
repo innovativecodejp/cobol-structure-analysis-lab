@@ -57,15 +57,15 @@ flowchart LR
     end
     
     subgraph Axes
-        g1[g1 Control]
-        g2[g2 Data]
-        g3[g3 State]
-        g4[g4 Transaction]
-        g5[g5 Interface]
+        g1["g1 Control"]
+        g2["g2 Data"]
+        g3["g3 State"]
+        g4["g4 Transaction"]
+        g5["g5 Interface"]
     end
     
     subgraph Space
-        GS[GS = [0,1]^n]
+        GS["GS = [0,1]^n"]
     end
     
     CFG --> g1
