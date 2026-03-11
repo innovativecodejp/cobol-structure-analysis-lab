@@ -106,21 +106,22 @@ $$
 
 このグラフは、全体空間 $G$ に対応する **Hypercube Graph の部分グラフ** として解釈できる。
 （ただしエッジは依存関係を満たす遷移のみに制限される）
-
 ```mermaid
 graph TD
     subgraph "Lattice Structure (Hasse Diagram / Lattice Graph)"
-        Top((Top: {p1, p2}))
-        p1(( {p1} ))
-        p2(( {p2} ))
-        Bot((Bot: ∅))
+        Top(("Top: {p1, p2}"))
+        p1(("{p1}"))
+        p2(("{p2}"))
+        Bot(("Bot: ∅"))
 
         Bot -->|cover| p1
         Bot -.->|invalid| p2
         p1 -->|cover| Top
         p2 -.->|invalid| Top
     end
-    style p2 fill:#ccc,stroke-dasharray: 5 5
+    
+    %% p2をグレーかつ点線で強調
+    style p2 fill:#ccc,stroke-dasharray:5 5
 ```
 *(注: 上図は p2 が p1 に依存する場合の例。p2単独はInvalidとなり、Bot->p2のエッジは存在しない)*
 
