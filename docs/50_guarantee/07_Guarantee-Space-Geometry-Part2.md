@@ -117,45 +117,37 @@ $( \mathcal{P}(\mathbb{P}), d_w )$ が距離空間であることを示す。
 
 ```mermaid
 graph TD
-    subgraph Guarantee Landscape
+    subgraph "Guarantee_Landscape"
         direction BT
         
-        %% Nodes representing Guarantee States
-        S0((Bot: ∅)):::level0
+        S0(("Bot: None"))
+        S1a(("S1: {p1}"))
+        S1b(("S2: {p2}"))
+        S2a(("S12: {p1,p2}"))
+        S2b(("S23: {p2,p3}"))
+        S3(("Top: All"))
         
-        S1a((S1: {p1})):::level1
-        S1b((S2: {p2})):::level1
-        
-        S2a((S12: {p1,p2})):::level2
-        S2b((S23: {p2,p3})):::level2
-        
-        S3((Top: ℙ)):::level3
-        
-        %% Edges representing unit transitions (distance = w(p))
-        S0 -- w(p1) --> S1a
-        S0 -- w(p2) --> S1b
-        
-        S1a -- w(p2) --> S2a
-        S1b -- w(p1) --> S2a
-        
-        S2a -- w(p3) --> S3
-        S2b -- w(p1) --> S3
-        
-        %% Strength Levels (Measure)
-        classDef level0 fill:#fff,stroke:#333,stroke-width:1px;
-        classDef level1 fill:#eef,stroke:#333,stroke-width:1px;
-        classDef level2 fill:#ddf,stroke:#333,stroke-width:2px;
-        classDef level3 fill:#bbf,stroke:#333,stroke-width:3px;
-        
-        %% Metrics
-        linkStyle 0,1,2,3,4,5 stroke-width:1px,fill:none,stroke:#666;
+        S0 -- "w(p1)" --> S1a
+        S0 -- "w(p2)" --> S1b
+        S1a -- "w(p2)" --> S2a
+        S1b -- "w(p1)" --> S2a
+        S2a -- "w(p3)" --> S3
+        S2b -- "w(p1)" --> S3
+
+        classDef level0 fill:#fff,stroke:#333
+        classDef level1 fill:#eef,stroke:#333
+        classDef level2 fill:#ddf,stroke:#333
+        classDef level3 fill:#bbf,stroke:#333
+
+        class S0 level0
+        class S1a,S1b level1
+        class S2a,S2b level2
+        class S3 level3
     end
-    
-    %% Legend
-    subgraph Legend
-        L1[Height = Measure μ]
-        L2[Edge Length = Weight w]
-        L3[Path Length = Metric d_w]
+
+    subgraph "Legend"
+        L1["Height: Measure"]
+        L2["Edge: Weight"]
     end
 ```
 

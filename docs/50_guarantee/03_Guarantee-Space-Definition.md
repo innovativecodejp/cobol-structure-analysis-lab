@@ -105,13 +105,13 @@ $$
 
 ```mermaid
 graph TD
-    Top[⊤ : 完全保証 {All}]
+    Top["⊤ : 完全保証 {All}"]
     
-    G_Decide[G_decision : 判断層保証]
-    G_Struct[G_structure : 構造層保証]
-    G_Syn[G_syntax : 構文層保証]
+    G_Decide["G_decision : 判断層保証"]
+    G_Struct["G_structure : 構造層保証"]
+    G_Syn["G_syntax : 構文層保証"]
     
-    Bottom[⊥ : 保証なし ∅]
+    Bottom["⊥ : 保証なし ∅"]
     
     Top --> G_Decide
     G_Decide --> G_Struct
@@ -120,7 +120,7 @@ graph TD
     
     subgraph Properties
         P_side[P_side]
-        P_flow[P_flow/P_data]
+        P_flow["P_flow / P_data"]
         P_syn[P_syn]
     end
     

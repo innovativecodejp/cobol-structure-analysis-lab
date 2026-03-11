@@ -151,19 +151,19 @@ Guarantee Transition Graph と Migration Path の関係を以下に示す。
 ```mermaid
 graph TD
     subgraph "Guarantee Transition Graph (DAG)"
-        Bot((Start: ∅))
+        Bot(("Start: ∅"))
         
         %% Layer 1
-        L1_1(( {p1} ))
-        L1_2(( {p2} ))
+        L1_1(("{p1}"))
+        L1_2(("{p2}"))
         
         %% Layer 2
-        L2_1(( {p1, p3} ))
-        L2_2(( {p2, p4} ))
-        L2_3(( {p1, p2} ))
+        L2_1(("{p1, p3}"))
+        L2_2(("{p2, p4}"))
+        L2_3(("{p1, p2}"))
         
         %% Layer 3
-        Top((Goal: ℙ))
+        Top(("Goal: ℙ"))
         
         %% Valid Transitions
         Bot --> L1_1
@@ -177,16 +177,16 @@ graph TD
         L2_1 --> Top
         L2_2 --> Top
         L2_3 --> Top
-        
-        %% Invalid (Dependent) Nodes are excluded implicitly
     end
 
     %% Highlight one Migration Path
-    linkStyle 0,3,6 stroke-width:4px,stroke:blue;
-    
+    linkStyle 0,2,5 stroke:blue,stroke-width:4px
+
     subgraph "Migration Path Example"
         direction LR
-        P_Start((∅)) == p1 ==> P_S1(( {p1} )) == p3 ==> P_S2(( {p1, p3} )) == "..." ==> P_Goal((ℙ))
+        P_Start(("∅")) -- "p1" --> P_S1(("{p1}"))
+        P_S1 -- "p3" --> P_S2(("{p1, p3}"))
+        P_S2 -- "..." --> P_Goal(("ℙ"))
     end
 ```
 

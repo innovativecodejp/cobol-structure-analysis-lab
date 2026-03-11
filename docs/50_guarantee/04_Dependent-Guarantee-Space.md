@@ -180,20 +180,20 @@ graph BT
 
 ```mermaid
 graph TD
-    Top[Top: Full Guarantee]
+    Top["Top: Full Guarantee"]
     
-    S_NoSide[No SideEffect<br>{Syn, Flow, Data, Bound}]
-    S_NoBound[No Boundary<br>{Syn, Flow, Data, Side}]
+    S_NoSide["No SideEffect<br>{Syn, Flow, Data, Bound}"]
+    S_NoBound["No Boundary<br>{Syn, Flow, Data, Side}"]
     
-    S_Data[Data Struct<br>{Syn, Flow, Data}]
-    S_BoundFlow[Bound & Flow<br>{Syn, Flow, Bound}]
+    S_Data["Data Struct<br>{Syn, Flow, Data}"]
+    S_BoundFlow["Bound & Flow<br>{Syn, Flow, Bound}"]
     
-    S_Flow[Flow Struct<br>{Syn, Flow}]
-    S_Bound[Boundary<br>{Syn, Bound}]
+    S_Flow["Flow Struct<br>{Syn, Flow}"]
+    S_Bound["Boundary<br>{Syn, Bound}"]
     
-    S_Syn[Syntax Only<br>{Syn}]
+    S_Syn["Syntax Only<br>{Syn}"]
     
-    Bot[Bot: None]
+    Bot["Bot: None"]
 
     %% Lattice Edges (Subset relation)
     Top --> S_NoSide
