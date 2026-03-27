@@ -20,7 +20,7 @@
 \sigma = \langle T_\sigma, B_\sigma, P_\sigma \rangle
 \]
 
-として与えられる。ここで \( T_\sigma \) は対象成果物・関係の集合、\( B_\sigma \) は境界条件、\( P_\sigma \) は AST・Guarantee・Decision 各ビューへの射影族である。
+として与えられる。ここで \( T_\sigma \) は対象成果物・関係の集合、\( B_\sigma \) は境界条件、\( P_\sigma \) は AST / CFG / DFG / Guarantee / Decision などの各ビューへの射影族である。
 
 `Scope` の本質は **「何を、どの境界で、どの読み方で対象とするか」** を固定する **target range**（適用範囲の記述）である。`Scope` はそれ自体、**保証の真偽や強度を与える評価器ではない**。
 

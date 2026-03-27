@@ -16,7 +16,7 @@
 \sigma = \langle T_\sigma, B_\sigma, P_\sigma \rangle
 \]
 
-として与えられる。ここで \( T_\sigma \) は対象集合、\( B_\sigma \) は境界条件、\( P_\sigma \) は AST・Guarantee・Decision の各ビューへの射影族である。
+として与えられる。ここで \( T_\sigma \) は対象集合、\( B_\sigma \) は境界条件、\( P_\sigma \) は AST / CFG / DFG / Guarantee / Decision などの各ビューへの射影族である。
 
 `Scope` の役割は、**何を分析対象とみなし、どこまでを内部とし、どの観点で読むか** を固定することである。ゆえに `Scope` は本質的に **analytical scope** であり、対象の構造的一貫性を与えるが、それ自体は実行計画やリリース順序を直接には定めない。
 
