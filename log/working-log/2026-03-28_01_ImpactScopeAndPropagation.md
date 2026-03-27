@@ -1,4 +1,4 @@
-# 2026-03-28_07_ImpactScopeAndPropagation
+# 2026-03-28_01_ImpactScopeAndPropagation
 
 ## 🎯 今日の目的
 - `docs/prompts/phase6/60_scope/07_Impact-Scope-and-Propagation.md` に沿って、Phase 6 の第7文書として **変更影響を Scope として捉える枠組み** を今日の作業として整理する。
@@ -9,7 +9,7 @@
 - 既存の `07` 文書を見直し、**Local Impact Scope** と **Extended Impact Scope** を、それぞれ三つ組として明示する補強を行った。
 - **Change Origin** を、編集座標ではなく **意味的な構造起点** として再確認した。
 - **control / data / dependency** の三系統を、propagation を駆動する媒体として整理した。
-- `log/research-log/2026-03-28_07_ImpactScopeAndPropagation.md` に、決定事項と保留を研究メモとして残した。
+- `log/research-log/2026-03-28_01_ImpactScopeAndPropagation.md` に、決定事項と保留を研究メモとして残した。
 
 ## 🔍 結果
 - **Impact Scope** を、到達集合そのものではなく、**境界づけられ分析可能な影響領域** として再確認できた。

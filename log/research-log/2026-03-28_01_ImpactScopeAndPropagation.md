@@ -1,4 +1,4 @@
-# 2026-03-28_07_ImpactScopeAndPropagation
+# 2026-03-28_01_ImpactScopeAndPropagation
 
 ## 🎯 今日の研究焦点（1つだけ）
 - Phase 6 の第7文書として、変更影響を **Change Origin** から始まる **structural propagation** として再整理し、その到達領域を **Impact Scope** として形式化する。
