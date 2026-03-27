@@ -129,6 +129,14 @@ o = v_0 \leadsto v_1 \leadsto \cdots \leadsto v_n = x
 
 など、1 ステップまたは低深度の伝播で到達する領域を含む。
 
+最小形として、
+
+\[
+\sigma_{loc}(o) = \langle T_{loc}(o), B_{loc}(o), P_{loc}(o) \rangle
+\]
+
+と置き、\( T_{loc}(o) \) は低深度の propagation path によって到達される要素集合とする。ここで local とは「近い」という印象語ではなく、**伝播深度と媒介関係が限定された影響領域** を指す。
+
 ### 7.2 Extended Impact Scope
 
 **Extended Impact Scope** \( \sigma_{ext}(o) \) は、推移的伝播を含めた拡張影響領域であり、
@@ -139,7 +147,17 @@ T_{loc}(o) \subseteq T_{ext}(o)
 
 を満たす。ここでは局所変更が、呼出連鎖、共有データ、外部契約、検証責務、移行パッケージ境界へと波及する。
 
+同様に、
+
+\[
+\sigma_{ext}(o) = \langle T_{ext}(o), B_{ext}(o), P_{ext}(o) \rangle
+\]
+
+と置くことができる。`extended` は、単に広いという意味ではなく、**推移閉包により意味的責務が押し広げられた領域** を表す。
+
 局所影響だけを見ると安全に見える変更でも、拡張影響まで追うと **Migration Unit** や verification planning に効くことがある。したがって extended impact を無視した分析は、局所的には正しいが移行判断としては不十分である。
+
+local と extended の区別は、影響分析の粒度制御にも対応する。前者は即時検討・差分理解に向き、後者は packaging・verification・feasibility judgment に向く。
 
 ## 8. Impact Closure
 
