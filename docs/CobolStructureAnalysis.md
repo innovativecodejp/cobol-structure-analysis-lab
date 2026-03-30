@@ -1,4 +1,4 @@
-# 10_ast
+﻿# 10_ast
 
 # 01_AST-Scope-Definition
 
@@ -219,6 +219,3156 @@ classDiagram
 
 本分類体系により、COBOLの主要な構文要素を網羅し、かつ意味的に凝集度の高いASTを構築できる。
 Statementレベルでの抽象化（Assign, Compute, ...）により、個別の命令語（`ADD` vs `SUBTRACT`）の差分を吸収し、後続の解析を容易にする。
+
+
+# 20_ir
+
+# IR Core Definition
+
+## 1. Purpose
+本稿は、COBOL 構造解析研究における **IR（Intermediate Representation）** の中核定義を確立する。先行して `10_ast` では構文層としての粒度と分類が整備され、`50_guarantee`・`60_scope`・`60_decision` では、それぞれ保証・境界・移行判断に関する判断接続層の概念が与えられてきた。しかし、構文観測から制御・データ・境界の作用へ、さらに Guarantee / Scope / Decision へ至るまでの **構造的作用の中間媒体** が形式的に固定されていなければ、後段のグラフ理論・保証評価・判断は、いずれも「何に対して」成立するのかを一貫して説明できない。
+
+Phase8 の `20_ir` が担うのは、単なる変換パイプライン上の実装用中間コードの定義ではない。**AST が与える構文構造を、解析可能な構造作用単位へ再編成し、CFG / DFG の母体となりうると同時に、Guarantee / Scope / Decision に接続可能な判断可能構造を供給する抽象層** を理論として固定することが、本稿の目的である。
+
+## 2. Definition of IR
+**一文定義**：本研究空間における IR とは、**COBOL ソースから AST により観測された構文要素を、制御作用・データ作用・境界作用・副作用などの意味ある構造単位へ再構成した、構造層（structural action layer）の表現である。**
+
+本研究における IR は、構文木の次に置かれる低レベル命令列ではない。一般的な compiler IR が code generation や最適化の都合で設計されるのに対し、本研究の IR は **理解・比較・影響分析・移行判断の根拠提示** を主目的とする。したがって、特定言語への生成順序やターゲット固有命令から独立した **研究上の構造抽象** として定義される。
+
+この違いは本質的である。compiler IR はしばしば「実行に近い均質な操作列」へ寄るが、本研究の IR は **作用の種類と境界の違いを保持したまま、判断材料となる単位を整える**。ゆえに IR は、AST を単に潰した中間段ではなく、構文層から判断層へ向かうための **構造作用層** と位置づけられる。
+
+## 3. Why IR is Needed After AST
+AST だけでは、次の不足が残る。
+
+第一に、**構文カテゴリと解析単位の不一致** である。COBOL の一文は複数の作用を内包しうる。paragraph / section は構文的にはコンテナであるが、PERFORM や GO TO によって **制御上の入口・出口・遷移先** として意味を持つ。AST はそれらを構文的に表現できるが、制御依存やデータ依存の分析、保証適用、判断説明に必要な **作用単位の再編成** までは自動的に与えない。
+
+第二に、**判断可能構造の欠如** である。Guarantee は何が保存されるかを、Scope はどこまでが閉じた対象かを、Decision は移行可否やリスクを論じる。しかしそれらはすべて、「どの単位に対して主張するのか」という問いを伴う。AST ノードは観測には十分でも、保証単位や判断単位としては細かすぎたり粗すぎたりすることがある。
+
+第三に、**移行判断研究における説明責任** である。移行可否は、構文の有無ではなく、制御の跳躍、境界越え、状態遷移、外部依存、複合データ変換といった **構造的リスク要因** に依存する。IR は、これらを比較可能な形に正規化する前段として、判断材料を生成する。
+
+## 4. Boundary of IR
+IR が扱うものは、次である。
+
+- 制御の分岐・反復・移譲・終端
+- データの定義・利用・変換・集約・分解
+- 外部との入出力や呼出に伴う境界作用
+- paragraph / section に結びつく制御意味
+- 複数作用を束ねる合成単位
+
+一方で、IR が直接扱わないものは、字句規則、構文木の具象形状そのもの、ソース上のコメントや空白、特定ターゲット言語の生成規則、実行時最適化のような実装層の都合である。これらは構文層または実装層の論題であって、IR の直接責務ではない。
+
+AST / CFG / DFG との責務分離も明確である。AST は **観測された構文** を保持し、IR は **作用構造** を保持し、CFG は制御遷移を、DFG はデータ依存をグラフとして表現する。IR は CFG・DFG の **ノード候補・辺候補・作用ラベルの源泉** であり、グラフそのものではない。
+
+## 5. IR as a Structural Layer
+研究モデルは、少なくとも三層で理解される。
+
+- **構文層**：COBOL の文法に沿った構造。AST が代表する。
+- **構造層**：実行意味を持つ作用への再編成。IR が中心となる。
+- **判断層**：Guarantee / Scope / Decision による保証・境界・判断の層。
+
+IR は、構文層と判断層のあいだで **橋渡し** を行う。AST でトレース可能だった構文的根拠を失わずに、Guarantee / Scope / Decision が要求する **単位化・境界化・リスク説明** に耐える表現へ昇格させるのである。
+
+IR の抽象度は、アルゴリズムの手順ではなく **作用の種類と関係** のレベルに置かれる。したがって IR は、構文の具体性と判断の抽象性の中間にありつつ、両者を断絶させない構造層として機能する。
+
+## 6. Relationship to AST / CFG / DFG
+AST は IR の **入力観測** である。AST から IR への写像は 1 対 1 に限られず、分割、統合、補助構文の吸収を含む。ゆえに AST と IR の関係は、単なる変換ではなく **再編成を伴う射影** と理解されるべきである。
+
+CFG への接続では、IR 上の制御作用が **分岐、合流、反復、ジャンプ、終端** の骨格を供給する。IR は join 点や loop back edge の要請を意味の上で保持し、CFG フェーズがそれを具体グラフへ落とす。
+
+DFG への接続では、IR 上のデータ作用・境界作用が **def-use・変換・伝播・副作用依存** の候補となる。IR は「どの作用がどのデータに触るか」を識別し、DFG が依存の詳細を定める。
+
+```mermaid
+flowchart LR
+  subgraph Syntax["構文層"]
+    AST["AST\n構文・トレース"]
+  end
+  subgraph Structural["構造層"]
+    IR["IR\n構造作用の単位化"]
+  end
+  subgraph Graphs["グラフ層"]
+    CFG["CFG"]
+    DFG["DFG"]
+  end
+  subgraph Judgment["判断接続層"]
+    G["Guarantee"]
+    S["Scope"]
+    D["Decision"]
+  end
+
+  AST --> IR
+  IR --> CFG
+  IR --> DFG
+  IR --> G
+  IR --> S
+  G --> D
+  S --> D
+  IR --> D
+```
+
+## 7. Relationship to Guarantee / Scope / Decision
+**Guarantee** の観点から見れば、IR は保証を掛けうる構造候補を供給する。AST の構文カテゴリ名そのものではなく、作用のまとまりが保証の粒度と対応しうるからである。
+
+**Scope** の観点から見れば、IR はスコープ境界候補を供給する。ループ単位、手続境界、境界作用のまとまり、呼出単位などは、閉じた推論対象の候補となる。
+
+**Decision** の観点から見れば、IR は移行可否やリスクの **構造的根拠** を保持する。制御の非構造化、境界依存、終端の不統一、データ変換密度などは、IR 上で記述できる特徴であり、判断はそれらに依拠する。
+
+この意味で IR は、構文から判断へ向かうための **根拠生成層** である。
+
+## 8. Risks of Not Defining IR Properly
+IR が未定義、あるいは AST と混同された場合、次の問題が生じる。
+
+- CFG が構文追随に留まり、PERFORM や GO TO の実効構造を説明できない
+- DFG が表層的になり、一文多作用や境界作用の分離が不十分になる
+- Guarantee が対象単位を失い、主張の適用範囲が揺れる
+- Scope が境界根拠を欠き、閉包や影響伝播の説明が弱くなる
+- Decision が説明責任を持てず、判断が慣習依存になる
+
+また、IR を実装寄りに定義しすぎた場合、研究基盤としての **理論的独立性** が失われる。特定生成物の都合で粒度や分類が揺れれば、比較可能性と再現可能性が損なわれる。
+
+## 9. Summary
+本稿は、IR を **構文層の次に置かれる構造作用層** として定義し、AST との差分、扱う責務範囲、CFG / DFG への接続、および Guarantee / Scope / Decision との判断接続を固定した。IR は構文の写しではなく、移行判断に耐える **構造単位への再編成** である。この定義は、Phase8 以後の Unit taxonomy、AST 写像、制御抽象、データ抽象、境界抽象の共通基盤となる。
+
+---
+# IR Design Principles
+
+## 1. Why Design Principles Are Needed
+IR の一文定義だけでは、設計判断の安定した基準は得られない。どの情報を落とし、どの作用を分離し、どの粒度で単位化するかは、文書や実装者の解釈差に敏感である。原則が不在だと、**AST への回帰**、**特定生成物への従属**、**グラフ層への先取り**、**判断層との不整合** が同時に発生し、研究としての比較可能性が損なわれる。
+
+したがって本稿は、IR を **移行判断に耐える構造表現** として設計するための規範群を明示する。原則は、後続の Unit 分類・AST 写像・CFG / DFG 接続の **整合条件** として機能する。
+
+## 2. Core Principles
+本研究で IR 設計に従うべき中核原則を、次のように掲げる。
+
+1. **構文従属回避**
+2. **実装依存回避**
+3. **構造作用優先**
+4. **接続可能性維持**
+5. **粒度一貫性**
+6. **正規化可能性**
+7. **境界明示性**
+8. **判断単位への昇格可能性**
+
+これらは独立した規則の列ではなく、IR を研究基盤として成立させるための相互依存的原則群である。
+
+## 3. Detailed Explanation of Each Principle
+### 3.1 構文従属回避
+**定義**：IR の分類軸は parser が返す構文ラベルではなく、プログラムが **何をしているか** に基づく。
+
+**必要性**：構文従属は、COBOL の表記揺れや句の差異を、そのまま分析差として固定してしまう。
+
+**守らない場合の問題**：同じ作用が異なる構文形で別物として扱われ、差分分析や保証適用が不安定になる。
+
+**他原則との関係**：正規化可能性と粒度一貫性を支え、実装依存回避とも補強し合う。
+
+### 3.2 実装依存回避
+**定義**：IR の形状を、特定ターゲット言語や生成ツールの都合で決めない。
+
+**必要性**：研究基盤は資産横断の比較と判断の説明に耐えなければならない。
+
+**守らない場合の問題**：生成都合で境界作用が内包化されたり、制御が均質化され、リスク説明が失われる。
+
+**他原則との関係**：判断単位への昇格可能性や接続可能性維持の前提となる。
+
+### 3.3 構造作用優先
+**定義**：IR は命令の列ではなく、**制御・データ・境界などの作用の単位と関係** を表す。
+
+**必要性**：DFG・Guarantee・Decision は、構文名ではなく作用に結びつく。
+
+**守らない場合の問題**：一文多作用の分解や境界の分離ができず、依存やリスクの説明が粗くなる。
+
+**他原則との関係**：接続可能性維持の内容を具体化する中心原則である。
+
+### 3.4 接続可能性維持
+**定義**：IR は、CFG・DFG・Guarantee・Scope・Decision へ橋を断たないよう設計される。
+
+**必要性**：IR を孤立した中間物にすると、後段理論が各々別物になり、研究の一貫性が崩れる。
+
+**守らない場合の問題**：グラフは存在しても IR と整合せず、判断は再び構文へ退行する。
+
+**他原則との関係**：境界明示性や粒度一貫性と強く結びつく。
+
+### 3.5 粒度一貫性
+**定義**：同一の分析目的において、類似構造は類似の粒度で IR 化される。
+
+**必要性**：比較、スライス、閉包、保証単位化は粒度が揃って初めて安定する。
+
+**守らない場合の問題**：一部だけ過度に細かく、一部だけ粗い IR が生まれ、依存閉包や Scope の比較が歪む。
+
+**他原則との関係**：正規化可能性と緊張関係を持ちうるため、目的に応じた意図的例外を後続文書で規定する必要がある。
+
+### 3.6 正規化可能性
+**定義**：意味的に近い構造を、IR 上で比較可能なパターンへ寄せる余地を持つこと。
+
+**必要性**：資産間比較、パターン検出、保証テンプレの再利用に不可欠である。
+
+**守らない場合の問題**：構文差がそのまま IR 差となり、「同じリスク」が検出できなくなる。
+
+**他原則との関係**：構文従属回避の実効性を担保する。
+
+### 3.7 境界明示性
+**定義**：外部 I/O、CALL、環境依存、終端などの境界越え作用を、内部計算と混同しない。
+
+**必要性**：移行リスクの主因はしばしば境界と契約である。
+
+**守らない場合の問題**：READ と MOVE が同一視され、検証範囲やスコープ推定が誤る。
+
+**他原則との関係**：DFG の副作用依存、Scope の境界候補、Decision のリスク説明と直結する。
+
+### 3.8 判断単位への昇格可能性
+**定義**：各 IR Unit が、Guarantee の対象、Scope の候補、Decision の根拠として語れるように設計すること。
+
+**必要性**：IR が単なる実装都合の塊では、判断理論への接続が切れる。
+
+**守らない場合の問題**：説明不能な黒箱単位が増え、監査可能性と再現性が失われる。
+
+**他原則との関係**：接続可能性維持の判断層側の具体化である。
+
+## 4. Tensions and Trade-offs Among Principles
+原則群は相互に補強する一方で、いくつかの緊張を持つ。
+
+第一に、**抽象化 vs 情報保持** である。作用優先は情報圧縮を促すが、CFG / DFG に必要な手掛かりを落とせば接続可能性が損なわれる。解は、意味に無関係な構文情報だけを削り、作用に関わる情報は保持することである。
+
+第二に、**正規化 vs COBOL 特有性保持** である。過度の正規化は、PERFORM THRU や EVALUATE ALSO のような COBOL 特有の制御意味を消しかねない。解は、正規化パターンの上に由来タグや補助注記を許容し、比較可能性と固有性を両立することである。
+
+第三に、**粒度細分化 vs 可読性** である。細かい IR は DFG や Guarantee には有利だが、人間レビューや Composite Unit の安定性を損なう可能性がある。そのため、基準粒度を固定し、必要時のみ分解する二段設計が望ましい。
+
+## 5. Principles as Preconditions for Later Models
+CFG に対しては、構造作用優先・境界明示性・接続可能性が、分岐・反復・移譲・終端の骨格を支える。DFG に対しては、作用優先と境界明示性が、def-use と副作用伝播の起点を支える。
+
+Guarantee に対しては、判断単位への昇格可能性と粒度一貫性が、保証適用単位を支える。Scope に対しては、境界明示性と粒度一貫性が、閉じた対象の候補と伝播起点を支える。Decision に対しては、上記すべてが、リスクの構造的説明と証拠射程を支える。
+
+```mermaid
+flowchart TB
+  P1["構文従属回避"]
+  P2["実装依存回避"]
+  P3["構造作用優先"]
+  P4["接続可能性維持"]
+  P5["粒度一貫性"]
+  P6["正規化可能性"]
+  P7["境界明示性"]
+  P8["判断単位への昇格可能性"]
+  AST["AST"]
+  IR["IR"]
+  CFG["CFG"]
+  DFG["DFG"]
+  G["Guarantee"]
+  S["Scope"]
+  D["Decision"]
+
+  AST --> IR
+  P1 --> IR
+  P2 --> IR
+  P3 --> IR
+  P4 --> CFG
+  P4 --> DFG
+  P5 --> G
+  P5 --> S
+  P6 --> IR
+  P7 --> CFG
+  P7 --> S
+  P8 --> G
+  P8 --> D
+  IR --> CFG
+  IR --> DFG
+  IR --> G
+  IR --> S
+  IR --> D
+```
+
+## 6. Summary
+IR 設計原則は、定義を **運用可能な規範** に落とすものである。構文従属と実装依存を避けつつ、作用を中心に、グラフ層と判断接続層へ至る道を断たない。原則間の緊張は、正規化・粒度・固有性のバランスとして明示的に管理されるべきであり、この原則群が Phase8 全体の安定条件となる。
+
+---
+# IR Unit Taxonomy
+
+## 1. What Is an IR Unit
+**一文定義**：IR Unit とは、IR 上で識別される最小の意味ある構造作用のまとまりであり、制御・データ・境界などの観点から責務を型付けした分析単位である。
+
+ここでいう Unit は、AST のノード型や COBOL の文法カテゴリそのものではない。`statement` は構文層の区切りであるが、必ずしも単一の作用に対応しない。したがって IR Unit は **文の写像先** として定義されつつも、必要に応じて **一文から複数 Unit へ分解** され、あるいは複数構文要素を **単一 Unit へ統合** しうる。これは、DFG の精度、Guarantee の適用粒度、Scope の閉包妥当性を同時に満たすためである。
+
+## 2. Why a Taxonomy Is Needed
+IR の定義と設計原則が与えられても、構成単位が不明確なままでは分析モデルにならない。分類体系がなければ、AST 写像は揺れ、CFG / DFG 接続は恣意化し、Guarantee / Scope / Decision に対しても統一した語彙を与えられない。
+
+Taxonomy が必要なのは、IR を「ノードの寄せ集め」ではなく、**後続分析に耐える型付き構造** として扱うためである。特に重要なのは、分類を構文カテゴリ名で代用しないことである。さもなければ COBOL の表記揺れに分析が引きずられ、研究上の比較可能性が壊れる。
+
+## 3. Classification Axes
+IR Unit を配置する主要軸は次のとおりである。
+
+- **制御作用**：実行順序・分岐・反復・移譲を変えるか
+- **データ作用**：データ項の定義・参照・変換を行うか
+- **状態遷移**：制御や処理モードに効く状態を更新するか
+- **境界越え**：外部ファイル・他プログラム・端末・環境に触れるか
+- **呼出**：手続やプログラム境界を跨ぐ移譲を伴うか
+- **条件判定**：真偽や選択空間の分割を行うか
+- **複合構成**：複数作用を束ねる単位か
+- **終端 / 例外 / 中断**：終了や脱出を明示するか
+
+これらは排他的な単軸分類ではなく、1つの Unit が複数軸に関与しうる。ただし、Taxonomy としては **主たる責務** を定める必要がある。
+
+## 4. Proposed Taxonomy of IR Units
+本研究で採用する型の族は、次の八類を中核とする。
+
+1. **Control Unit**
+2. **Condition / Guard Unit**
+3. **Data Operation Unit**
+4. **State Transition Unit**
+5. **Boundary Interaction Unit**
+6. **Invocation Unit**
+7. **Composite Unit**
+8. **Terminal Unit**
+
+これらは、IR を **作用の型付き集合** として扱うための最小語彙である。
+
+```mermaid
+flowchart TB
+  CO[Control Unit]
+  GU[Condition / Guard Unit]
+  DA[Data Operation Unit]
+  ST[State Transition Unit]
+  BI[Boundary Interaction Unit]
+  IN[Invocation Unit]
+  CP[Composite Unit]
+  TE[Terminal Unit]
+
+  CP --> CO
+  CP --> DA
+  CP --> BI
+  CO --> GU
+  CO --> IN
+  CO --> TE
+  DA --> ST
+```
+
+## 5. Detailed Description of Each Unit Type
+### 5.1 Control Unit
+**定義**：順序、分岐、反復、移譲など、制御フローの骨格を形成する Unit である。  
+**典型 COBOL 構造**：IF、EVALUATE、PERFORM 系、GO TO、NEXT SENTENCE。  
+**保持すべき情報**：分岐の型、合流点の有無、反復の終了条件、遷移先の種別。  
+**後続分析との関係**：CFG のノード・辺候補であり、Scope の制御境界候補にもなる。
+
+### 5.2 Condition / Guard Unit
+**定義**：真偽や選択空間の分割を与える条件評価 Unit である。  
+**典型 COBOL 構造**：IF 条件、EVALUATE の選択条件、PERFORM UNTIL の条件。  
+**保持すべき情報**：条件式の抽象、参照データ、選択空間の分割型。  
+**後続分析との関係**：CFG では branch / dispatch の条件核となり、DFG では use 側の候補になる。
+
+### 5.3 Data Operation Unit
+**定義**：内部データの更新・変換・集約・分解を担う Unit である。  
+**典型 COBOL 構造**：MOVE、COMPUTE、ADD、STRING、UNSTRING、INSPECT。  
+**保持すべき情報**：source、target、変換の型、位置依存性。  
+**後続分析との関係**：DFG の中心であり、Guarantee のデータ不変条件に直結する。
+
+### 5.4 State Transition Unit
+**定義**：処理モードや制御状態に影響する状態遷移を明示する Unit である。  
+**典型 COBOL 構造**：フラグ更新、状態コード設定、制御スイッチ変更。  
+**保持すべき情報**：遷移前後の状態役割、制御への影響。  
+**後続分析との関係**：CFG・DFG の両方にまたがり、Decision 上の複雑性説明に効く。
+
+### 5.5 Boundary Interaction Unit
+**定義**：外部リソース、他手続、端末、環境との交差を持つ Unit である。  
+**典型 COBOL 構造**：READ、WRITE、REWRITE、CALL、ACCEPT、DISPLAY。  
+**保持すべき情報**：境界種別、方向、外部依存、可観測副作用。  
+**後続分析との関係**：Scope の外縁候補、Guarantee 困難性、Decision リスク要因となる。
+
+### 5.6 Invocation Unit
+**定義**：手続呼出や範囲実行に伴う制御移譲を表す Unit である。  
+**典型 COBOL 構造**：CALL、PERFORM paragraph、PERFORM THRU。  
+**保持すべき情報**：移譲先、戻り点、範囲、呼出規律。  
+**後続分析との関係**：CFG の手続境界、Scope の階層化、Decision の結合度説明に使われる。
+
+### 5.7 Composite Unit
+**定義**：複数の Unit を1つの論理塊として束ねる Unit である。  
+**典型 COBOL 構造**：paragraph 群、トランザクション的手続のまとまり、複合制御ブロック。  
+**保持すべき情報**：内部 Unit 列、入口・出口、外部インタフェース。  
+**後続分析との関係**：Scope 候補や移行単位候補の中間表現となる。
+
+### 5.8 Terminal Unit
+**定義**：終了、復帰、中断、停止を明示する Unit である。  
+**典型 COBOL 構造**：STOP RUN、GOBACK。  
+**保持すべき情報**：終了種別、戻り先の有無、実行停止の範囲。  
+**後続分析との関係**：CFG の出口候補であり、Decision の切替可能性や安全停止性に関わる。
+
+## 6. Relationships Among Unit Types
+IR Unit 間には、少なくとも次の関係が定義できる。
+
+- **包含**：Composite Unit が他の Unit を内部に持つ
+- **依存**：Data Operation Unit が Condition / Guard Unit や Boundary Interaction Unit に依存する
+- **合成**：複数の Unit が sequence / nested / boundary-inclusive に束ねられる
+- **派生**：複数 AST ノードから単一 IR Unit が派生することがある
+
+この関係整理により、IR は単なる型一覧ではなく、**型どうしがどう組み合わさって構造を作るか** を表す体系になる。
+
+## 7. Risks of Poor Taxonomy
+分類が曖昧だと、同じ作用が複数型に散らばり、CFG・DFG の生成規則が衝突する。分類を文法カテゴリに回収すると、parser のラベルがそのまま Unit 名になり、表記揺れが分析差になる。逆に過度に細分化しすぎると、Composite Unit なしには Scope が組めず、レビューも困難になる。
+
+したがって、良い Taxonomy とは、細かさを競うものではなく、**後続分析と判断接続に必要な区別をちょうどよく保持する分類** である。
+
+## 8. Summary
+IR Unit Taxonomy は、IR を **構文ではなく作用** で型付けする枠組みである。本稿では、Control、Guard、Data Operation、State Transition、Boundary Interaction、Invocation、Composite、Terminal の八類を中核とし、それぞれの責務と後続分析との関係を整理した。この分類の安定が、AST 写像、CFG / DFG 接続、Guarantee / Scope / Decision への接続全体の基盤となる。
+
+---
+# AST to IR Mapping
+
+## 1. Why Mapping Is Needed
+AST は構文層として、観測の忠実さとトレーサビリティを与える。しかし移行判断に必要なのは、制御・データ・境界の **作用のまとまり** である。写像は、AST が持つ構文情報を **失わずに参照可能** に残しつつ、IR が要求する単位へ **再構成** する操作として位置づけられる。
+
+写像段階で保存すべきは、ソース位置、構文由来の識別子、コンテナ階層などの根拠である。再構成すべきは、一文多作用の分割、補助句の統合、paragraph / section を制御境界としての単位へ昇格させることである。したがって AST→IR 写像は、単なる変換ではなく **構文層から構造層への射影規則** である。
+
+## 2. Mapping Principles
+AST→IR 写像には、少なくとも次の原則が必要である。
+
+- **作用優先**：ノード数の一致ではなく、作用責務がどの IR Unit 型に載るかを基準にする
+- **トレーサビリティ保持**：各 IR Unit は、根拠となる AST 範囲へ逆参照できる
+- **単位一貫性**：同じ構造パターンは同じ族の IR パターンへ寄せる
+- **判断接続の予約**：Guarantee / Scope / Decision が参照しうる境界・終端・呼出規律を欠落させない
+
+これらにより、AST から IR への写像は、正規化の入り口でありながら、判断材料の元情報を失わない形で行われる。
+
+## 3. Basic Mapping Patterns
+写像の基本パターンは少なくとも次のとおりである。
+
+### 3.1 1対1写像
+単一構文要素が単一 IR Unit になる場合である。単純な MOVE や明確な終端文などが典型である。
+
+### 3.2 1対多写像
+単一構文が複数 IR Unit に分解される場合である。一文に I/O とデータ更新が混在する場合や、PERFORM が呼出・反復・範囲実行を同時に含む場合がこれに当たる。
+
+### 3.3 多対1写像
+複数 AST ノードが単一 IR Unit に統合される場合である。補助句を親作用へ吸収したり、複数の構文断片を1つの Boundary Interaction Unit として扱う場合がある。
+
+### 3.4 コンテナ→境界写像
+paragraph / section のような構文コンテナが、IR では **境界単位や呼出可能領域** として意味を持つ場合である。
+
+### 3.5 補助句の吸収
+冗長な clause や補助的構文が、独立 Unit ではなく親 Unit に帰属する場合である。
+
+### 3.6 条件表現の統合
+IF や EVALUATE における条件部分を、Guard Unit と Control Unit の関係として統合する場合である。
+
+```mermaid
+flowchart LR
+  AST["AST ノード群"] --> P1["1対1"]
+  AST --> P2["1対多"]
+  AST --> P3["多対1"]
+  P1 --> IR["IR Units"]
+  P2 --> IR
+  P3 --> IR
+```
+
+## 4. Mapping Rules for Major COBOL Structures
+### 4.1 paragraph / section
+構文的にはコンテナだが、IR では PERFORM や GO TO の対象・範囲・遷移先として **制御境界** を持つ。必要に応じて Composite Unit や Invocation Unit の核になる。
+
+### 4.2 IF
+Guard Unit と Branch 型 Control Unit に分解される。暗黙の join は制御抽象として保持される。
+
+### 4.3 EVALUATE
+複数 Guard と Dispatch 型 Control Unit の組合せに写される。単なる switch 還元ではなく、条件空間分割として扱う余地を持つ。
+
+### 4.4 PERFORM
+Invocation、Iteration、あるいは bounded-range execute の複合として写される。PERFORM THRU は単一 call に潰してはならない。
+
+### 4.5 MOVE / COMPUTE
+Data Operation Unit へ写される。ただし一文複数作用を含む場合は 1対多写像となる。
+
+### 4.6 READ / WRITE
+Boundary Interaction Unit として写される。成功 / 失敗経路は Control Unit と結びつき、I/O 後のデータ更新は Data Operation Unit として分離しうる。
+
+### 4.7 CALL
+Invocation Unit として写される。引数の流れは後続の DFG 接続で扱う手掛かりを持つ。
+
+### 4.8 STOP RUN / GOBACK
+Terminal Unit に写される。プログラム停止と呼出元復帰は意味上区別される。
+
+## 5. Information Preserved, Added, and Lost
+### 保持する情報
+- ソース位置
+- AST ノード由来の識別子
+- コンテナ階層
+- paragraph / section 所属
+
+### IR 生成時に新たに付与する情報
+- IR Unit 型
+- 作用カテゴリ
+- 制御境界タグ
+- 正規化パターン ID
+- 判断接続用の注記
+
+### 失われうる情報
+- 冗長な構文飾り
+- 意味に影響しない句の表出差
+- 正規化により吸収される表記揺れ
+
+### 後続層へ渡す情報
+- 制御骨格
+- データ作用候補
+- 境界・呼出・終端フラグ
+- 条件依存の骨格
+
+## 6. Mapping as the Entry Point of Normalization
+AST→IR 写像は、**正規化の第一段** である。clause ベースで散らばる条件や、同一意味の異なる構文形を、IR 上の Guard / Control / Data / Boundary のパターンへ寄せる。完全な正規化は `08_IR-Composition-and-Normalization.md` で扱うが、写像時点で **何を揃え、何を固有タグとして残すか** を決めておかなければ、後続の比較・差分分析は安定しない。
+
+## 7. Risks and Failure Modes
+写像が曖昧な場合、同じ AST パターンが異なる IR に散らばり、比較不能になる。情報を落としすぎると、境界作用や終端が消え、CFG / DFG / Decision が過小評価を起こす。AST の粒度と IR の粒度が整合しない場合、Guarantee や Scope の単位が揺れ、研究全体の説明責任が弱くなる。
+
+## 8. Summary
+AST→IR 写像は、構文層から構造層への射影規則である。1対1 / 1対多 / 多対1、コンテナの境界化、補助構文の吸収を通じて、CFG / DFG および判断接続層へ一貫した入力を与える。写像は正規化の入口でもあり、ここでの規律が後続全体の安定性を決定する。
+
+---
+# IR Control Abstraction
+
+## 1. Why Control Abstraction Is Needed
+AST は IF や PERFORM を構文的に正しく表す。しかし CFG は **遷移** を、Scope は **境界と閉包** を、Decision は **非構造化や手続結合** を論じる。これらに直結するのは、「branch か」「dispatch か」「反復か」「移譲か」といった **制御作用のカテゴリ** である。IR 上で制御を抽象化せずに CFG を生成すると、構文ノードの数だけノードが増え、join や loop back edge が不明瞭になり、説明不能なグラフが生成されやすい。
+
+したがって制御抽象は、CFG 直接生成の前段として、制御の意味カテゴリを固定する作業である。ここで問うのは「どう辺を張るか」ではなく、「何を制御単位として数えるか」である。
+
+## 2. Core Categories of Control in IR
+IR における制御の中核カテゴリは次のとおりである。
+
+- **Sequence**：順次進行
+- **Branch**：二択または少数択の条件分岐
+- **Dispatch**：条件空間の分割に基づく多択
+- **Iteration**：条件またはカウンタに基づく反復
+- **Jump**：無条件または条件付きの直接遷移
+- **Return / Exit / Termination**：手続・プログラムの終了や復帰
+
+これらは Control Unit / Guard Unit / Terminal Unit と組み合わさり、Invocation Unit とも交差する。制御抽象の目的は、COBOL の多様な制御記法を、このような安定した構造カテゴリへ還元することである。
+
+## 3. Abstraction of Major COBOL Control Structures
+### IF
+Guard Unit と Branch 型 Control Unit の組として扱う。条件と分岐骨格を分離し、暗黙の合流点を制御抽象として保持する。
+
+### EVALUATE
+Dispatch として扱う。単純な switch 還元に閉じず、**条件空間の分割** として理解する。ALSO や複合条件は dispatch の内部構造として保持される。
+
+### PERFORM paragraph
+Invocation に近い手続範囲実行として扱う。戻り点が重要な要素であり、単なる Jump とは異なる。
+
+### PERFORM THRU
+範囲実行として扱う。単一呼出ではなく、複数 paragraph にまたがる制御範囲として抽象化する。
+
+### PERFORM UNTIL / VARYING
+Iteration として扱う。条件 Guard、本体 Sequence、戻り条件を分けて記述することで、後続の CFG 接続が安定する。
+
+### GO TO
+Jump として扱う。参照先 paragraph / section は制御境界上のラベルとして IR に現れる。
+
+### NEXT SENTENCE
+局所的スキップに相当する Jump / 順序調整として扱う。これは構造化を阻害する要因であり、Decision でも重要なリスクになる。
+
+### STOP RUN / GOBACK
+Termination として扱う。プログラム停止と呼出元への復帰は、意味上区別されるべき終端種別である。
+
+## 4. Paragraph and Section as Control Boundaries
+paragraph / section は、単なる構文コンテナではない。PERFORM の対象、GO TO の着地点、THRU の範囲端、スコープ候補としての **callable region** を形成しうる。
+
+IR では、少なくとも次を区別する必要がある。
+
+- **参照先**：名前解決されたエントリ
+- **遷移先**：Jump の着地点
+- **戻り先**：Invocation や範囲実行後の復帰点
+
+これらは AST のコンテナ階層だけでは十分に固定されないため、IR の制御抽象で明示される必要がある。paragraph / section を制御境界として扱うことにより、後続の CFG・Scope・Decision との接続が安定する。
+
+## 5. Connection from IR Control Units to CFG
+IR の制御抽象は、CFG において次のような構造へ橋渡しされる。
+
+| IR 制御抽象 | CFG 上の対応 |
+|-------------|--------------|
+| Sequence | 直列の辺 |
+| Branch | 分岐辺と join |
+| Dispatch | 多分岐と合流 |
+| Iteration | ループヘッダ、back edge、出口 |
+| Jump | 直接辺、または中間ノードを介した遷移 |
+| Termination | 出口ノード |
+
+```mermaid
+flowchart LR
+  subgraph IRControl["IR 制御抽象"]
+    S[Sequence]
+    B[Branch]
+    D[Dispatch]
+    I[Iteration]
+    J[Jump]
+    T[Termination]
+  end
+  subgraph CFG["CFG 構造"]
+    E[制御辺]
+    G[join]
+    L[loop back]
+    X[exit]
+  end
+
+  S --> E
+  B --> E
+  B --> G
+  D --> E
+  D --> G
+  I --> L
+  I --> G
+  J --> E
+  T --> X
+```
+
+IR は join の要請、loop の戻り、終端の種別を意味の上で保持し、CFG フェーズがそれを具体グラフへ落とす。IR を飛ばすと、これらの説明責任が CFG 単体へ押しつけられ、構造理解が不安定になる。
+
+## 6. Risks and Pitfalls
+PERFORM を単純 call とみなすと、THRU、反復、戻り点が失われ、Scope や CFG が実構造から乖離する。EVALUATE を単純 switch とみなすと、条件領域の重なりや ALSO の意味を落とし、Guard の依存と分岐の説明が不足する。GO TO の扱いを曖昧にすると、着地点が構造上どこにあるかを見失い、非構造化リスクを過小評価する。
+
+## 7. Summary
+IR における制御抽象は、COBOL の手続制御を Sequence / Branch / Dispatch / Iteration / Jump / Termination に整理し、paragraph / section を **制御境界** として明示する作業である。これにより CFG への橋が意味的に整い、Guarantee / Scope / Decision は制御複雑性を構造的に説明できる。本稿の抽象は実装アルゴリズムではなく、解析と判断のための分類である。
+
+---
+# IR Data Operation Model
+
+## 1. Why Data Operation Abstraction Is Needed
+データ作用抽象とは、AST 層で観測される文法上のデータ操作を、移行判断と依存分析に耐える **構造的作用単位** へ再編成する IR 上のモデルである。AST は MOVE や STRING を構文ノードとして識別できるが、同一の構文形が異なる意味的作用、たとえば単純代入、変換、分解、集約を内包しうる。したがって DFG を前提とする分析では、**文法ラベルではなく作用の種類とデータ関係** を IR で明示しなければならない。
+
+この抽象が必要な理由は三つある。第一に、構文層だけでは依存の実効的形が定まらないこと。第二に、COBOL は一文に複数のターゲットや中間領域を含みうるため、文単位のままでは DFG の辺候補が過剰統合または過剰分割されること。第三に、移行判断では「何がどのデータ状態をどう変えるか」が説明責任の中心となるため、Guarantee / Scope / Decision が参照できる観測可能な作用記述が必要なことである。
+
+## 2. Core Categories of Data Operations
+IR 上のデータ操作は、少なくとも次の分類軸で整理される。
+
+| 区分 | 意味 |
+|------|------|
+| Assignment | 値または参照先の束縛・複写 |
+| Transformation | 演算や変形による意味内容の変化 |
+| Aggregation | 複数ソースから単一ターゲットへの収束 |
+| Decomposition | 単一ソースから複数ターゲットへの分配 |
+| Initialization | 既定状態への初期化・正規化 |
+| Formatting / Rearrangement | 書式や配置の再構成 |
+| Position-dependent operation | 桁・区切り・位置に依存する処理 |
+
+これらは構文名による区別ではなく、**作用意味** による区別である。同じ MOVE でも単純 Assignment の場合と Formatting を伴う場合があり、同じ STRING でも Aggregation と Position-dependent operation の複合になることがある。
+
+```mermaid
+flowchart LR
+  AST["AST 層\n構文ラベル"] --> IR["IR 層\n構造的作用"]
+  IR --> A[Assignment]
+  IR --> T[Transformation]
+  IR --> AG[Aggregation]
+  IR --> DC[Decomposition]
+  IR --> INI[Initialization]
+  IR --> F[Formatting]
+  IR --> P[Position-dependent]
+  IR --> DFG["DFG\n依存・伝播"]
+```
+
+## 3. Abstraction of Major COBOL Data Operations
+### MOVE
+単純複写から、編集項目や対応付けによる再配置まで幅がある。IR ではコピー単位と位置依存の有無を区別し、単一 Assignment に還元できない場合は Formatting や Decomposition を伴うものとして扱う。
+
+### COMPUTE
+典型的には Transformation である。演算、丸め、条件付き更新などがあれば、Transformation と Assignment の合成として読む。
+
+### ADD / SUBTRACT / MULTIPLY / DIVIDE
+ターゲットへの累積更新として、Transformation + Assignment とみなすのが自然である。SIZE ERROR のような制御的分岐は別の Control Unit との合成になる。
+
+### INITIALIZE
+Initialization に分類される。単純なゼロクリアではなく、「論理領域を既定状態へ戻す」という意味で扱う。
+
+### INSPECT
+置換、検査、カウントを含みうるため、Transformation と Position-dependent operation の複合として扱うことが多い。
+
+### STRING
+複数ソースの連結は Aggregation、ターゲット領域への書込は Assignment である。POINTER のような位置状態更新は必要に応じて別作用として切り出す。
+
+### UNSTRING
+単一ソースから複数受け手への分配であるため、Decomposition と Position-dependent operation の複合として扱う。
+
+## 4. Information Retained in Data Operation Units
+各データ作用 IR Unit は、最低限次の情報を保持すべきである。
+
+- **source**：読取・参照となる論理オペランド
+- **target**：書込・更新対象
+- **intermediate transformation**：source から target への意味写像の種別
+- **positional dependency**：桁、区切り、オフセット、配置依存の有無
+- **side effect possibility**：例外経路や外部作用と接続する可能性
+
+ここで重要なのは、IR が構文木の写しを保持することではなく、**後続の DFG・Guarantee・Scope が必要とするデータ作用の骨格** を保持することである。
+
+## 5. Connection from IR Data Units to DFG
+DFG は IR のデータ作用を母体として構築される。接続規則の骨格は次のとおりである。
+
+- **def / use**：target を def、source を use として展開する
+- **transformation edge**：COMPUTE や INSPECT のような変換作用を、変換依存として展開する
+- **aggregation / decomposition edge**：STRING / UNSTRING のような多対一、一対多の関係を保持する
+- **state change**：フラグや状態項目の更新を、単純データ流に埋め込まず状態変化として注記する
+
+Guarantee への接続では、どの変換が不変条件を破りうるかを特定する手掛かりになる。Scope への接続では、データ作用の伝播外縁がスコープ候補の根拠になる。
+
+```mermaid
+flowchart TB
+  subgraph IRData["IR データ作用"]
+    U[use]
+    O[operation type]
+    D[def]
+  end
+  IRData --> DFGn["DFG ノード・辺"]
+  O --> TE["transformation edge"]
+  O --> AE["aggregation / decomposition edge"]
+```
+
+## 6. Risks and Failure Modes
+見た目の文法差だけで分類すると、同じ Aggregation が別物の DFG になる。複合操作を単一代入として扱うと、STRING / UNSTRING のような分割・収束構造が消え、移行リスクを過小評価する。位置依存性を落とすと、INSPECT や編集 MOVE のような処理が移行後に非等価になりやすい。副作用可能性を無視すると、境界モデルとの接続が崩れ、Guarantee の適用範囲が曖昧になる。
+
+## 7. Summary
+データ作用は AST の構文ラベルではなく、IR 上では Assignment、Transformation、Aggregation、Decomposition、Initialization、Formatting、Position-dependent operation として再分類される。主要 COBOL 操作はいずれもこれらの合成として記述され、DFG では def / use、変換辺、集約・分解辺として展開される。この抽象が、Guarantee / Scope / Decision に対するデータ観点の説明可能性を支える。
+
+---
+# IR Boundary and Side Effect Model
+
+## 1. Why Boundary Modeling Is Needed
+境界作用とは、手続内部の論理データ更新だけで完結せず、**外部資源・他手続・利用者・実行環境** と交差する IR 上の構造的作用である。通常のデータ操作と境界作用を同一の箱に入れると、依存分析は **観測可能な変化の所在** を誤り、移行では契約・プロトコル・環境差に関するリスクがデータ流の中へ埋没する。
+
+境界を IR で分離する理由は三つある。第一に、Guarantee はしばしば手続内の不変条件だけでは語れず、ファイル属性や呼出規約のような **外部前提** に依存するからである。第二に、Scope は有界な意味対象を選ぶが、境界作用はその **外縁** を定義しうるからである。第三に、Decision は「何が変えられ、何が観測されるか」を説明できなければならず、境界を隠すと判断根拠が内部実装の見かけへ還元されるからである。
+
+## 2. Types of Boundaries in IR
+IR は少なくとも次の境界種別を区別する。
+
+| 境界種別 | 指すもの |
+|----------|----------|
+| File boundary | ファイル・レコード格納との交差 |
+| Procedure / program boundary | CALL や他コンパイル単位への越境 |
+| User / terminal boundary | ACCEPT / DISPLAY などの端末入出力 |
+| External system boundary | 外部サブシステムやメッセージ先との交差 |
+| Environment boundary | 日付、環境値、実行条件へのアクセス |
+
+これらの境界は、単なる入出力デバイス分類ではなく、**どこで内部の意味空間が外部の契約や状態と接続されるか** を示す構造区分である。
+
+```mermaid
+flowchart TB
+  subgraph Internal["内部作用 IR"]
+    D[データ作用]
+    C[制御作用]
+  end
+  subgraph Boundary["境界種別"]
+    F[File]
+    P[Procedure / Program]
+    U[User / Terminal]
+    E[External System]
+    ENV[Environment]
+  end
+
+  Internal --> Boundary
+  Boundary --> J["Guarantee / Scope / Decision"]
+```
+
+## 3. Major COBOL Boundary Operations
+### READ / WRITE / REWRITE / DELETE / START
+File boundary の中核である。レコード存在、順序、鍵、ファイル状態は可観測状態を更新しうるため、単純なデータ移送として扱ってはならない。
+
+### CALL
+Procedure / program boundary の典型である。パラメタ契約、共有ストレージ、呼出規約は外部依存として IR に現れる。
+
+### ACCEPT / DISPLAY
+User / terminal boundary を構成する。人間観測可能な状態変化として、テスト容易性や移行後 UI 代替の議論に直結する。
+
+### SORT / MERGE
+ファイルと一時領域にまたがる複合境界として扱う。詳細アルゴリズムではなく、入出力集合と順序意味を保持することが重要である。
+
+これらは AST では文種として識別されるが、IR では **Boundary Interaction Unit** として通常の Data Operation Unit と型を分ける。
+
+## 4. Side Effects as Structural Elements
+本研究における副作用は、単なる実装上の副次結果ではなく、**構造概念** である。少なくとも次の三点で捉えられる。
+
+- **可観測状態変化**：プロセス外または手続外から観測可能な結果の変化
+- **内部状態変化との区別**：WORKING-STORAGE の更新は内部状態であり、外部資源更新とは区別される
+- **外部依存の存在**：境界作用は前提となる資源・契約を伴う
+
+副作用を構造概念として扱うことで、IR は「何が変わったか」だけでなく、「その変化が内部に閉じるのか外部へ漏れるのか」を明示できる。
+
+```mermaid
+flowchart LR
+  IO["Boundary Interaction Unit"] --> OBS["可観測状態"]
+  IO --> DEP["外部依存・契約"]
+  OBS --> R["リスク・検証範囲"]
+  DEP --> S["Scope 境界候補"]
+```
+
+## 5. Connection to Guarantee / Scope / Decision
+Guarantee に対しては、境界作用は **保証困難性** を高める。なぜなら外部振る舞いが閉じた意味空間に含まれにくく、保存主張には環境や資源の前提が必要になるからである。
+
+Scope に対しては、境界作用の集合が **Scope boundary candidate** となる。ファイル読書きのまとまり、CALL 連鎖の入口、端末入出力の塊は、どこまでを一つの有界対象とみなすかの根拠になる。
+
+Decision に対しては、境界の種類と密度が直接の **リスク指標** になる。I/O 集中、深い CALL 依存、未文書化の外部境界は、移行可否、段階移行、ラッパ要否を左右する。
+
+## 6. Risks and Pitfalls
+境界を見落とすと、READ を単なる代入として扱い、順序・鍵・再実行安全性が判断から消える。CALL を内部関数化してしまうと、Scope と DFG が実依存より狭くなる。WRITE を単純な target 更新とみなすと、永続化とロールバックの問題が Guarantee から脱落する。
+
+## 7. Summary
+境界作用は通常のデータ作用と型を分離し、File、Procedure、User、External System、Environment の境界種別として IR に現れる。副作用は実装細目ではなく、**可観測状態と外部依存** を伴う構造として記述される。Guarantee / Scope / Decision はいずれも境界を前提・外縁・リスクとして読む必要があり、IR はそのための基盤単位を供給する。
+
+---
+# IR Composition and Normalization
+
+## 1. Why Composition Matters
+IR Unit の分類だけでは、プログラム片を **比較可能なまとまり** として扱えない。実際の COBOL は、文の列、入れ子の条件、反復、境界作用が **合成** された形で現れる。合成規則がなければ、同一の意味構造を異なる表層列として扱ってしまい、Scope の包含関係や Guarantee の適用範囲の比較が不安定になる。
+
+合成が必要なのは、解析対象が常に複合的であり、CFG / DFG が単一 Unit ではなく **Unit の配置関係** に依存し、Migration Decision も単文ではなく手続やスライス全体に対して下されるからである。
+
+## 2. How IR Units Compose
+IR の合成は、少なくとも次の形として整理される。
+
+| 合成の形 | 意味 |
+|----------|------|
+| Sequence composition | 実行順序に沿った隣接合成 |
+| Nested composition | 条件・境界の内側に入れ子で含まれる合成 |
+| Conditional composition | 分岐により排他的に選ばれる合成 |
+| Iterative composition | 反復により繰り返される合成 |
+| Boundary-inclusive composition | 内部作用と境界作用を同一塊として束ねる合成 |
+
+Composite Unit は、これらの合成規則によって形成される **論理的なまとまり** である。重要なのは、Composite が AST の入れ子そのものではなく、観測・保証・判断の単位を選ぶための階層だということである。
+
+```mermaid
+flowchart TB
+  U1[IR Unit]
+  U2[IR Unit]
+  U3[Boundary Unit]
+  S[Sequence]
+  N[Nested / Conditional]
+  C[Composite Unit]
+
+  U1 --> S
+  U2 --> S
+  S --> N
+  U3 --> C
+  N --> C
+```
+
+## 3. Why Normalization Is Needed
+正規化とは、構文表現の揺れを吸収し、IR 上で **同型の意味構造を同型に見せるための理論的操作** の族である。目的は次の三つである。
+
+- **比較可能性**：資産間・版間で同じパターンかどうかを構造作用で照合する
+- **差分分析可能性**：変更の意味的影響を表記差ではなく作用差で捉える
+- **Guarantee / Scope 単位化**：保証適用域と有界対象を正規形上の境界で安定化する
+
+正規化がなければ、構文差がそのまま IR 差となり、同じ構造リスクや保証テンプレートを再利用できない。
+
+## 4. What Should Be Normalized
+正規化対象として、少なくとも次を想定する。
+
+- **複合文の分解**：一文多作用を作用単位へ分離する
+- **入れ子構造の平準化**：解析上は比較可能な制御骨格へ寄せる
+- **条件表現の整形**：同値な条件を比較しやすい標準形へ寄せる
+- **制御終端の明示**：分岐、ループ、終了の出口を一意に参照可能にする
+- **作用単位への分離**：制御・データ・境界が同一文に混在する場合に型分離する
+
+```mermaid
+flowchart LR
+  AST["AST 層\n表記揺れ"] --> D["分解・分離"]
+  D --> N["条件・終端の整形"]
+  N --> IRN["IR 正規形候補"]
+  IRN --> CMP["比較・差分"]
+  IRN --> GS["Guarantee / Scope"]
+```
+
+## 5. Limits of Normalization
+正規化には限界がある。COBOL 特有構造を失いすぎれば、PERFORM THRU や特殊な境界処理の意味が消える。抽象化しすぎれば、リスクパターンの識別が不可能になる。さらに、桁、符号、編集、端数処理など **意味的非等価になりうる差異** は、正規化で潰してはならない。
+
+したがって正規化は、情報削除ではなく **等価類への整列** と理解されるべきである。保持すべき差異と吸収すべき揺れを分けることが核心である。
+
+## 6. Risks and Failure Modes
+正規化しない場合、同一パターンが散在し、Guarantee テンプレートや Scope 候補の再利用が効かなくなる。過正規化した場合、トレーサビリティが失われ、監査や説明責任を満たせなくなる。粒度が崩壊すると、分解しすぎて Composite の意味が壊れるか、統合しすぎて境界が見えなくなる。
+
+## 7. Summary
+合成は IR を **手続的意味のまとまり** として扱うための規則であり、正規化は **比較・差分・判断単位の安定** のための規則である。両者は異なる概念だが、互いに補完しあう。AST 層の多様な表現は IR 層で型付きの作用と合成に収斂し、そこから CFG / DFG および Guarantee / Scope / Decision へ一貫した橋が架けられる。
+
+---
+# IR Connection to CFG and DFG
+
+## 1. Why the Connection Layer Is Needed
+IR は構造的作用の整理層であり、単体では制御の全順序やデータ依存の閉包をグラフとして固定しない。CFG / DFG は解析・検証・移行判断に不可欠だが、AST から直接グラフを構築すると、構文ノードの粒度と作用の粒度が不一致となり、分岐の合流や def / use の実効が歪みやすい。
+
+接続層が必要なのは、IR がすでに **branch / loop / join / exit** および **def / use / transformation** を型付けしており、それを CFG / DFG へ渡すための理論的インタフェースになるからである。また、制御依存とデータ依存を混同しないためにも、AST とグラフのあいだに IR を置く必要がある。
+
+## 2. IR to CFG Connection
+IR の制御抽象は、CFG において次の対応を持つ。
+
+| IR 側の骨格 | CFG 側の読み |
+|-------------|--------------|
+| Sequence | 直列の制御流れ辺 |
+| Branch | 条件付きの複数後続 |
+| Loop | 後退辺・継続条件 |
+| Join | 分岐後の合流点 |
+| Exit | 手続・段落・プログラムからの脱出 |
+| Jump | GO TO 等の非構造化遷移 |
+| Procedure boundary | PERFORM / CALL に伴う入口・出口・復帰 |
+
+IR は CFG のノードや辺をそのまま与えるのではなく、**何がノード候補であり、どこで流れが分かれ、どこで閉じるか** を定める。特に paragraph / section の制御境界、PERFORM の戻り点、STOP RUN / GOBACK の終端種別は、CFG 側で安定した表現を得るための重要な手掛かりである。
+
+```mermaid
+flowchart TB
+  subgraph IRControl["IR 制御・境界"]
+    S[Sequence]
+    B[Branch]
+    L[Loop]
+    J[Join]
+    X[Exit / Jump]
+    P[Procedure boundary]
+  end
+  subgraph CFG["CFG"]
+    N[Node]
+    E[Edge]
+  end
+
+  IRControl --> N
+  IRControl --> E
+```
+
+## 3. IR to DFG Connection
+IR のデータ作用・境界作用は、DFG において次の対応を持つ。
+
+| IR 側の作用 | DFG 側の読み |
+|-------------|--------------|
+| def / use | 変数・論理領域の定義・使用 |
+| transformation | 演算や書式変換による依存 |
+| propagation | 複数文にわたる値の伝播 |
+| decomposition / aggregation | 一対多・多対一のデータ構造依存 |
+| side effect influence | 境界作用による外部状態依存 |
+
+ここで重要なのは、制御 IR とデータ IR を分けておくことである。条件付き def / use のような場合でも、制御辺とデータ辺を同一視してはならない。IR はそれらの交点を明示しつつ、型の混同を防ぐ層として働く。
+
+## 4. Node Generation Rules
+CFG ノード候補となるのは、制御上 **順序が分かれる最小作用点**、分岐、合流、ループ頭、手続境界の入口 / 出口、ジャンプの着地点である。単純データ作用は必ずしも独立 CFG ノードを要しないが、制御上重要な観測点と結びつく場合はノード化されうる。
+
+DFG ノード候補となるのは、**def / use が生じる単位**、変換の演算節、境界作用の可観測イベントである。同一文から複数 DFG ノードが生じることもありうる。
+
+一対一でない場合の扱いも明記されるべきである。複合 IR は複数 CFG ノードまたは複数 DFG ノードへ展開されうるし、逆に意味的に透明な中間はグラフ上で省略されうる。ただし、その場合もトレーサビリティは維持されなければならない。
+
+## 5. Edge Generation Rules
+### control flow edge
+IR の順序合成と分岐選択から生成される。Jump は例外的遷移や非構造化遷移として辺化される。
+
+### control dependence edge
+条件がどの作用の実行可否に効くかを、IR 上の Branch / Dispatch 構造から導く。
+
+### data flow edge
+def から use への値依存を表す。Transformation や Aggregation / Decomposition は、その種別に応じた中間構造を介して展開される。
+
+### dependency propagation
+境界作用は外部ノードへ接続され、影響分析やスライスの起点になる。
+
+```mermaid
+flowchart LR
+  IR[IR 層] --> CFGG["CFG\n制御流れ・制御依存"]
+  IR --> DFGG["DFG\nデータ流・副作用"]
+  CFGG -.-> DFGG
+```
+
+## 6. Risks and Failure Modes
+IR 側で合流や出口が十分に表現されていないと、CFG に偽の直列が入りやすい。接続規則が曖昧だと、同じ IR が CFG と DFG で別物として数えられ、Scope の射影が不整合になる。DISPLAY や CALL のような境界作用を制御のみ、またはデータのみへ寄せすぎると、検証範囲と依存範囲の両方が誤る。
+
+## 7. Summary
+IR は CFG / DFG の **母体** である。CFG 接続は sequence、branch、loop、join、exit、jump、procedure boundary をノードと制御辺へ写像し、DFG 接続は def / use、transformation、propagation、aggregation / decomposition、副作用をデータ辺へ写像する。ノード生成と辺生成を区別し、一対一を前提にしないことが、後続フェーズ `30_cfg`・`40_dfg` に耐える接続設計となる。
+
+---
+# IR Connection to Guarantee, Scope, and Decision
+
+## 1. Why IR Must Connect to Judgment Models
+本研究における IR は、変換パイプライン上の実装都合の中間形式ではない。AST で得た構造を **構造的作用** として再編し、Guarantee / Scope / Decision という **判断接続層** へ渡すための層である。Guarantee は「何が保存されるか」を、Scope は「何に対して推論するか」を、Decision は「移行が許容されるか」を扱うが、いずれも **根拠の載る単位** がなければ説明責任を果たせない。IR はその判断可能構造単位の供給源である。
+
+IR が判断モデルに接続されない場合、Guarantee は構文の見かけに張り付き、Scope は恣意的な区切りになり、Decision は再現可能な根拠を欠く。Phase8 の価値は、この接続を理論として固定することにある。
+
+```mermaid
+flowchart TB
+  AST[AST 層]
+  IR[IR 層]
+  G[Guarantee]
+  S[Scope]
+  D[Decision]
+
+  AST --> IR
+  IR --> G
+  IR --> S
+  IR --> D
+  G --> D
+  S --> D
+```
+
+## 2. IR and Guarantee
+Guarantee Unit は保存主張の **評価単位** であり、IR Unit は作用・境界・制御の **観測単位** である。両者は一対一に対応するとは限らない。単一の Guarantee が複数 IR Unit の合成に掛かることもあれば、単一 IR Unit が複数保証観点を持つこともある。
+
+IR が Guarantee に接続されるのは、IR が「この作用の下で何が変わるか」を明示するからである。制御作用、データ作用、境界作用、終端作用が識別されていれば、どの Unit に対してどの保存主張を評価すべきかが定まる。
+
+保証困難性を高める IR 特徴としては、次が挙げられる。
+
+- 境界作用の密集
+- 位置依存の強いデータ変換
+- 非構造化ジャンプ
+- 正規化困難な表記揺れ
+- 外部依存の強い呼出連鎖
+
+これらは Guarantee Space 上の主張コストを上げ、検証前提を増大させる。
+
+## 3. IR and Scope
+Scope は、境界条件と射影族を備えた **有界な意味的対象** である。IR は、その対象集合と境界条件の候補を与える。
+
+第一に、IR Unit は **Scope boundary candidate** になる。paragraph / section、CALL の出入口、ファイル I/O のまとまり、反復単位は、どこまでを1つの閉じた対象とみなせるかの根拠になる。
+
+第二に、IR は **閉包・包含・伝播** の議論を支える。データ作用 IR は依存の内側を、境界作用 IR は外縁を示し、Control Unit はどこで作用が合流・脱出するかを示す。これにより Scope は、構文的ではなく構造的に境界づけられる。
+
+第三に、paragraph / section や boundary interaction は AST 上ではコンテナや文種に見えるが、IR 上では **制御目的地・callable region・越境点** として理解される。この理解が Scope の妥当性を支える。
+
+## 4. IR and Migration Decision
+Migration Decision に必要な IR 情報は少なくとも次を含む。
+
+- 作用の型と合成の形
+- 外部依存と可観測変化
+- 正規化可能性
+- 境界の密度と位置
+- 説明可能な制御・データパターン
+
+IR は、可否判断を単なる印象論ではなく、**構造的根拠** として説明するための中間表現である。たとえば、高密度分岐、境界作用の集中、複合データ変換、正規化困難性、強い外部依存は、いずれも高リスク IR パターンとして読みうる。
+
+## 5. Structural Features of IR as Risk Indicators
+| IR 上の構造特徴 | 判断・リスク上の含意 |
+|-----------------|----------------------|
+| 高密度制御分岐 | 経路カバレッジと保証コストの増大 |
+| 境界作用の集中 | 契約・環境・データ準備要件の増加 |
+| 複合データ変換 | 等価性議論と観測点の増加 |
+| 正規化困難性 | パターン化移行支援の失効 |
+| 外部依存の強さ | ラッパ、段階移行、ロールバック設計の必要性 |
+
+```mermaid
+flowchart LR
+  F1[分岐密度]
+  F2[境界集中]
+  F3[複合変換]
+  F4[正規化困難]
+  F5[外部依存]
+  R[リスク指標]
+  D[Migration Decision]
+
+  F1 --> R
+  F2 --> R
+  F3 --> R
+  F4 --> R
+  F5 --> R
+  R --> D
+```
+
+## 6. Conditions for IR to Become a Judgment Unit
+IR が判断単位として成立するためには、少なくとも次が必要である。
+
+- **観測可能性**：AST から一意に、または許容可能な曖昧さつきでトレースできること
+- **境界明示性**：内部作用と境界作用が混同されないこと
+- **他層接続可能性**：CFG / DFG / Guarantee / Scope / Decision へ型整合的に接続できること
+- **比較可能性**：正規化と合成の下で他資産と照合できること
+- **保証可能性**：少なくとも「なぜ保証困難か」を構造的に説明できること
+
+これらを満たすとき、IR Unit は単なる中間表現ではなく、研究上の **判断単位** として成立する。
+
+## 7. Risks and Failure Modes
+IR が判断接続できない場合、Decision は定性的な印象に留まり、監査に耐えない。Guarantee Unit と IR Unit の粒度が不整合な場合、主張の適用漏れや二重適用が起こる。Scope との粒度不整合があると、影響伝播や閉包の説明が弱まる。さらに、リスク要因が IR に現れない設計では、移行理論としての反証可能性が失われる。
+
+## 8. Summary
+IR は AST 層の次に位置する **構造的作用層** であり、Guarantee / Scope / Decision という判断接続層への入力である。Guarantee は IR を保存主張の載る現実として、Scope は有界対象の根拠として、Decision は可否・段階・証拠の説明材料として読む。IR の構造特徴はリスク指標となり、判断単位としての成立条件は観測可能性、境界明示性、接続可能性、比較可能性、保証可能性によって与えられる。したがって `20_ir` は、`50_guarantee`、`60_scope`、`60_decision` を分断しないための共通中間理論である。
+
+---
+# `20_ir`
+
+Phase 8: IR の文書群です。
+
+`20_ir` は、`10_ast` `50_guarantee` `60_scope` `60_decision` を前提として、  
+**構文構造を移行判断に耐える構造作用単位へ再編成するための中間構造理論** を与えます。
+
+IR は単なる実装中間形式ではなく、AST と CFG / DFG、および Guarantee / Scope / Decision のあいだを接続する **構造層** として位置づけられます。
+
+## Documents
+
+- `01_IR-Core-Definition.md`
+- `02_IR-Design-Principles.md`
+- `03_IR-Unit-Taxonomy.md`
+- `04_AST-to-IR-Mapping.md`
+- `05_IR-Control-Abstraction.md`
+- `06_IR-Data-Operation-Model.md`
+- `07_IR-Boundary-and-SideEffect-Model.md`
+- `08_IR-Composition-and-Normalization.md`
+- `09_IR-Connection-to-CFG-DFG.md`
+- `10_IR-Connection-to-Guarantee-Scope-Decision.md`
+
+## Structure
+
+- `01` は IR の定義と位置づけを固定する。
+- `02` は IR 設計原則を固定する。
+- `03` は IR Unit の分類体系を与える。
+- `04` は AST から IR への写像規則を与える。
+- `05` `06` `07` は制御・データ・境界の主要作用領域を個別に定義する。
+- `08` は合成規則と正規化規則を与え、比較可能性を支える。
+- `09` は IR を CFG / DFG へ接続する。
+- `10` は IR を Guarantee / Scope / Decision へ接続する。
+
+## Notes
+
+- IR は AST の単なる焼き直しではなく、**制御作用・データ作用・境界作用を型付きで扱う構造表現** である。
+- `20_ir` は `30_cfg` `40_dfg` の前段であると同時に、`50_guarantee` `60_scope` `60_decision` を分断しないための中間層である。
+- 各文書は、定義、必要性、境界、粒度、接続、リスク、可視化を揃える方針で構成されている。
+
+## Next Connection
+
+- `30_cfg`：IR 上の制御作用をグラフ構造へ展開する
+- `40_dfg`：IR 上のデータ作用と副作用を依存構造へ展開する
+- `50_guarantee`：Guarantee Unit と IR Unit の対応を精緻化する
+- `60_scope`：IR 境界を Scope 境界候補として再評価する
+- `60_decision`：IR 特徴量を移行判断材料として再編成する
+
+
+# 30_cfg
+
+# CFG Core Definition
+
+## 1. 目的
+本稿は、COBOL 構造解析研究における **CFG（Control Flow Graph）** の中核定義を確立する。先行して `10_ast` では **構文層** としての観測粒度が与えられ、`20_ir` では **構造作用層（IR）** として制御・データ・境界の作用が再編成されてきた。しかし、分岐点・合流点・反復・非構造遷移・経路の閉包といった **制御到達と経路閉包** を、グラフとして固定しなければ、**判断接続層** における Guarantee（保証）・Scope（境界）・Decision（移行判断）は、「どの制御構造に対して主張するのか」を一貫して説明できない。
+
+Phase9 の `30_cfg` が担うのは、実行トレースの逐次再生図でも、構文木の別表現でもない。**IR が供給する制御作用の骨格を、到達可能性・経路集合・局所閉包の観点からグラフ化し、移行判断・影響分析・保証境界の基礎構造として運用可能にする「制御到達と経路閉包の構造層」** を理論として固定することが、本稿の目的である。
+
+## 2. CFG の定義
+**一文定義**：本研究空間における CFG とは、**プログラムの制御が実効的に遷移しうる順序関係を、ノードと有向辺により表した、制御到達と経路閉包の構造層の表現である。**
+
+本研究の CFG は、コンパイラ最適化用の低水準ジャンプ列の可視化を主目的としない。一般の「制御フロー図」が実装都合で均質化されうるのに対し、本研究の CFG は **どこで分岐し、どこで合流し、どの経路集合が閉じるか** を、COBOL における paragraph / section / PERFORM / GO TO 等の実効構造を踏まえて保持する **研究上の制御抽象** として定義される。
+
+CFG は **構文層（AST）** の具象形状そのものではなく、**構造作用層（IR）** の作用列そのものでもない。AST は観測、IR は作用の再編成、CFG は **制御の到達関係と経路構造の閉包** を担う。したがって CFG は、構文から判断へ至る道のりにおいて、**経路と閉包を操作可能な形で外在化する層** と位置づけられる。
+
+## 3. なぜ AST と IR のあとに CFG が必要か
+AST のみでは、次の不足が残る。
+
+第一に、**構文カテゴリと制御到達単位の不一致** である。COBOL の一文・一段落は、複数の実効遷移を内包しうる。AST は構文的トレースには十分でも、**分岐の開き方・合流の再統合・ループの戻り** を経路として固定する作業までは与えない。
+
+第二に、**経路閉包の欠如** である。移行可否やリスクはしばしば「どの経路を通れば到達しうるか」「どの領域が局所的に閉じているか」に依存する。AST ノード集合は、経路集合や閉包の代わりにはならない。
+
+第三に、**IR 単体ではグラフとしての制御順序が固定されない** である。IR は branch / join / loop / jump を型付けしうるが、**実際の遷移の骨格** をノード・辺として確定するのは CFG の役割である（`20_ir` の接続議論と整合する）。
+
+## 4. CFG の責務境界
+CFG が扱うものは、次である。
+
+- 制御の分岐・合流・反復境界・終端・手続境界に伴う遷移
+- paragraph / section を跨ぐ実効遷移（明示的・暗黙的を含む）
+- 非構造遷移（GO TO 等）による辺の存在
+- 経路（path）として理解されるべき順序関係の骨格
+- 局所解析単位（基本ブロック、制御領域）への分解の前提となる分割点
+
+一方で、CFG が直接扱わないものは、字句規則、構文木の具象形状、データの def-use 関係そのもの、外部入出力の意味論、特定ターゲット言語への生成規則である。データ依存は **DFG** の論題であり、保証命題の妥当性そのものは **Guarantee**、境界の業務閉包は **Scope**、総合判断は **Decision** の論題である。CFG はそれらに **構造入力** を供する。
+
+## 5. 最小語彙：ノード・辺・経路・領域
+本研究空間における最小語彙は、後続文書で精緻化される前提で、次のとおり固定する。
+
+- **ノード**：制御上、観測・分割・合流のために識別される点。実行可能な直列片の代表、分岐点、合流点、ループ頭、終端、手続境界上の観測点などが候補となる。
+- **辺**：あるノードから別ノードへの **実効的制御遷移** を表す有向関係。条件付き・無条件・後退・非構造などの意味分類は別稿で与える。
+- **経路**：始点から終点（または観測区間）に至る **辺の有限列** として理解される対象。同一ノード集合でも経路が異なれば、到達意味や保証適用が異なりうる。
+- **領域**：CFG 上で入口・出口・内部遷移により **局所的にまとまり** をなす部分グラフ。閉包性は `08` 以降で精密化するが、本稿では「経路・分割の単位としてのまとまり」として位置づける。
+
+## 6. COBOL における単位の二層性
+COBOL では **業務・保守上の自然単位**（paragraph / section）と、**制御解析上の最小単位**（基本ブロック等）が一致しないことが常である。本研究では、
+
+- **制御解析単位**＝CFG 上の分割・到達の基準（典型：基本ブロック）
+- **業務参照単位**＝paragraph / section 名や手続コンテナ
+
+を区別する。CFG は前者を主として構成しつつ、後者との **対応（トレーサビリティ）** を失わないことが、移行判断において説明責任を満たす条件となる。
+
+## 7. 他モデルとの関係
+研究モデルは、次のように理解される。
+
+| 層 | 代表 | 担うもの |
+|---|------|----------|
+| 構文層 | AST | 文法に沿った観測構造 |
+| 構造作用層 | IR | 作用の種類と再編成（制御・データ・境界） |
+| 制御到達と経路閉包の構造層 | CFG | 遷移の骨格、経路、合流、閉包の前提 |
+| データ依存の構造層 | DFG | def-use・変換・伝播 |
+| 判断接続層 | Guarantee / Scope / Decision | 保証・境界・移行判断 |
+
+```mermaid
+flowchart LR
+  subgraph Syntax["構文層"]
+    AST["AST"]
+  end
+  subgraph StructuralAction["構造作用層"]
+    IR["IR"]
+  end
+  subgraph CFGlayer["制御到達と経路閉包の構造層"]
+    CFG["CFG"]
+  end
+  subgraph DFGlayer["データ依存の構造層"]
+    DFG["DFG"]
+  end
+  subgraph Judgment["判断接続層"]
+    G["Guarantee"]
+    S["Scope"]
+    D["Decision"]
+  end
+
+  AST --> IR
+  IR --> CFG
+  IR --> DFG
+  CFG --> G
+  CFG --> S
+  CFG --> D
+  G --> D
+  S --> D
+```
+
+## 8. 判断接続層への接続（前提）
+**Guarantee** に対して CFG は、保証を分割・統合する際の **経路依存性** の骨格を与える。同一ノードでも経路によって成立条件が異なりうるからである。
+
+**Scope** に対して CFG は、影響伝播や閉じた推論対象の **境界候補** を与える。制御的閉包と業務的閉包のずれは、CFG 上の領域構造として説明されうる。
+
+**Decision** に対して CFG は、非構造遷移、多出口、深い分岐ネット、未合流経路など **リスクを増幅しうる制御パターン** の根拠を与える。
+
+## 9. 定義不全のリスク
+CFG が未定義、あるいは構文層と混同された場合、次が生じる。
+
+- 分岐・合流が図示されず、保証の適用範囲が偽の直列化になる
+- PERFORM / GO TO の実効構造が説明できず、移行判断が慣習依存になる
+- DFG や Scope との接続が不整合になり、影響分析が信頼できない
+
+## 10. まとめ
+本稿は、CFG を **制御到達と経路閉包の構造層** と定義し、構文層（AST）・構造作用層（IR）・データ依存（DFG）・判断接続層（Guarantee / Scope / Decision）との役割分担を固定した。CFG は実行の写しではなく、**経路と閉包を判断可能にする外在化** である。
+
+### 用語簡易表
+| 用語 | 本稿での位置づけ |
+|------|------------------|
+| AST | 構文層 |
+| IR | 構造作用層 |
+| CFG | 制御到達と経路閉包の構造層 |
+| DFG | データ依存の構造層 |
+| Guarantee / Scope / Decision | 判断接続層 |
+
+### 他文書との参照関係
+- 前提：`20_ir`（IR 中核定義、IR–CFG 接続）
+- 続稿：`02` ノード／辺分類、`03` 基本ブロック／領域、`04` 写像、`05` 経路
+
+### Mermaid 図の説明
+上図は、AST→IR→CFG/DFG の流れと、CFG が判断接続層へ入力を与える関係を示す。
+
+### 未解決論点
+- 「同一 paragraph 内」のみでは足りない閉包の精密定義（`08` へ）
+- 動的制御（ALTER 等）を静的 CFG にどう埋め込むかの方針レベルの保留
+
+---
+# CFG Node and Edge Taxonomy
+
+## 1. 目的
+本稿は、`01_CFG-Core-Definition` で与えた CFG の中核に対し、**ノード型** と **辺型** の分類体系を確定する。分類は実装の都合ではなく、**移行判断・危険構造の識別・保証・境界説明** に直結する軸で与える。構文層（AST）のカテゴリ名と同一視せず、**制御到達と経路閉包の構造層** として何が観測点となり、何が遷移として辺化されるかを固定することが目的である。
+
+## 2. 定義対象のスコープ
+対象は、COBOL プログラムに由来する CFG 上のノード・辺の **意味分類** である。データ依存辺（DFG）や型システムは対象外とする。非構造制御の詳細な類型は `07` で拡張しうるが、本稿では **structured / non-structured** の判別基準までを与える。
+
+## 3. 分類の原則
+**ノード** は「制御が分割・観測・再統合される点」であり、**辺** は「実効的遷移」である。同一の構文要素が、ノード化と辺化の両方を要請しうるが、**役割を混同しない**。分類軸は次の三つを併用する。
+
+1. **制御役割**（順序・分岐・合流・反復・終端・境界）
+2. **遷移様式**（無条件・条件・後退・呼出様・非構造）
+3. **COBOL 固有のコンテキスト**（paragraph / section 境界、範囲 PERFORM 等）
+
+## 4. ノード分類
+**ノード** を、少なくとも次の型に分類する。
+
+| ノード型 | 定義的要旨 |
+|----------|------------|
+| Entry | プログラム・手続・解析対象領域の制御入口 |
+| Exit / Terminal | 制御が当該単位から逸脱する点 |
+| Sequential / Plain | 分岐・合流・ループ頭を内包しない直列実行片の代表点 |
+| Branch | 条件または選択により **複数の後続** を持つ観測点 |
+| Merge | 複数前駆から **再統合** される観測点 |
+| Loop header | 反復制御の **継続判定・反復入口** に相当する観測点 |
+| Procedure boundary | PERFORM / CALL 等に伴う **入口・出口・復帰点** の観測 |
+| Jump anchor | GO TO の **出発・到着** を明示するための観測点 |
+| Exception / interrupt hook | 例外的制御遷移の接続点 |
+
+## 5. 辺分類
+**辺** を、少なくとも次の型に分類する。
+
+| 辺型 | 定義的要旨 |
+|------|------------|
+| Normal / fall-through | 条件なしの **順次進行** または暗黙の次文・次段落への流れ |
+| Conditional | 分岐選択に応じた **一対一の遷移** |
+| Back edge | 反復に伴う **後退** |
+| Call-like transfer | PERFORM / CALL に伴う **下位への移譲** と **復帰** |
+| Paragraph transition | paragraph 名を介した **単位間遷移** |
+| Section boundary | section 境界を跨ぐ遷移 |
+| Non-structured jump | GO TO 等による **構造化パターンから逸脱した** 遷移 |
+| Abnormal / exceptional | エラー・中断・終了系の **通常フロー外** 遷移 |
+
+## 6. Structured edge と Non-structured edge
+**Structured edge** とは、分岐・合流・反復・手続呼出の **型付け可能な制御パターン** の内部に収まる辺である。すなわち、対応する branch / merge / loop header / procedure boundary により、**経路の再統合または終端** が理論上説明できる遷移を指す。
+
+**Non-structured edge** とは、上記の型付けに **局所的に回収できない** 遷移である。典型は GO TO による **任意ラベルへの飛び** であり、merge の欠落、多入口、ループ外への逸脱などを生じうる。同一グラフ上に両者を載せ、**辺型で差を明示** する。
+
+## 7. COBOL 特有論点
+paragraph は保守上の単位であるが、CFG では **paragraph transition 辺** として普遍化する。section は **section boundary** として境界候補と接続しうる。PERFORM THRU は、単一の手続呼出に還元できない **範囲遷移** を生じ、ノード分割と辺の束ね方に影響する。EXIT PARAGRAPH / EXIT SECTION / GOBACK / STOP RUN は **Exit / Terminal** 系のノード・辺分類に接続される。
+
+## 8. 他フェーズとの接続
+**構文層（AST）** は、本 taxonomy のラベルではなく **根拠となる観測** を与える。**構造作用層（IR）** は、branch / join / loop / jump / procedure boundary の **意味骨格** を型付けし、CFG はそれを **ノード・辺の具体配置** に落とす。**DFG** とは辺の意味が異なり、混同しない。**判断接続層** では、non-structured edge の密度、merge の欠如、多出口が **リスク指標** となりうる。
+
+## 9. 移行判断への意味
+taxonomy は、次の判断質問に答えるための **共通語彙** である。
+
+- どこが分岐点か、どこで経路が再統合されるか
+- 非構造遷移が **局所か横断か** を辺型から読み取れるか
+- 保証を **経路単位** で分割する必要がある箇所が識別できるか
+
+## 10. まとめ
+本稿は、CFG ノード・辺の **型体系** を定義し、structured / non-structured の **判別基準** を与えた。paragraph / section 遷移は **汎用辺型** に収めることで、COBOL 特有性を失わずに一般 CFG 語彙へ接続した。
+
+```mermaid
+flowchart TB
+  subgraph Nodes["Node kinds"]
+    E[Entry]
+    X[Exit / Terminal]
+    S[Sequential / Plain]
+    B[Branch]
+    M[Merge]
+    L[Loop header]
+    P[Procedure boundary]
+    J[Jump anchor]
+  end
+  subgraph Edges["Edge kinds"]
+    N[normal / fall-through]
+    C[conditional]
+    K[back edge]
+    T[call-like]
+    PT[paragraph transition]
+    SB[section boundary]
+    U[non-structured jump]
+    A[abnormal]
+  end
+  B --> C
+  L --> K
+  P --> T
+```
+
+### 用語簡易表
+| 記号 | 意味 |
+|------|------|
+| Merge | 経路の再統合点 |
+| Back edge | 反復の後退遷移 |
+| Non-structured | 型付け回収不能な遷移 |
+
+### 他文書との参照関係
+- 前提：`01_CFG-Core-Definition`
+- 続稿：`03` 基本ブロック／領域、`05` 分岐・合流・経路
+
+### Mermaid 図の説明
+ノード族と辺族の対応を概観し、どの観測点がどの遷移型と強く結びつくかを示す。
+
+### リスク観点
+non-structured jump と abnormal edge が多い領域は、merge を欠く経路が増え、**保証分割** と **テスト設計** の複雑性を高める。
+
+### 未解決論点
+- 例外フローを同一 CFG に統合する粒度
+- 動的制御の辺型への写し方
+
+---
+# Basic Block and Control Region
+
+## 1. 目的
+本稿は、CFG を **局所解析単位** として操作するための二つの概念、**基本ブロック（basic block）** と **制御領域（control region）** を定義する。構文層（AST）の statement 列や、業務参照単位である paragraph / section との **意図的なズレ** を明文化し、**制御到達と経路閉包の構造層** 上で、どこまでが直列か、どこから局所閉包が成立しうるかを固定する。Scope 候補との接続可能性を示すことが副次的目的である。
+
+## 2. 定義対象のスコープ
+対象は、CFG 上の **分割** と **領域まとまり** の理論定義である。支配・ポスト支配・厳密な閉包演算は `08` で精密化する。本稿では **入口・出口・内部遷移** による領域の直観と、paragraph との二層モデルを確定する。
+
+## 3. 基本ブロックの定義
+**基本ブロック** とは、CFG のノード列を次を満たすように分割した **最大の直列実行片** である。
+
+1. ブロック内の任意二点は、ブロック内のみを通る有向路で結ばれる
+2. ブロックは **単一入口** を持つ
+3. ブロックの最後は、**分岐・ジャンプ・合流への参加・終端** のいずれかにより、直列性が終了する
+
+基本ブロックは **制御解析単位** の典型である。statement 単位や文法上の一行単位ではない。
+
+## 4. 単一入口・単一出口について
+**単一入口（SE）** は基本ブロックの要件として採用する。**単一出口（SX）** は基本ブロックに常に課さない。すなわち、一つの基本ブロック末尾から **複数の後続** が出ることはあるが、ブロック内部で出口が分岐しない。
+
+より大きな **領域** に対して SE/SX を論じる場合、SX は「領域を抜ける辺が本質的に一種類に集約できるか」という **閉包議論** に接続する。本稿では、SX を基本ブロックの必須条件とはせず、**control region** 側で扱う。
+
+## 5. 制御領域（control region）の定義
+**制御領域** とは、CFG の部分グラフ \(R\) であって、次を満たすものとして定義される。
+
+1. **入口集合** と **出口集合** が識別できる
+2. \(R\) の内部の遷移は、\(R\) のノードに閉じて説明できる部分を持つ
+3. 領域は **単一入口** を持ちうるし、**単一出口** を持ちうる
+
+領域は **構文の塊** ではなく、**制御のまとまり** として与える。
+
+## 6. statement 単位・block 単位・paragraph 単位
+| 単位 | 性質 |
+|------|------|
+| statement（構文層） | AST 上の記述単位。複数作用・複数遷移を内包しうる |
+| basic block（構造層・CFG） | 分岐・合流のない直列片。制御解析の最小単位の典型 |
+| paragraph / section（業務参照） | 名付けられた保守・業務単位。CFG 分割点と一致しないことが多い |
+
+## 7. paragraph / section と region のズレ
+paragraph は **一続きの文の列** を束ねうるが、PERFORM や GO TO により **実効 CFG は paragraph 境界を恣意的に出入り** する。したがって「paragraph = region」とは限らない。section は **境界候補** として強いが、制御閉包と一致しない場合がある。このズレは **Scope** と **migration unit** の議論で中核となる。
+
+## 8. region と Scope 候補の関係
+**Scope 候補** は、影響が伝播しうる範囲を **閉じた推論対象** として切り出す単位である。control region は、その **制御的候補** を供する。ただし業務閉包と制御閉包は一致しないため、Scope は **単一の region 写像** に還元できない場合がある。CFG は **制御側の根拠** を与えるに留まる。
+
+## 9. 構造作用層（IR）・判断接続層との接続
+**IR** は、procedure boundary や branch / join を型付けし、**どこでブロック境界が生じうるか** の手掛かりを与える。**Guarantee** は、region 内の経路集合に対して命題を貼りうる。**Decision** は、SE/SX を欠く領域や多出口を **移行難易度** へ写しうる。
+
+## 10. 移行判断への意味
+基本ブロックは **変更影響の局所化** と **カバレッジ単位** の基礎となる。control region は **まとめて移行可能か**、**分割が必要か** の初見の構造指標となる。
+
+## 11. まとめ
+本稿は、基本ブロックを **単一入口の最大直列片** と定義し、制御領域を **入口・出口・内部遷移による部分グラフのまとまり** として定義した。paragraph / section は **業務参照単位** として区別し、制御解析単位との二層モデルを固定した。
+
+```mermaid
+flowchart TB
+  subgraph BB["Basic block"]
+    b1[entry of block]
+    b2[... sequential ...]
+    b3[last node]
+  end
+  b3 -->|branch| out1[successor A]
+  b3 -->|branch| out2[successor B]
+
+  subgraph R["Control region R"]
+    rin[region entries]
+    rbody[internal nodes]
+    rout[region exits]
+    rin --> rbody --> rout
+  end
+```
+
+### 用語簡易表
+| 用語 | 要約 |
+|------|------|
+| Basic block | 分岐・合流のない最大直列片、単一入口 |
+| Control region | 入口・出口付きの部分グラフのまとまり |
+| 二層モデル | 制御解析単位 ≠ paragraph 参照単位 |
+
+### 他文書との参照関係
+- 前提：`01`、`02`
+- 続稿：`04` 写像、`08` 閉包・支配
+
+### Mermaid 図の説明
+基本ブロックの末尾分岐と、領域の入口・内部・出口の模式を示す。
+
+### リスク観点
+一つの paragraph が複数基本ブロックに跨り、かつ region が多出口であるとき、**保証単位の分割** と **テストの経路爆発** が同時に悪化しうる。
+
+### 未解決論点
+- SE/SX region の十分必要条件を COBOL 実務でどこまで要求するか
+- 宣言部・入出力例外を region に含めるかの境界
+
+---
+# CFG Mapping from AST and IR
+
+## 1. 目的
+本稿は、**構文層（AST）** および **構造作用層（IR）** から、**制御到達と経路閉包の構造層（CFG）** をどう構成するかの **写像規則** を定義する。構文ノードからの機械的な「そのままグラフ化」ではなく、**どの制御構造がノード・辺に落ちるか**、**何が失われ何が保持されるか** を明文化する。DFG 構築とは **別接続面** であることを明示する。
+
+## 2. 定義対象のスコープ
+対象は、COBOL の代表的制御構造に対する **理論的写像** である。実装手順やアルゴリズムは扱わない。fall-through、paragraph 跨ぎ、範囲 PERFORM を含む。**動的制御** は静的 CFG では近似ラベルとして扱う余地を残す。
+
+## 3. 写像の二経路：AST 直結と IR 媒介
+**AST 直結** で足りる部分は、構文上明示された **順序接続**、単純な **IF / EVALUATE の分岐木**、**GO TO のターゲット** など、構文観測だけで遷移関係が定まる骨格である。
+
+**IR 媒介** が本質的な部分は、一文多作用の分解、paragraph の制御意味の正規化、PERFORM の **入口・出口・復帰** の型付け、branch / join / loop の **意味ラベル**、非構造化度の明示である。IR は CFG に **ノード候補・辺候補・境界ラベル** を供し、CFG はそれを **グラフ配置** に確定する。
+
+## 4. 構文（AST）→CFG の対応（骨格）
+| 構文層の観測 | CFG 上の読み（骨格） |
+|--------------|----------------------|
+| 順次文列 | 基本ブロック内の直列（辺：normal / fall-through） |
+| IF | branch ノード、条件辺、合流 merge |
+| EVALUATE | 多分岐 branch、各選択肢辺、共通 merge |
+| PERFORM（単一） | call-like：手続入口へ、復帰点へ戻る |
+| PERFORM THRU | 範囲入口から出口への **順路** と復帰を含む部分グラフ |
+| GO TO | non-structured jump 辺、jump anchor ノード |
+| EXIT PARAGRAPH / SECTION | 当該単位の出口へ向かう **終端・脱出** 系辺 |
+| STOP RUN / GOBACK | Terminal 系ノード・辺 |
+
+**Fall-through** は、次の paragraph 先頭への暗黙遷移を **明示的 control edge** として表現する点が重要である。
+
+## 5. IR（構造作用層）→CFG の対応（骨格）
+| IR 側の制御骨格 | CFG 側の読み |
+|-----------------|---------------|
+| Sequence | 直列の control flow edge |
+| Branch | 条件付き複数後続 |
+| Loop | 後退辺・継続条件に対応する骨格 |
+| Join | 分岐後の merge |
+| Exit | 手続・段落・プログラムからの脱出 |
+| Jump | GO TO 等の非構造遷移 |
+| Procedure boundary | PERFORM / CALL の入口・出口・復帰 |
+
+IR は **ノード・辺を唯一決定しない** 場合がある。同一 IR 複合が複数 CFG ノードに展開されうるし、意味的に透明な点は省略されうる。ただし **トレーサビリティ** を失わないことが研究上の条件である。
+
+## 6. statement 列から基本ブロックを構成する規則
+1. **分岐点・合流点・ジャンプの出発・ジャンプの到着・手続境界の観測点** をブロック境界とする。
+2. 境界間の最大直列片を **一基本ブロック** とする。
+3. paragraph 名は **ラベル** としてノード注釈に付与しうるが、ブロック分割の十分条件ではない。
+
+## 7. paragraph / section を跨ぐ制御
+- **明示 PERFORM**：paragraph transition 辺＋call-like の復帰
+- **GO TO**：section / paragraph を跨ぐ non-structured jump となりうる
+- **section 境界**：section boundary 辺として記録し、Scope 候補と対応付けうる
+
+## 8. 情報の保持と喪失
+**保持される典型** は、分岐構造、合流、ループ骨格、非構造遷移の存在、終端種別、手続復帰点である。
+
+**落ちうる典型** は、コメント、空白、ソース上の整形、**データ依存の詳細**、実行時のみ成立する経路である。静的 CFG は **構文的経路の上限近似** を与えるにとどまる。
+
+## 9. DFG との区別
+CFG の辺は **制御遷移** である。def-use は **DFG** で表す。条件式がデータに依存する場合でも、**制御辺とデータ辺を同一視しない**。IR は交点を型付けし、二つのグラフへの射影を分離する。
+
+## 10. 判断接続層への含意
+写像規則が曖昧だと、**同じソースに対し複数の CFG** が競合し、Guarantee / Scope / Decision の根拠が揺れる。よって写像は **研究規約** として固定し、トレーサビリティを維持する必要がある。
+
+## 11. まとめ
+本稿は、AST からの **明示遷移** と IR からの **意味骨格** を組み合わせて CFG を構成する規則を示し、代表構文ごとの対応と情報の保持・喪失を整理した。
+
+```mermaid
+flowchart LR
+  subgraph Syntax["構文層 AST"]
+    A[parse tree / statements]
+  end
+  subgraph IRlayer["構造作用層 IR"]
+    I[control ops\nbranch/join/loop/jump/...]
+  end
+  subgraph CFGlayer["制御到達と経路閉包 CFG"]
+    C[nodes + edges]
+  end
+  A -->|direct edges where explicit| C
+  A --> I
+  I -->|shape + labels| C
+```
+
+### 用語簡易表
+| 用語 | 意味 |
+|------|------|
+| 写像規則 | AST/IR 要素から CFG 要素への対応規約 |
+| Fall-through | 暗黙順序を明示辺化すること |
+
+### 他文書との参照関係
+- 前提：`20_ir`（IR 中核、IR–CFG 接続）、`01`〜`03`
+- 続稿：`05` 経路、`06`〜`07` ループ・非構造
+
+### Mermaid 図の説明
+AST からの直接辺化と、IR 媒介による骨格付与の二経路を示す。
+
+### リスク観点
+IR で join が省略されると CFG に偽直列が入り、**保証範囲** が過大・過小に歪む。
+
+### 未解決論点
+- ALTER 等の動的制御の静的近似のラベル規約
+- COPY 展開後の「唯一の CFG」の定義
+
+---
+# Branch, Merge, and Path Structure
+
+## 1. 目的
+本稿は、CFG を **経路の構造** として読むための概念、**分岐（branch）**、**合流（merge）**、**経路（path）** を定義する。merge を図上の交点に還元せず、**判断上の再統合点** として扱う。実行可能経路・保証対象経路といった **準備概念** を導入し、**Guarantee** が経路依存になりうる理由を明文化する。**判断接続層** への接続の下地を固定する。
+
+## 2. 定義対象のスコープ
+対象は **制御到達と経路閉包の構造層（CFG）** における経路論の基礎である。ループの細目は `06`、非構造遷移の類型は `07`、支配・閉包は `08` で精密化する。本稿では **path の定義**、**branch の開き**、**merge の意味**、**多分岐**、**早期脱出**、**path-sensitive 保証の準備** に焦点を当てる。
+
+## 3. 分岐（branch）
+**分岐** とは、CFG 上のノード \(b\) が **二つ以上の後続** を持ち、かつ制御がそのうち **一つを選択** して進む構造として理解される関係である。条件分岐・選択分岐を含む。EVALUATE は **単一ノードの多分岐** として抽象化されうる。
+
+**分岐の開き方** として、各選択肢は **別辺** として表現され、それぞれが **異なる初期経路接頭辞** を生む。
+
+## 4. 合流（merge）
+**合流** とは、**二つ以上の異なる前駆** から制御が **同一ノード** \(m\) に入る構造である。merge は **経路が再統合される点** であり、以降の実行は **どの前駆から来たか** によって状態が異なりうる。
+
+判断上、merge は次の意味を持つ。
+
+- **再統合点**：分岐で分かれた経路が **同一の後続解析領域** に戻る
+- **観測点**：path-sensitive な性質を持つ場合、merge 以降の主張は **経路履歴** に依存しうる
+
+## 5. 経路（path）
+**経路** とは、CFG の辺の有限列 \((e_1,\ldots,e_n)\) であって、辺同士が **首尾一貫して接続** されるものである。経路は **ノードの集合** ではない。同一ノード集合を通っても **辺列が異なれば別経路** ありうる。
+
+**始点・終点** は、解析目的に応じて、プログラム入口から某 merge まで、某 branch から終端までなど **区間** を指定する。
+
+## 6. 経路分類の観点
+次の区別は、後続の保証・テスト論で精密化される **準備概念** として導入する。
+
+| 観点 | 説明 |
+|------|------|
+| 構文的経路 | CFG 上で辺接続として存在する経路 |
+| 実行可能経路 | データ・環境制約のもとで **実際にありうる** 経路 |
+| 保証対象経路 | Guarantee によって **性質が主張される** 経路部分集合 |
+| 未カバー経路 | テスト・証明が **未着手** の経路 |
+
+静的 CFG は **構文的経路の上限近似** を与える。
+
+## 7. 多分岐構造
+EVALUATE や多条件 IF は、**扇状の branch** と **共通 merge** として表現される。共通 merge が省略される場合、**経路は合流せず並行して終端** へ向かう。これは **保証の分割** を要請しうる。
+
+## 8. 早期脱出（early exit / early transfer）
+EXIT PARAGRAPH、EXIT SECTION、GO TO による **手続・領域からの早期脱出** は、**通常の merge へ至らない経路** を生む。これは **path 集合の分断** を意味し、**カバレッジ・保証単位** の複雑性を上げる。早期脱出は **non-structured** と限らないが、**合流の欠落** と併発しうる。
+
+## 9. ノード集合と経路概念の区別
+「ノード集合が同じ」ことは「同一経路」ではない。Guarantee が **状態不変条件** を含む場合、**どの分岐選択列を通ったか** が主張の前提となる。よって **Guarantee Unit は経路依存になりうる**。
+
+## 10. 判断接続層との接続（準備）
+- **Guarantee**：保証を **経路単位** で分割・統合する必要の有無は、branch の深さ、merge の有無、早期脱出の有無に依存する
+- **Scope**：経路が **領域外へ逸脱** するかどうかは、境界ノード・辺で識別する
+- **Decision**：経路数増大、未合流、非構造遷移の混在は **移行リスク** の指標となりうる
+
+## 11. 移行判断への意味
+経路構造は、**テスト可能か**、**仕様が経路で分岐しているか**、**移行後も同じ経路集合が意味を持つか** を論じるための **共通言語** である。
+
+## 12. まとめ
+本稿は、branch・merge・path を定義し、merge を **再統合点** として位置づけ、経路の **列としての同一性** を強調した。静的 CFG 上の経路と、実行可能・保証対象経路の **段階的区別** を導入し、Guarantee の経路依存性の根拠を与えた。
+
+```mermaid
+flowchart TB
+  start([start]) --> b{branch}
+  b -->|cond1| p1[path prefix 1]
+  b -->|cond2| p2[path prefix 2]
+  p1 --> m((merge))
+  p2 --> m
+  m --> tail[downstream]
+  p1 -.->|early exit| x[exit without merge]
+```
+
+### 用語簡易表
+| 用語 | 要約 |
+|------|------|
+| Path | 辺の有限接続列 |
+| Merge | 経路の再統合点 |
+| Path-sensitive | 経路履歴に依存する主張 |
+
+### 他文書との参照関係
+- 前提：`01`〜`04`、`20_ir`（branch/join 骨格）
+- 続稿：`06` ループ、`08` 支配・閉包、`09` 判断接続の詳細
+
+### Mermaid 図の説明
+分岐→合流の正常形と、合流を経由しない早期脱出経路の対比を示す。
+
+### リスク観点
+merge が欠けたまま終端が増えると **経路集合が指数的に肥大** し、**条件網羅** と **契約保証** のコストが跳ね上がる。
+
+### 未解決論点
+- feasible 経路を静的に近似する規約
+- 同一 merge 後にいつ path-sensitive を解消してよいか
+
+---
+# ループと反復モデル（Loop and Iteration Model）
+
+## 1. 目的
+本稿は、Phase9 `30_cfg` において、**CFG を制御到達と経路閉包の構造層**として扱う際の中核要素である **反復構造** を、単なるグラフ上の後退辺（back edge）の存在として還元せず、**制御抽象として識別・分類可能な構造単位**として定式化する。先行する分岐・合流・経路の議論（`05`）と、後続の非構造制御（`07`）、支配・閉包（`08`）、判断接続層（`09` `10`）との接続において、ループが **移行難易度・保証単位・説明責任** に与える差分を固定することが目的である。
+
+**構文層（AST）** は `PERFORM` 等の表層記法を与えるにとどまり、**構造作用層（IR）** は反復に関与する制御作用（条件・範囲・復帰）を型付けする。本稿が扱うのは、その作用が **CFG 上でどのような反復スキーマ（header / body / exit）として現れるか** の理論的整理である。
+
+## 2. 定義対象のスコープ
+本稿は次を対象とする。
+
+- `PERFORM` 系に由来する反復（条件反復、添字反復、回数反復、段落範囲反復）
+- 単一ループ、入れ子ループ、複合条件を伴う反復の **構造的位置づけ**
+- ループ境界における **合流・出口・後退** の意味分類
+
+対象外とするのは、具体的な解析アルゴリズム、ループ不変条件の自動推論、実行時性能、特定ターゲット言語への機械的変換手順である。
+
+## 3. コア概念の定義
+### 3.1 反復スキーマ（iteration schema）
+**反復スキーマ** とは、CFG の部分構造として、**同一の制御領域を繰り返し通過しうる閉じた経路族** を特徴づける最小の構造パターンである。反復スキーマは、少なくとも次の役割分担を備える。
+
+- **ループ頭（loop header）**：反復が「再入」される観測点
+- **ループ本体（loop body）**：反復ごとに実行されうる作用列に対応する領域
+- **出口辺（exit edge）**：反復から脱出し、ループ外の合流または後続へ至る辺
+- **継続辺（continue edge）**：本体の末尾または中間からループ頭へ戻る経路要素
+
+**一文定義**：本研究空間における反復は、**ループ頭・本体・出口・継続が制御依存として識別可能な閉路構造** として定義される。
+
+### 3.2 後退辺（back edge）の位置づけ
+後退辺は反復の **十分条件ではなく記述手段** である。同一の後退辺表象でも、ループ頭の単一性、出口の個数、本体の非連結性などにより **移行リスクと保証難易度は異なりうる**。したがって本稿では、back edge をループ定義の代用とせず、反復スキーマへ還元して語る。
+
+### 3.3 終了条件（termination）の構造的位置づけ
+終了条件は **構文層の述語そのもの** ではなく、CFG 上では次のいずれかとして現れる。
+
+- **先判定型**：ループ頭での条件分岐により、継続と出口が分離される
+- **後判定型相当**：本体実行後に再条件化され、継続辺がループ頭へ戻る
+- **カウンタ／添字駆動**：更新点と境界判定点が本体内部または header に分散する
+
+終了可能性の証明は本稿の主題ではないが、**判断接続層** においては「終了条件が単一箇所に集約されているか」「分散しているか」が、説明可能性と検証コストに直結する。
+
+## 4. ループ分類（loop taxonomy）
+| 区分 | 構造的要約 | CFG 上の読み |
+|------|------------|--------------|
+| 条件反復（UNTIL 型） | 真偽条件による継続／脱出 | header での branch、exit と continue |
+| 添字反復（VARYING 型） | 添字範囲と更新による反復 | header／本体に分散した更新・判定、合流の複雑化 |
+| 回数反復（TIMES 型） | 回数上限による反復 | 明示カウンタに相当する制御構造 |
+| 段落範囲反復 | 単一段落または THRU 範囲の反復実行 | 手続境界ノードと loop header の関係が強い |
+| 入れ子反復 | 反復領域の包含 | 内側 exit が外側 header と交差しないことが望ましいが、COBOL では崩れうる |
+
+## 5. COBOL 特有の構造論点
+COBOL の反復は、**段落（paragraph）・節（section）** をコンテナとして持ち、`PERFORM THRU` により **制御領域が構文コンテナと一致しない** ことがある。これは次の論点を生む。
+
+- **ループ本体の非連結性**：本体が複数ブロックに分割され、合流が単純化されない
+- **出口の暗黙化**：`EXIT PARAGRAPH` / `EXIT SECTION` 等が、CFG 上の出口辺として分散しうる
+- **入れ子の交差**：内側の脱出が外側ループの構造を壊す場合、反復スキーマの単純木モデルが失効する
+
+## 6. 他モデルとの接続
+- **構文層（AST）**：`PERFORM` の構文種別とオプションが、反復スキーマ推定の手掛かりとなる
+- **構造作用層（IR）**：branch／loop／join／procedure boundary の型が、header・exit の候補を供給する
+- **制御到達と経路閉包の構造層（CFG）**：本稿の反復は、path 族の閉包性と、merge の多重度を通じて記述される
+- **判断接続層**：Guarantee は反復内の経路網羅、Scope は反復領域の境界、Decision は打ち切り困難性や構造複雑性を読む
+
+```mermaid
+flowchart TB
+  subgraph CFG["CFG（制御到達・経路閉包）"]
+    H[loop header]
+    B[loop body]
+    X[exit edge]
+    C[continue to header]
+  end
+  subgraph Layers["前後層"]
+    AST["構文層 AST"]
+    IR["構造作用層 IR"]
+    J["判断接続層 G/S/D"]
+  end
+  AST -.-> IR
+  IR --> H
+  H --> B
+  B --> C
+  C --> H
+  B --> X
+  H --> X
+  CFG --> J
+```
+
+## 7. 移行判断への意味
+反復は移行において次の意味を持つ。
+
+- **状態空間の圧縮失敗**：同一ノード集合でも反復回数に依存する挙動は、単純な「ブロック単位置換」を危うくする
+- **テスト・保証の経路爆発**：merge と continue の組合せが多いほど、経路ベースの主張が重くなる
+- **境界の曖昧化**：段落範囲反復は、業務単位と制御閉包のズレを増幅し、Scope 候補の選定を難しくする
+
+## 8. まとめ
+本稿は、CFG 上の反復を **ループ頭・本体・出口・継続** から成る反復スキーマとして定義し、`PERFORM` 系の差異を構造 taxonomy に落とし込んだ。後退辺はループの表象手段にとどめ、終了条件の配置と合流構造を通じて **判断接続層** に橋を架ける。これにより、反復は「循環がある」という弱い記述から、移行・保証・説明に耐える **独立した制御抽象** へ昇格する。
+
+## 9. 用語簡易表
+| 用語 | 意味 |
+|------|------|
+| 反復スキーマ | header／body／exit／continue が識別可能な閉路構造 |
+| ループ頭 | 反復の再入点・条件の主座 |
+| 出口辺 | 反復領域からの脱出経路 |
+| 後退辺 | ループ頭方向への制御辺（表象） |
+
+## 10. 他文書との参照関係
+- 前提：`05_Branch-Merge-and-Path-Structure.md`
+- 続接：`07_NonStructured-Control-and-GOTO.md`、`08_Dominance-Reachability-and-Closure.md`、`09_CFG-to-Scope-Guarantee-Decision.md`
+
+## 11. Mermaid 図の説明
+上図は、IR から供給される制御候補がループ頭へ集約され、継続と出口が分岐する最小スキーマを示す。判断接続層は、このスキーマが生成する **経路閉包** を読む。
+
+## 12. 未解決論点
+- 動的制御が反復スキーマに与える不確定性の扱い
+- 終了条件とデータ作用が強結合する場合の DFG との合同議論
+
+---
+# 非構造制御と GO TO（Non-Structured Control and GOTO）
+
+## 1. 目的
+本稿は、COBOL プログラムに現れる **非構造制御** を、道徳的排除の対象ではなく、**CFG 上で観測可能な構造破壊の程度** として理論化する。`30_cfg` における CFG は **制御到達と経路閉包の構造層** であり、構造化された分岐・合流・反復と **同一グラフ上** に非構造辺を載せ、エッジ分類によって差異を明示する立場を採る。
+
+**構文層（AST）** は `GO TO` 等の記法を与え、**構造作用層（IR）** は jump・exit・手続境界として型付けする。本稿は、その結果として **判断接続層** にどの種類の説明負債が発生するかを構造言語で固定する。
+
+## 2. 定義対象のスコープ
+対象とするのは次に相当する制御現象である。
+
+- 明示ジャンプ（`GO TO`）に代表される **任意着地点への制御移譲**
+- paragraph／section を跨ぐ遷移、および **fall-through** に伴う制御の非構造性
+- ループや単一入口領域を破壊する **構造破壊ジャンプ**
+
+対象外とするのは、ジャンプ解決の実装手順、ラベル解析の詳細アルゴリズム、特定ツールによる自動リファクタリング戦略である。
+
+## 3. コア概念の定義
+### 3.1 非構造制御（non-structured control）
+**非構造制御** とは、CFG を **単一入口・単一出口の合成規則だけで再構成できない** 制御の寄与である。ここで「再構成できない」は、ソース上の整形可能性ではなく、**与えられた CFG の経路構造における合成制約の破れ** として理解する。
+
+### 3.2 非構造辺（non-structured edge）
+非構造辺は、通常の順序辺・条件辺に加え、次の性質のいずれかを持つ制御辺として定義される。
+
+- **領域横断性**：固定された control region の境界を、構造化合成の規則に沿わずに跨ぐ
+- **入口多重化の誘発**：同一の制御観測点へ、意図的でない多様な前駆から到達しうる状態を安定化する
+- **出口多重化の誘発**：同一の意味単位から、非対称な複数の脱出先へ分散する
+- **ループ破壊**：反復スキーマの header／exit の読みを、単一の閉路モデルで説明できなくする
+
+### 3.3 構造回復可能性（recoverability）
+**構造回復可能性** とは、非構造辺を **等価な構造化スキーマ** へ置換しうるかを、CFG の性質として評価する観念である。
+
+- **局所回復**：限定された部分グラフ内で、多入口・多出口を解消しうる
+- **大域回復**：プログラム全体の意味保存のもとで、単一入口単一出口領域へ分解しうる
+
+回復不能性は「悪」の宣告ではなく、**移行・検証・説明コストの上界** を示す記号である。
+
+## 4. 非構造制御の分類
+| 類型 | 構造破壊の主効果 | 典型的な判断影響 |
+|------|------------------|------------------|
+| 局所ジャンプ | 小領域内の出口／入口の再配線 | 局所テストで吸収しうるが、merge の説明が複雑化 |
+| 領域横断ジャンプ | control region／paragraph 境界を直接短絡 | Scope 候補と CFG 閉包のズレが拡大 |
+| ループ破壊ジャンプ | 反復スキーマの単純モデル失効 | 経路保証・不変条件の説明が困難 |
+| 入口多重化 | 単一入口仮定の崩壊 | 保証単位の前提が弱まる |
+| 出口多重化 | 合流前の意味分岐の増加 | Decision におけるリスク要因として顕在化 |
+
+## 5. COBOL 特有の構造論点
+- **paragraph 横断**：業務記述の自然単位と CFG の最小単位が一致しないため、非構造辺が「遠距離依存」として現れやすい
+- **section 境界**：宣言と実行の境界が、制御の見通しを損なう
+- **fall-through**：構文上は直列に見えるが、実効は多入口化・多出口化を伴うことがある
+- **EXIT 系と jump の混線**：出口制御が分散すると、非構造度の定量化が難しくなる
+
+## 6. 他モデルとの接続
+- **IR**：Jump／Exit／Procedure boundary が非構造辺候補を供給する
+- **分岐・合流（`05`）**：merge の手前で非構造辺が集中すると path 説明が破綻しやすい
+- **反復（`06`）**：ループ破壊は反復スキーマの失効として記録される
+- **支配・閉包（`08`）**：入口／出口構造の理解に post-dominator 等が必要になる
+- **判断接続層**：Guarantee は経路の未整理さ、Scope は領域横断、Decision は回復コストとして読む
+
+```mermaid
+flowchart LR
+  subgraph Structured["構造化部分"]
+    A[branch]
+    M[merge]
+  end
+  subgraph NonS["非構造寄与"]
+    G[GO TO / 遠距離遷移]
+  end
+  A --> M
+  G -.->|non-structured edge| M
+  G -.->|region crossing| N[distant node]
+```
+
+## 7. 移行判断への意味
+非構造制御は、次を通じて移行リスクを押し上げる。
+
+- **説明不能経路の増加**：置換言語側の構造化 idiom への写像が一意でなくなる
+- **スコープ分割の困難**：制御閉包と業務閉包の不一致が拡大する
+- **テスト設計の負荷**：入口・出口の組合せが増え、カバレッジ方針と Guarantee の整合が取りにくい
+
+## 8. まとめ
+本稿は、非構造制御を CFG の **辺の意味分類** として定義し、局所／領域横断／ループ破壊・多入口・多出口という軸で類型化した。構造回復可能性は、移行可否の **説明責任とコスト** を見積るための構造指標として位置づけられる。
+
+## 9. 非構造度の指標候補
+アルゴリズムではなく **観測可能な構造特徴** として、次を候補とする。
+
+- 非構造辺の密度
+- 遠距離遷移の件数
+- 多入口・多出口ノード／領域の個数
+- ループ破壊辺の有無と反復スキーマ単純性の喪失度
+
+## 10. 用語簡易表
+| 用語 | 意味 |
+|------|------|
+| 非構造制御 | 単一入口単一出口合成で再構成しにくい制御寄与 |
+| 非構造辺 | 上記を生じさせる制御辺のクラス |
+| 構造回復 | 等価な構造化スキーマへの置換可能性 |
+
+## 11. 他文書との参照関係
+- 前提：`02_CFG-Node-and-Edge-Taxonomy.md`、`05`〜`06`
+- 続接：`08`、`09`、`10`
+
+## 12. Mermaid 図の説明
+上図は、局所的分岐・合流に対し、遠距離への非構造辺が「領域横断」として重ね掛けされる状況を模式的に示す。
+
+## 13. 未解決論点
+- 動的制御による **辺集合そのものの変動** の扱い
+- 「等価性」の基準をどの判断接続層概念に結びつけるか
+
+---
+# 支配・到達性・閉包（Dominance, Reachability, and Closure）
+
+## 1. 目的
+本稿は、CFG を **制御到達と経路閉包の構造層** として扱う際に不可欠な **到達性（reachability）・支配（dominance）・閉包性（closure）** を、証明論ではなく **移行単位の切り出し・保証境界の説明・影響伝播の読み** に接続する水準で定義する。数学的厳密さより、**判断接続層** が参照しうる操作可能概念として固定することが目的である。
+
+## 2. 定義対象のスコープ
+対象とするのは、単一プロシージャ／コンパイル単位に対する CFG 上の関係である。複数プログラム間の呼出は、手続境界ノードとして **入口・出口条件** に還元して扱う。
+
+本稿は **アルゴリズム** を扱わない。
+
+## 3. コア概念の定義
+### 3.1 到達性（reachability）
+ノード \(v\) がノード \(u\) から **到達可能** であるとは、\(u\) から \(v\) へ至る **制御経路** が存在することをいう。到達性は、「その作用は実行されうるか」という **最弱の前提** を与える。到達不能は **デッドコード** の手掛かりとなるが、本研究では主に **保証・テストの無駄削減** と **説明範囲の切断** に用いる。
+
+### 3.2 支配（dominance）
+ノード \(d\) がノード \(n\) を **支配** するとは、入口から \(n\) への任意の経路が \(d\) を通過しなければならないことをいう。**直観** として、\(n\) に至る前に **必ず通る関所** である。
+
+### 3.3 ポスト支配（post-dominance）
+ノード \(p\) がノード \(n\) を **ポスト支配** するとは、\(n\) から各終端への任意の経路が \(p\) を通過しなければならないことをいう。**直観** として、\(n\) 以降で **必ず通る合流・出口前関所** である。
+
+### 3.4 制御閉包（control closure）
+**制御閉包** とは、部分グラフ \(R\) が、与えられた入口・出口の取り方の下で **内部の制御流れが外部へ逸脱せず説明できる** という性質である。実務的には次の区別を採る。
+
+- **弱閉包**：内部から外部への辺が存在しない
+- **強閉包**：単一入口・単一出口に近い合成規則で **置換可能** である
+
+### 3.5 単一入口・単一出口領域（SESE）
+**SESE 領域** は、支配とポスト支配を用いて **カット可能な制御断片** として理解される。COBOL では非構造辺により SESE 仮定が容易に崩れる点が論点となる。
+
+### 3.6 還元不能性（irreducible control）
+**還元不能な制御** とは、ループ構造を単純な階層木で表すことが困難な、**絡み合った後退** を伴う制御である。本稿ではアルゴリズム的判定ではなく、**説明構造としての複雑性** として扱う。
+
+```mermaid
+flowchart TB
+  ENTRY[entry]
+  D[dominator-like cut]
+  N[work region]
+  P[post-dominator-like cut]
+  EXIT[exit]
+  ENTRY --> D --> N --> P --> EXIT
+```
+
+## 4. COBOL 特有の構造論点
+- **多出口・分散出口**：`EXIT` 系・非構造辺により、ポスト支配の基準となる出口集合が曖昧化しうる
+- **段落モデルとのズレ**：支配関係は basic block 粒度で安定しやすいが、業務説明は paragraph 粒度で行われる
+- **例外・I/O 境界**：宣言部や例外ハンドラは、制御閉包の「外」と「内」を分断しうる
+
+## 5. 他モデルとの接続
+- **構文層（AST）**：入口・出口の候補を構文的に与える
+- **構造作用層（IR）**：branch／join／exit の骨格が支配・ポスト支配の **候補カット** となる
+- **非構造制御（`07`）**：支配関係の説明力を弱める要因として記録される
+- **判断接続層**：
+  - **Scope**：制御閉包は境界候補の十分条件になりうるが、業務閉包と一致しない
+  - **Guarantee**：支配関係は「必ず実行される前提」や「条件付き実行」の説明に効く
+  - **Decision**：SESE に近いほど分割容易性が高い、という **構造指標** を与える
+
+## 6. 移行判断への意味
+- **migration unit の切り出し**：支配／ポスト支配で挟まれた領域は、置換単位の候補となるが、非構造辺があるとカットが無意味化する
+- **影響伝播**：変更点からの到達・逆到達で、説明すべき経路集合を束ねる
+- **保証の説明責任**：「すべての経路で」を主張するほど、支配・合流・出口の配置が説明の主役になる
+
+## 7. 制御閉包とスコープ閉包の不一致
+制御閉包だけでは Scope が十分に決まらない典型理由は次のとおりである。
+
+- paragraph 名で見た業務まとまりと、CFG の閉包が一致しない
+- データ依存や外部 I/O が、制御的には閉じていても **意味的には開いている**
+
+## 8. まとめ
+本稿は、到達性・支配・ポスト支配・制御閉包・SESE・還元不能性を、CFG 上の **判断可能な関係** として定義し、非構造制御や COBOL 特有出口がもたらす説明の難度を明示した。これらは **判断接続層** における境界・保証・分割判断の **構造根拠** となる。
+
+## 9. 用語簡易表
+| 用語 | 意味 |
+|------|------|
+| 支配 | 入口からの任意経路が必ず通る前関所 |
+| ポスト支配 | 出口側の任意経路が必ず通る後関所 |
+| 制御閉包 | 内部制御が外部へ逸脱しない説明可能性 |
+| SESE | 単一入口・単一出口に近いカット可能領域 |
+
+## 10. 他文書との参照関係
+- 前提：`03`〜`07`
+- 続接：`09`、`10`
+
+## 11. Mermaid 図の説明
+上図は、入口側の支配カットと出口側のポスト支配カットのあいだに作業領域を挟む **概念的スライス** を示す。
+
+## 12. 未解決論点
+- 出口集合の規定がポスト支配に与える影響
+- 還元不能性と「人間にとっての理解容易性」の相関
+
+---
+# CFG から Scope・Guarantee・Decision への接続（CFG to Scope, Guarantee, and Decision）
+
+## 1. 目的
+本稿は、`30_cfg` で与えられた CFG を **制御到達と経路閉包の構造層** として確立したうえで、**判断接続層** における **Scope（境界）・Guarantee（保証）・Decision（移行判断）** へ、どのような **射影規則と限界** で接続するかを明文化する。CFG を単独理論で終わらせず、研究全体の **根拠の流通** を可能にすることが目的である。
+
+## 2. 定義対象のスコープ
+対象とするのは、CFG が供給しうる **境界候補・保証単位候補・判断材料** の理論的対応である。データ依存、例外契約、業務意味の完全な固定は、`40_dfg`、`50_guarantee` の詳細、`70_cases` に一部委ねる。
+
+## 3. コア概念の定義
+### 3.1 ノード保証・領域保証・経路保証
+**ノード保証** は、特定の CFG ノードまたは基本ブロックの実行に関する主張である。**領域保証** は、制御閉包に近い領域に対する主張である。**経路保証** は、分岐選択の組合せに依存する主張であり、**同一ノード集合でも経路により真偽が変わりうる** 点が本研究の要点である。
+
+### 3.2 制御閉包と保証閉包
+**制御閉包** は CFG 上の説明可能性である。**保証閉包** は、主張が意味的に閉じている範囲であり、データ・外部境界・例外を含みうる。二者は一致しない。
+
+### 3.3 保証不能経路（unguaranteeable path）
+**保証不能経路** とは、与えられた証拠・契約・観測の下で、主張の真偽または適用条件を **十分に説明できない経路** である。原因は、CFG 外の情報欠落である場合もあれば、CFG 上の **多入口・多出口・未閉包・非構造辺** による説明の分裂である場合もある。
+
+### 3.4 判断閉包（decision closure）
+**判断閉包** とは、Decision が結論を下すために **最小限そろえるべき根拠束** である。CFG はその一部（制御経路・閉包・危険パターン）を供給し、IR・DFG・Guarantee 契約で補完される。
+
+## 4. 接続マップ
+| 判断接続層 | CFG が供給する主な読み |
+|------------|-------------------------|
+| Scope | 制御閉包、SESE 近似、merge／exit の配置、領域横断辺の有無 |
+| Guarantee | 経路集合の分解、必達／条件付き到達、合流前後の説明単位 |
+| Decision | 分割容易性、非構造度、ループ・分岐複雑性、未閉包・保証不能の手掛かり |
+
+## 5. COBOL 特有の構造論点
+- **paragraph 参照と制御閉包のズレ**：Scope の自然言語境界が、CFG 閉包と一致しない
+- **PERFORM THRU と範囲保障**：領域保証を語るとき、手続境界と実効経路の差が問題になる
+- **EXIT と GO TO の混在**：経路保証の説明が分岐し、Guarantee の単位選択が難しくなる
+
+## 6. 他モデルとの接続
+```mermaid
+flowchart LR
+  subgraph Syntax["構文層 AST"]
+    A[観測された構文]
+  end
+  subgraph IRl["構造作用層 IR"]
+    I[制御作用の型付け]
+  end
+  subgraph CFGl["構造層 CFG"]
+    C[到達・支配・閉包・経路]
+  end
+  subgraph Judge["判断接続層"]
+    S[Scope]
+    G[Guarantee]
+    D[Decision]
+  end
+  A --> I --> C
+  C --> S
+  C --> G
+  C --> D
+  S --> D
+  G --> D
+```
+
+- **AST**：境界記号・制御記法の根拠
+- **IR**：CFG 構築の手掛かり
+- **DFG**：制御閉包が閉じても保証閉包が開く典型原因
+- **`10`**：CFG 由来リスクを Decision 入力へ集約
+
+## 7. 移行判断への意味
+- **migration decision** は、CFG だけでは完結しない。しかし **「どこを切ると制御説明が壊れるか」** は CFG が最も強い
+- **経路保証** が必要な主張ほど、`05`〜`08` の概念が Decision の前提になる
+- **保証不能経路** の顕在化は、移行の段階計画や追加証拠獲得を要求する
+
+## 8. まとめ
+本稿は、CFG を判断接続層へ接続する際の **射影規則** を、Scope／Guarantee／Decision の三軸で整理し、ノード・領域・経路の三層保証の違い、制御閉包と保証閉包の不一致、保証不能経路の概念を固定した。CFG は **根拠の中枢** であり、**結論の全部** ではない。
+
+## 9. 用語簡易表
+| 用語 | 意味 |
+|------|------|
+| 経路保証 | 分岐選択に依存する主張 |
+| 保証閉包 | 主張が意味的に閉じる範囲 |
+| 保証不能経路 | 説明・証拠不足で主張が付かない経路 |
+| 判断閉包 | Decision に必要な根拠束 |
+
+## 10. 他文書との参照関係
+- 前提：`01`〜`08`
+- 双方向：`50_guarantee`、`60_scope`、`60_decision`
+- 続接：`10`
+
+## 11. Mermaid 図の説明
+上図は、AST→IR→CFG の上流と、CFG から三つの判断概念への下流、および Scope／Guarantee から Decision への合流を示す。
+
+## 12. 未解決論点
+- Guarantee 契約言語と CFG 射影の **形式整合**
+- Scope の最終定義が業務辞書・モジュール境界に依存する場合の運用規則
+
+---
+# CFG リスクパターンと移行準備度（CFG Risk Patterns and Migration Readiness）
+
+## 1. 目的
+本稿は、`30_cfg` 群で整備した **制御到達と経路閉包の構造層（CFG）** の概念を、**判断接続層** における **移行準備度（migration readiness）** 評価へ接続する。危険の列挙ではなく、各パターンについて **なぜ構造的にリスクとなりうるか** を示し、**観測可能な CFG 特徴** として読み替えることが目的である。後続の事例分析へ展開可能な **入力観測の辞書** を与える。
+
+## 2. 定義対象のスコープ
+対象は、CFG 上で識別しうる **高リスク制御パターン** と、それが Scope／Guarantee／Decision に与える **典型的影響** である。実装の検出閾値やスコアリング式は本稿では与えない。
+
+## 3. コア概念の定義
+### 3.1 CFG リスクパターン
+**CFG リスクパターン** とは、移行・検証・構造回復のいずれかにおいて **コスト上界を押し上げうる制御構造の再帰的に現れる形** である。パターンは独立ではなく、合成により強化されうる。
+
+### 3.2 分割困難領域（hard-to-partition region）
+**分割困難領域** とは、単一入口単一出口に近い合成が崩れ、**意味保存のもとでのモジュール化** が難しい領域である。非構造辺、多出口、遠距離 merge が典型因となる。
+
+### 3.3 未閉包経路（non-closed paths）
+**未閉包経路** とは、制御閉包の説明下で **入口から出口まで一貫して束ねられない経路族** である。例外処理、動的制御、外部呼出の非局所出口が関与しうる。
+
+### 3.4 移行準備度（migration readiness）
+**移行準備度** は単一指標ではなく、**根拠束の充足度** である。CFG はその主要因を供給し、DFG・契約・テスト資産で補完される。
+
+## 4. リスクパターン一覧
+| ID | パターン名 | 構造要因（CFG） | 典型的判断影響 |
+|----|------------|-----------------|----------------|
+| R1 | 深い分岐ネスト | 連鎖 branch、複数 merge | 経路説明・テスト設計の複雑化 |
+| R2 | 非構造辺の高密度 | 非構造辺比率、遠距離短絡 | 構造回復コスト、Scope ズレ |
+| R3 | 多出口領域 | 出口辺の分散、ポスト支配の曖昧化 | 領域保証の困難、段階移行の障害 |
+| R4 | 複雑反復 | 分散した終了条件、本体非連結 | 経路保証・不変条件の説明困難 |
+| R5 | 還元不能な絡み | irreducible な後退構造 | 人間理解・工具支援の両難 |
+| R6 | 長距離 back edge | ループ頭と本体の地理的分離 | 影響分析・リファクタリングの難度増 |
+| R7 | paragraph 横断の複雑化 | 領域横断辺と業務単位の不一致 | 業務スコープと制御スコープの断裂 |
+| R8 | 例外・I/O 絡みの分岐 | 異常経路の合流不全 | 未閉包経路、保証不能 |
+
+## 5. 構造要因と判断影響の対応
+| 判断接続層 | R1–R8 が効きやすい論点 |
+|------------|-------------------------|
+| Scope | R2, R3, R7 |
+| Guarantee | R1, R4, R8 |
+| Decision | R2, R3, R5, R6 |
+
+## 6. COBOL 特有の構造論点
+- **PERFORM THRU** は R4／R7 と合成されやすい
+- **GO TO** は R2 の主要因である
+- **EXIT** 系は R3／R8 を誘発しうる
+
+## 7. 他モデルとの接続
+- **先行各稿**：`05`（path）、`06`（loop）、`07`（non-structured）、`08`（dominance／closure）、`09`（判断接続）
+- **DFG**：R8 の多くは制御だけでは閉じない
+- **事例**：パターンは `70_cases` で **再現条件** として検証されるべきである
+
+```mermaid
+flowchart TB
+  subgraph Inputs["観測入力（CFG 中心）"]
+    P1[branch depth / merge pattern]
+    P2[non-structured edges]
+    P3[multi-exit]
+    P4[loop complexity]
+    P5[irreducibility signal]
+    P6[long back edges]
+    P7[cross-paragraph cuts]
+    P8[exception edges open]
+  end
+  subgraph Risks["リスクパターン R1–R8"]
+    R[Risk pattern composition]
+  end
+  subgraph Out["判断接続層"]
+    S[Scope stress]
+    G[Guarantee stress]
+    D[Decision readiness]
+  end
+  P1 & P2 & P3 & P4 & P5 & P6 & P7 & P8 --> R
+  R --> S
+  R --> G
+  R --> D
+```
+
+## 8. 移行判断への意味
+- **準備度評価** は、「R パターンの有無と合成」＋「補助根拠（データ・契約・テスト）」で構成される
+- **高リスク CFG** は、移行不可を意味しない。**追加証拠と段階計画** を Decision が要求する記号である
+
+## 9. まとめ
+本稿は、CFG 上の構造特徴から R1–R8 のリスクパターンを定義し、Scope／Guarantee／Decision への典型的負荷として整理した。migration readiness は、これら **観測入力** と判断閉包の充足度として理解される。Phase9 はここで、**構造層から判断層への輸送** が可能な状態に至る。
+
+## 10. 用語簡易表
+| 用語 | 意味 |
+|------|------|
+| リスクパターン | コスト上界を押し上げうる再帰的構造形 |
+| 分割困難領域 | SESE 的合成が崩れた領域 |
+| 未閉包経路 | 制御閉包で束ねきれない経路族 |
+| 移行準備度 | 根拠束の充足度 |
+
+## 11. 他文書との参照関係
+- 総括的に `01`〜`09` に依存
+- `60_decision` への入力辞書として利用
+
+## 12. Mermaid 図の説明
+上図は、CFG から得られる観測特徴がリスクパターンへ合成され、三つの判断概念にストレスを与える流れを示す。
+
+## 13. 未解決論点
+- パターン間の **重み付けと合成規則**
+- 静的 CFG と実効経路の差が準備度を過大／過小評価しうる点
+
+---
+# `30_cfg`
+
+Phase 9: CFG の文書群です。
+
+`30_cfg` は、`10_ast` `20_ir` `50_guarantee` `60_scope` `60_decision` を前提として、  
+**COBOL の制御構造を、移行判断・保証境界・影響分析に接続可能な制御到達モデルとして定義するフェーズ** を構成します。
+
+CFG は単なる実行順序図ではなく、分岐・合流・反復・非構造遷移・到達可能性・閉包性を、判断可能な構造として外在化する **制御構造層** として位置づけられます。
+
+## Documents
+
+- `01_CFG-Core-Definition.md`
+- `02_CFG-Node-and-Edge-Taxonomy.md`
+- `03_Basic-Block-and-Control-Region.md`
+- `04_CFG-Mapping-from-AST-and-IR.md`
+- `05_Branch-Merge-and-Path-Structure.md`
+- `06_Loop-and-Iteration-Model.md`
+- `07_NonStructured-Control-and-GOTO.md`
+- `08_Dominance-Reachability-and-Closure.md`
+- `09_CFG-to-Scope-Guarantee-Decision.md`
+- `10_CFG-Risk-Patterns-and-Migration-Readiness.md`
+
+## Structure
+
+- `01` は CFG の定義、役割、責務境界を固定する。
+- `02` はノードと辺の分類体系を固定する。
+- `03` は基本ブロックと制御領域を定義し、解析単位を与える。
+- `04` は AST / IR から CFG への写像規則を整理する。
+- `05` は分岐・合流・経路構造を定義する。
+- `06` は反復とループ構造を定義する。
+- `07` は GO TO を含む非構造制御を独立論点として扱う。
+- `08` は到達性・支配性・閉包性を導入する。
+- `09` は CFG を Scope / Guarantee / Decision に接続する。
+- `10` は高リスク制御構造と移行準備度へ接続する。
+
+## Notes
+
+- CFG は **構文層（AST）** と **構造作用層（IR）** の後に置かれる、制御到達と経路閉包の構造層である。
+- paragraph / section は保守上の自然単位だが、CFG 上の最小解析単位は basic block であり、両者のズレを明示的に扱う。
+- `30_cfg` は `40_dfg` の前段であると同時に、`50_guarantee` `60_scope` `60_decision` を接続するための制御根拠層である。
+- 非構造制御は例外ではなく、移行リスクを説明するための第一級の分析対象として扱う。
+
+## Next Connection
+
+- `40_dfg`：制御経路上で生じる def-use / 伝播をデータ依存構造へ展開する
+- `50_guarantee`：経路保証・領域保証・保証不能経路を精緻化する
+- `60_scope`：CFG の制御閉包を Scope 境界候補として再評価する
+- `60_decision`：CFG リスクパターンを移行可否判断へ昇格する
+- `70_cases`：高リスク制御構造を事例単位で検証する
+
+
+# 40_dfg
+
+# DFG Core Definition
+
+## 1. Background
+
+本研究では、`10_ast` で構文構造を観測し、`20_ir` で構造作用を再編成し、`30_cfg` で制御到達と経路閉包を固定してきた。しかし移行可否判断・変更影響分析・保証範囲の評価では、**値がどこで生成され、どこへ伝播し、どこで参照・上書きされるか** を構造的に把握できなければ、CFG 単体では説明しきれない依存関係が残る。
+
+本稿で扱う DFG（Data Flow Graph）は、コンパイラ最適化向けの低レベルなデータフロー解析の写しではない。**移行判断・影響分析・保証可能性評価に耐える、データ依存の構造モデル** として定義する。
+
+## 2. Objective
+
+- COBOL 資産における **値の生成・伝播・参照・上書き・集約** を、グラフとして外在化する。
+- 「変数名が同じ」ことと「意味的に同一の値が流れている」ことを区別しうる抽象レベルを固定する。
+- AST / IR / CFG / Guarantee / Scope と **責務が重ならない接続点** を明示する。
+
+## 3. Formal Definition
+
+### 3.1 DFG の定義（本研究）
+
+**DFG** は、プログラム断片において観測される **データ要素（値の担い手）** をノードとし、  
+**定義（define）・利用（use）・派生・集約・分解・境界横断** といった関係をエッジとして表した **有向グラフ** である。
+
+- **ノード**：データ項目、リテラル、式・文の結果、ファイルレコード、外部入出力の端点、条件に関与するデータなど、**依存関係の端点となりうる観測単位**。
+- **エッジ**：値の流れ・依存の向きを表す。**define edge**（あるノードの値が別ノードを定義する）、**use edge**（あるノードの値が別ノードの計算・判定に使われる）、**propagation / derived-from**、**aggregation / decomposition**、**条件依存**、**スコープ横断** など、分類は別稿で体系化する。
+
+### 3.2 定義・使用・再定義・伝播
+
+- **define**：ある時点以降、そのデータ要素が **新たな値を持つ** とみなされる操作（代入、算術結果の格納、READ によるレコード取得、INITIALIZE など）。
+- **use**：式・条件・出力・引数などで **参照される** こと。
+- **再定義 / overwrite**：同一の論理ストレージ上に **後続の define が重なる** こと。COBOL ではグループと従属項目、REDEFINES により **同名・同領域でも意味が衝突** しうるため、**変数名の同一性だけでは同一性を断定しない**。
+- **伝播**：define から use へ、または中間結果を経由した **依存の連鎖**。
+- **集約・分岐合流**：複数 use から一つの define、または一つの値が複数の経路で合流する **merge** は、CFG 上の合流点と対応する。
+
+### 3.3 値の同一性と名前の同一性
+
+本研究の DFG では、**データ記述名の一致** と **データ依存として追跡すべき同一性** を分離する。  
+階層項目、REDEFINES、OCCURS、COPY 由来の同一物理配置の別名など、**意味境界（`06` で詳述）** に基づきノードを割り当てる。
+
+### 3.4 文・段落・手続きのどこまでを「一つの流れ」にするか
+
+- **既定の抽象**：文レベルで define/use を発生点として記録し、**段落・セクション・プログラム境界** は「境界ノード・横断エッジ」として扱う。
+- **集約**：移行判断の単位が段落や CALL 単位である場合、**同一 DFG 上で層を持たせる**（文内の細粒度と、手続き間の粗粒度の両方を扱う）ことを許容し、過剰な SSA 分解は必須としない。
+
+## 4. Structural Role
+
+DFG は **構造層** として、次を担う。
+
+- CFG が **制御到達** を与えるのに対し、DFG は **データ到達・依存閉包の素材** を与える。
+- IR が **構造作用の単位化** を与えるのに対し、DFG は **値の依存関係** を明示する。
+- 単なる「変数参照一覧」ではなく、**依存の種類と境界** を区別できる表現であること。
+
+## 5. Relation to Other Models
+
+| モデル | 役割 | DFG との関係 |
+|--------|------|----------------|
+| AST | 構文木・出現位置 | DFG ノード・エッジの **起源**（どの文・式から来たか） |
+| IR | 構造作用の単位 | **統一された中間表現** から DFG を生成しやすくする |
+| CFG | 制御フロー | **経路依存** により define の reach が変わる。DFG は CFG と独立ではない |
+| Guarantee | 保証単位 | データの前提・結果を **依存として** 補助 |
+| Scope | 影響境界 | **依存閉包** の根拠として接続 |
+
+```mermaid
+flowchart LR
+  subgraph Syntax["構文層"]
+    AST["AST"]
+  end
+  subgraph Structural["構造層"]
+    IR["IR"]
+    CFG["CFG"]
+    DFG["DFG"]
+  end
+  subgraph Judgment["判断層"]
+    G["Guarantee"]
+    S["Scope"]
+    D["Decision"]
+  end
+  AST --> IR
+  IR --> CFG
+  IR --> DFG
+  CFG --- DFG
+  DFG --> G
+  DFG --> S
+  G --> D
+  S --> D
+```
+
+## 6. Value for Migration Decision
+
+- **変更影響分析**：変更起点からの **依存伝播**（正方向）と **必要なテスト・検証範囲**（閉包）の根拠。
+- **未保証領域の検出**：外部境界・ファイル・CALL 越しに **依存が張り出している** 箇所の特定。
+- **移行単位の補助**：依存が密な部分は **一括移行** が現実的、などの **材料**（唯一の決定因子ではない）。
+- **CFG では見えない依存**：条件分岐の両側で共有されるデータ、ループ内更新とループ外参照の関係。
+- **Scope 閉包**：「どこまでを含めれば影響が閉じるか」の **データ側の根拠**。
+- **Guarantee Unit**：入力前提・出力結果を **データ依存** で記述する際の補助。
+
+## 7. Abstraction Levels
+
+| 層 | 内容 |
+|----|------|
+| **構文層** | MOVE / COMPUTE / READ / WRITE 等の **構文上の出現**。構文の列挙は DFG の定義入力であり、終着点ではない。 |
+| **構造層** | define-use、kill、reach、依存の種類、CFG との **制御敏感** 関係。 |
+| **判断層** | 「この項目変更はどこまで波及するか」「保証対象に含めるべき範囲はどこか」「移行困難度の高い依存の塊はどこか」。 |
+
+## 8. Open Issues
+
+- REDEFINES や可変長とポインタの **意味境界** の粒度は、プロジェクト方針で揺れうる。
+- path-sensitive な完全な reach と、判断に十分な **path-insensitive 近似** のバランス。
+- 実行時フォーマットや外部システム仕様の **未記述部分** は DFG だけでは閉じない残余不確実性を残す。
+
+## 9. Summary
+
+本研究における DFG は、**値の依存構造を移行判断に接続するための中核モデル** である。  
+AST / IR / CFG と混同せず、**名前と値の同一性を分離**し、**Guarantee / Scope** への接続を前提とする。以降の文書（`02`〜`10`）では、分類、define/use/reach、文単位規則、CFG 統合、境界、閉包、検証、リスク、全体接続を順に固定する。
+
+---
+# DFG Node and Edge Taxonomy
+
+## 1. Purpose
+
+DFG を比較・検証・説明可能にするため、**ノード種別** と **エッジ種別** を体系化する。分類は AST ノードの焼き直しではなく、**データ依存という構造** を記述するための語彙である。
+
+## 2. Design Principles
+
+- **移行分析に効く粒度**：最適化のための過細分解は必須としない。
+- **意味境界を尊重**：グループ／従属／REDEFINES は「名前」ではなく **論理データ要素** として扱う。
+- **CFG との併記**：エッジは可能なら **制御敏感** であることを前提に分類する。
+- **Scope / Guarantee への影響**：境界横断・保証単位の独立性を損ねるエッジを区別する。
+
+## 3. Node Taxonomy
+
+### 3.1 上位分類
+
+| 区分 | 説明 | 例 |
+|------|------|-----|
+| **Data Item Node** | プログラムが参照する論理データ要素 | 基本項目、グループ、従属、INDEX 付き要素 |
+| **Literal / Constant Node** | ソース上の定数・図式定数 | 数値リテラル、ZERO、SPACE、定数領域 |
+| **Expression Result Node** | 式評価の中間・最終結果 | COMPUTE 右辺の部分式（必要に応じて） |
+| **Statement Result Node** | 文の実行結果としてのまとまり | 文レベルで集約する「文結果」 |
+| **Input Source Node** | 外部からの入力の起点 | ファイルレコード、ACCEPT バッファ、CALL 入力 |
+| **Output Sink Node** | 外部への出力の終点 | DISPLAY、WRITE、CALL 出力、レポート行 |
+| **File Record Node** | ファイルセクション・レコードの論理単位 | FD 配下のレコード構造 |
+| **Condition-related Data Node** | 条件式に現れるデータ | IF / EVALUATE / UNTIL の判定に使う項目 |
+| **Temporary / Implicit Value Node** | 暗黙の中間・一時領域 | STRING 作業域、暗黙の再定義対象 |
+| **Aggregate / Group Node** | 集約単位 | グループ全体を一つの塊として扱う場合 |
+| **Subfield / Element Node** | 部分項目・配列要素 | OCCURS の要素、下位の数値項目 |
+
+### 3.2 粒度方針
+
+- **変数単位** だけでは足りない：**項目階層** と **物理配置の共有** を考慮する。
+- **フィールド単位** は、移行時に型・桁が独立に変わりうる場合に採用する。
+- **配列要素** は、添字が静的に分岐する場合と動的な場合で **到達の不確実性** が変わる。
+- **グループ単位** と **下位単位** は、MOVE や REDEFINES の **同時更新** を説明するために両方を持ちうる。
+
+## 4. Edge Taxonomy
+
+各エッジについて **意味・発生条件・始点終点・CFG との関係・Scope/Guarantee への影響** を一貫して記述する。
+
+| エッジ種別 | 意味 | 発生条件（概要） | 始点→終点 | CFG / 判断層 |
+|------------|------|------------------|-----------|----------------|
+| **define** | 終点が新たな値を持つ | 代入、算術格納、READ 等 | 値の源 → 定義先 | 到達経路で kill が変わる |
+| **use** | 終点の計算・判定に始点が必要 | 右辺、条件、出力 | 参照元 → 使用箇所 | 条件 use は経路で有効域が変わる |
+| **overwrite / redefine** | 同一領域の上書き・再解釈 | 同一ストレージ上の別名・別下位 | 上書き元 → 上書き先 | REDEFINES は意味衝突リスク |
+| **propagation** | 値の流れの総称 | define-use の連鎖 | 任意 | reach の素材 |
+| **derived-from** | 派生（計算・変換） | COMPUTE、算術文 | オペランド → 結果 | 多入力→一出力 |
+| **aggregation** | 複数から一つへ | 複数項目の結合、グループ MOVE | 複数 → 一つ | 閉包が膨らむ |
+| **decomposition** | 一つから複数へ | UNSTRING、部分参照 | 一つ → 複数 | 検証単位が増える |
+| **input-origin** | 外部入力からの定義 | READ、ACCEPT | 入力源 → データ項目 | 境界外依存 |
+| **output-consumption** | 外部への利用 | WRITE、DISPLAY | データ → シンク | 仕様変更の影響 |
+| **condition-dependency** | 条件の真偽にデータが関与 | IF / UNTIL | データ → 条件付き文 | 経路分岐と連動 |
+| **cross-scope transfer** | スコープ・境界をまたぐ | CALL USING、グローバル、ファイル | 境界片側 → 片側 | 保証・Scope の不一致 |
+
+## 5. Connection Constraints
+
+- **define の無い use** は、初期値・外部入力・未初期化の可能性として **検証対象** に残す。
+- **Output Sink** から **Data Item** への「逆方向の define」は通常しない（外部入力は Input Source 経由）。
+- **Literal** は define のソースとしてのみ接続し、通常は **overwrite されない**（定数領域の例外は別扱い）。
+- **Condition-related** と **値 use** は同じ項目でも **エッジ種別を分けて** よい（移行時のテスト観点が異なるため）。
+
+## 6. Granularity Policy
+
+| 判断 | 採用 |
+|------|------|
+| 移行で項目単位の変更が見込まれる | 下位項目までノード化 |
+| グループ全体の一括移行 | Aggregate を主とし下位は省略可 |
+| 条件分岐がデータ依存に強く効く | condition-dependency を明示 |
+| ファイルが境界 | File Record と I/O エッジを明示 |
+
+## 7. Migration Analysis Value
+
+- **高密度依存**（多数のエッジが同一ノードに集中）は、変更影響が広い **警告材料**。
+- **cross-scope transfer** が多いほど、**単体テスト・保証の切り出し** が難しくなる。
+- **overwrite / redefine** が多い領域は、**意味の衝突** と **デバッグ困難** の温床。
+
+## 8. Open Questions
+
+- 式の中間結果を **どこまでノード化するか** はツール負荷と判断の解像度のトレードオフ。
+- **動的配列・ポインタ** をどの程度 DFG に含めるかは、対象 COBOL のサブセット次第。
+
+## 9. Summary
+
+ノードは **データと外部端点と条件** をカバーし、エッジは **define/use・派生・集約・境界・条件** を区別する。  
+この分類は `03` の define/use/reach、`04` の文単位規則の **語彙** として用いる。
+
+---
+# Define-Use and Reaching Definition Model
+
+## 1. Background
+
+移行判断では「どこで定義された値がどこで使われるか」と「ある use に到達しうる definition は何か」を明示する必要がある。本稿では define / use / kill / reach を、COBOL と本研究の抽象レベルに合わせて **構造規則** として定義する。
+
+## 2. Core Concepts
+
+- **Definition（define）**：あるプログラム点において、データ要素が **新しい値を持つ** とみなされること。
+- **Use**：式・条件・出力・引数などで **値が読まれる** こと。
+- **Kill**：同一の論理ストレージ上で、**後続の define により** 先行する定義が無効化されること。
+- **Reaching definition**：CFG 上のある点において、**その use に到達しうる** define の集合。
+
+## 3. Definition Model
+
+### 3.1 define の種類（概念）
+
+| 操作群 | define の特徴 |
+|--------|----------------|
+| **MOVE** | 送信元（または式）から受信先へ **値のコピー／移動** による定義 |
+| **COMPUTE / 算術文** | 右辺式の評価結果が **格納先** を定義 |
+| **READ / ACCEPT** | 外部入力が **レコード／項目** を定義 |
+| **INITIALIZE** | 初期値付与により **複数項目を一括定義** |
+| **STRING / UNSTRING** | 送信側・区切り・受信側により **複数 define** |
+| **INSPECT** | 置換・カウント等で **対象項目を更新** する場合に define |
+| **SET** | 条件名・ポインタ等の **状態** を定義 |
+
+### 3.2 グループと従属
+
+- **グループ MOVE** では、対応する下位項目に **同時に define** が発生しうる。
+- **従属項目** だけを更新すると、**親グループの「意味」** は暗黙に変わる場合がある（論理ノードの扱いは境界モデルで補足）。
+
+### 3.3 Conditional definition
+
+条件付き文の内側での代入は、その **経路を通った場合にのみ** define が有効。CFG 上の **経路** とセットで解釈する。
+
+## 4. Use Model
+
+### 4.1 use の典型
+
+| 種類 | 例 |
+|------|-----|
+| **右辺参照** | MOVE 送信、算術のオペランド |
+| **条件参照** | IF / EVALUATE / PERFORM UNTIL の条件 |
+| **出力・引数** | WRITE のレコード、DISPLAY、CALL の USING |
+| **添字・長さ** | 配列添字、可変長の LENGTH OF |
+| **ファイルキー** | READ のキー指定 |
+
+### 4.2 条件 use と値 use
+
+- **条件 use**：分岐・反復の **制御** に効く。CFG と強く結びつく。
+- **値 use**：計算・移動の **データ** に効く。両方を区別すると、テストと移行影響の説明がしやすい。
+
+## 5. Reaching Definition Model
+
+### 5.1 CFG との関係
+
+reach は **CFG の経路** 上で定義される。同一の文でも、**前に通った経路** によって、ある use に届く define は異なる。
+
+### 5.2 Kill
+
+- 同じデータ要素に対する **後続の define** が kill を発生させる。
+- **REDEFINES** や **同一物理領域** では、一方の define が他方の「値の解釈」を **実質上無効化** しうる（**別名 kill** として扱う方針を取りうる）。
+
+### 5.3 合流点（merge）
+
+複数経路が合流するとき、ある use に対する reaching definitions は **集合** となる。path-insensitive 近似では **和集合** を取り、過剰な依存（保守的）になる。
+
+### 5.4 未初期化・到達不明
+
+- **define が存在しない use**：未初期化、外部から必ず入る前提、または **解析不能**。
+- **到達しない define**：デッドコードまたは不要代入。**移行時は削除候補** だが、仕様上必要な副作用がある場合もある。
+
+### 5.5 Scope 境界をまたぐ場合
+
+CALL の引数やファイル経由では、define が **別モジュール・別実行単位** にある。reach は **モジュール内 CFG** だけでは閉じず、**境界を越えた追跡** が必要。
+
+## 6. Merge and Kill Rules
+
+| 状況 | 規則（概念） |
+|------|----------------|
+| 直列 | 直前の define が reach（kill がなければ） |
+| 分岐後合流 | 各分岐の define 集合を merge |
+| ループ | 反復により **同じ define が複数回**、不変項目と更新項目を区別 |
+| 同一ストレージ別名 | REDEFINES による **意味上の kill** を規約で定義 |
+
+## 7. Connection to CFG and Scope
+
+- **path-sensitive** 解析：精度は高いがコストと仕様の完全性が必要。
+- **path-insensitive**：移行判断の **最初のスクリーニング** に向く。
+- **Scope**：影響閉包を切るとき、reach が **境界外に伸びている** 場合は Scope 不足のシグナル。
+
+## 8. Migration Risk Interpretation
+
+- **再定義が多い項目**：追跡が難しく、テスト漏れリスクが高い。
+- **多数の reaching definitions**：その use は **仕様が複雑** または **経路が多い**。
+- **条件分岐で保証が分かれる**：Guarantee Unit を **経路別** に分ける必要が出る。
+- **Guarantee Unit の入力前提**：define が「前提を満たす入力」に対応し、use が「保証したい観測」に対応する、という **接続** が可能。
+
+## 9. Summary
+
+define / use / kill / reach は **CFG とセット** で解釈し、COBOL の **階層・共有領域** を別名 kill として扱う方針を明文化する。  
+`04` の文単位規則は、本稿の **形式基盤** の上に載る。
+
+---
+# Statement-Level Data Flow Rules
+
+## 1. Purpose
+
+主要 COBOL 文ごとに **define / use / 暗黙ノード / エッジ種別 / CFG 上の注意 / Scope・Guarantee / 移行リスク** を揃え、文単位の DFG 生成規則を固定する。実装コードではなく **抽象規則** として記述する。
+
+## 2. Rule Design Policy
+
+- 文の **データ効果** に焦点を当てる（制御効果は CFG と連携）。
+- **グループ・部分項目** は境界モデル（`06`）と整合する前提で、ここでは **典型** を示す。
+- 丸め・サイズ超過などの **実行時例外** は、DFG の必須要素とはせず **注記** とする。
+
+## 3. Rules by Statement
+
+### 3.1 MOVE
+
+| 項目 | 内容 |
+|------|------|
+| 役割 | 値の複製・編集付き移動 |
+| define | 受信側（グループなら対応する下位を含む） |
+| use | 送信側、編集文字列・変換指定に関与する項目 |
+| 暗黙ノード | 編集が複雑な場合、中間イメージ（任意） |
+| エッジ | define, use, derived-from（計算付きの場合） |
+| CFG | 文は通常1基本ブロック内 |
+| Scope / Guarantee | 大きなグループ MOVE は **影響面が広い** |
+| リスク | グループ対応ミス、異なる型・桁の暗黙変換 |
+
+### 3.2 COMPUTE
+
+| 項目 | 内容 |
+|------|------|
+| define | 左辺項目 |
+| use | 右辺の全オペランド |
+| 暗黙ノード | 式が複雑な場合、部分式ノード（任意） |
+| エッジ | derived-from, use, define |
+| CFG | 例外条件（SIZE ERROR 等）がある場合は **分岐** とリンク |
+| リスク | 丸め順序、中間精度は仕様依存 |
+
+### 3.3 ADD / SUBTRACT / MULTIPLY / DIVIDE
+
+| 項目 | 内容 |
+|------|------|
+| define | 格納先（GIVING 含む） |
+| use | オペランド全て |
+| エッジ | 複数 use → 一 define（aggregation 的） |
+| リスク | サイズエラー分岐、余り |
+
+### 3.4 IF
+
+| 項目 | 内容 |
+|------|------|
+| define | なし（代入を伴わない場合） |
+| use | 条件式内の全データ |
+| エッジ | condition-dependency から **_then/else 内の文** へ（統合は `05`） |
+| CFG | 分岐・合流が必須。reach は **分岐で分割** |
+| リスク | 条件の網羅、デッド分岐 |
+
+### 3.5 EVALUATE
+
+| 項目 | 内容 |
+|------|------|
+| use | 選択対象、WHEN 条件のデータ |
+| エッジ | 複数条件と **選ばれた文** のデータ依存 |
+| CFG | 多路分岐。合流点での merge |
+| リスク | フォールスルー、OTHER の有無 |
+
+### 3.6 PERFORM（条件参照がある場合）
+
+| 項目 | 内容 |
+|------|------|
+| use | UNTIL / VARYING の条件・添字 |
+| define | 本文内の文に委譲 |
+| CFG | ループエッジ。反復による **累積 define** |
+| リスク | 無限ループ、ループ不変の誤認 |
+
+### 3.7 READ
+
+| 項目 | 内容 |
+|------|------|
+| define | レコード領域（INTO 指定含む） |
+| use | キー、ファイル状態を参照する場合 |
+| エッジ | input-origin, define |
+| Scope | ファイル境界 **越えの define** |
+| リスク | AT END、無効レコード |
+
+### 3.8 WRITE
+
+| 項目 | 内容 |
+|------|------|
+| use | 出力レコード内容 |
+| define | 通常なし（レコードを書き換えない場合） |
+| エッジ | use → output-consumption |
+| リスク | レコードレイアウト変更の波及 |
+
+### 3.9 REWRITE
+
+| 項目 | 内容 |
+|------|------|
+| use | 新内容 |
+| define | ファイル上のレコード像（論理） |
+| リスク | READ-REWRITE 間の **他トランザクション** は DFG 外 |
+
+### 3.10 ACCEPT
+
+| 項目 | 内容 |
+|------|------|
+| define | 受信項目 |
+| エッジ | input-origin |
+| Scope | 端末・システム入力境界 |
+
+### 3.11 DISPLAY
+
+| 項目 | 内容 |
+|------|------|
+| use | 出力対象 |
+| エッジ | output-consumption |
+
+### 3.12 INITIALIZE
+
+| 項目 | 内容 |
+|------|------|
+| define | 指定項目（複数）一括 |
+| use | 置換が VALUE 句等で別項目を参照する場合 |
+| リスク | **広範囲の同時 define**、見落とし |
+
+### 3.13 STRING
+
+| 項目 | 内容 |
+|------|------|
+| use | 送信項目、区切り |
+| define | 受信、POINTER 更新 |
+| 暗黙 | 連結結果の一時像（任意） |
+| リスク | 長さ超過、POINTER 連鎖 |
+
+### 3.14 UNSTRING
+
+| 項目 | 内容 |
+|------|------|
+| use | ソース |
+| define | 複数受信、区切りカウンタ |
+| エッジ | decomposition |
+| リスク | 区切り曖昧性 |
+
+### 3.15 INSPECT
+
+| 項目 | 内容 |
+|------|------|
+| use | 検査対象 |
+| define | 置換・変換で **対象を更新** する場合 |
+| リスク | 全置換・部分置換の見誤り |
+
+### 3.16 SET
+
+| 項目 | 内容 |
+|------|------|
+| define | 設定先（条件名、ポインタ等） |
+| use | TO 句の参照 |
+
+### 3.17 CALL（引数）
+
+| 項目 | 内容 |
+|------|------|
+| use / define | BY REFERENCE / CONTENT / VALUE に応じ **呼び出し側** の項目は use、**被呼び出し側** での副作用は cross-scope |
+| Scope | **手続き境界** を越える主な源 |
+
+## 4. Cross-Cutting Concerns
+
+- **EVALUATE / IF** は条件 use が **CFG と直交** する。
+- **PERFORM** は **同一データへの反復 define** を生む。
+- **ファイル I/O** は **外部シンク・ソース** として必ず境界ノード化するのが安全。
+
+## 5. Migration Risk Notes
+
+- **INITIALIZE / STRING / UNSTRING / INSPECT** は変更時の **暗黙の波及** が大きい。
+- **グループ MOVE / COMPUTE** は **桁・符号・編集** の移行仕様とセットで検証が必要。
+
+## 6. Summary
+
+文単位で define/use を揃えることで、`05` 以降の **CFG 統合・境界・閉包** の入力として一貫した規則を与える。
+
+---
+# DFG and CFG Integration
+
+## 1. Background
+
+CFG は制御の流れを、DFG は値の依存を表す。移行判断では **「どの制御経路において、どの値依存が成立するか」** を扱う必要があり、両者を独立したままでは不十分である。
+
+## 2. Distinct Roles of CFG and DFG
+
+| | CFG | DFG |
+|---|-----|-----|
+| 主対象 | 分岐・合流・反復・到達 | define / use / 伝播 |
+| 辺の意味 | 制御が次へ進む | 値が依存する |
+| 典型用途 | 経路・網羅・非構造制御 | 変更影響・データテスト |
+
+**片方だけでは足りない理由**：CFG だけでは **同じ経路でもデータの出所** が分からない。DFG だけでは **条件が偽のときに無効な依存** を区別しにくい。
+
+## 3. Integration Points
+
+- **CFG 上の各制御点** に、そこで **有効な reaching definitions** を対応づける（概念上の **プロダクト**）。
+- **分岐条件** は DFG 上では **条件 use** とし、CFG の **出辺** と対応させる。
+- **合流点** では、各前驱からの **データ依存集合を merge** する。
+
+```mermaid
+flowchart TB
+  B1["分岐点: 条件 use"]
+  P1["経路1上の define"]
+  P2["経路2上の define"]
+  M["合流点: reach の merge"]
+  B1 --> P1
+  B1 --> P2
+  P1 --> M
+  P2 --> M
+```
+
+## 4. Branching, Loop, and Merge
+
+### 4.1 分岐（IF / EVALUATE）
+
+- **定義が分岐する**場合：各 arm に **局所的な define** が付き、合流後の use は **両方の定義に依存しうる**（path-insensitive では保守的に結線）。
+- **条件 use と値 use**：条件は **制御敏感**、代入の右辺は **データ依存**。保証は **経路別** に分けて記述しうる。
+
+### 4.2 ループ（PERFORM VARYING / UNTIL）
+
+- **反復的再定義**：ループ変数・集計項目は **複数回の define** が同一 CFG サイクル上にある。
+- **ループ不変項目**：更新がなければ reach は **エントリの定義** を維持しうる（不変解析は任意）。
+- **PERFORM UNTIL**：条件の use が **各反復** で評価される。
+
+### 4.3 合流
+
+- **複数定義の merge**：不確実性（どの定義が有効か）が **移行テストの分岐** に直結。
+- **条件付き定義**：合流点で **φ 的な未決** を明示するか、保守的に **両方から辺** を張るかは方針。
+
+### 4.4 GO TO / EXIT / NEXT SENTENCE
+
+- CFG 上の **非構造遷移** は、データ依存の **到達可能性** を変える。`30_cfg` の非構造モデルと **同一の CFG** を前提に DFG を重ねる。
+
+## 5. Control-Dependent Data Relations
+
+- **Control-dependent use**：条件が真のときだけ意味を持つ use（例：THEN 内のみの代入の前提）。
+- **CFG edge と DFG edge**：制御の辺は **実行順**、データの辺は **値依存**。同一プログラム点に **両方が接続** される。
+- **control predicate を DFG に載せるか**：本研究では **条件を読むデータ** をノード化し **condition-dependency** として表す（PDG 実装までは踏み込まない）。
+
+## 6. Implications for Scope and Guarantee
+
+- **分岐ごとに保証範囲が変わる**場合、Guarantee Unit を **経路別** に分割する根拠が CFG+DFG で与えられる。
+- **Scope**：合流点以降の **大きな reach 集合** は、Scope を広げる必要の **シグナル**。
+- **可能依存と必須依存**：全経路で成立する依存（必須）と、一部経路のみ（可能）を区別すると **移行リスク説明** が鋭くなる。
+
+## 7. Migration Decision Value
+
+- **条件依存の多層化** は、テストケース数と **仕様の分岐** を増やす。
+- **ループ内更新** は回帰テストの **反復観測** が必要。
+- **単純 DFG**（CFG を無視）との差は、**「実際には実行されない経路の依存」** の混入・欠落の差として説明できる。
+
+## 8. Summary
+
+DFG は CFG から **完全には独立しない**。分岐・合流・ループ・非構造遷移は **reach と merge** を通じてデータ依存の意味を変える。  
+`07` の影響伝播は、本稿の **統合視点** を前提とする。
+
+---
+# DFG Boundary and Scope Model
+
+## 1. Purpose
+
+データ依存は文・段落・プログラム・外部を越えて伝播する。**どこで DFG を切り、どこまで追えば影響が「閉じた」とみなせるか** を、境界候補と Scope 接続として定義する。
+
+## 2. Boundary Candidates
+
+| 境界 | 意味 | DFG 上の扱い |
+|------|------|----------------|
+| **Statement** | 文の前後 | define/use の最小発生単位 |
+| **Paragraph** | 段落 | 保守・命名の単位。横断エッジは **段落呼出し** |
+| **Section** | 節 | 初期化・共通処理の塊 |
+| **Procedure Division** | 手続き部 | メイン処理の外枠 |
+| **Program** | コンパイル単位 | CALL / パラメータで **他プログラム** と接続 |
+| **External interface** | システム間 | ファイル、DB、MQ、端末 |
+| **File** | 入出力 | レコード型・レイアウトが **契約** |
+
+## 3. Scope Levels
+
+本研究の **Scope**（`60_scope`）と対応づける。
+
+- **文／基本ブロックスコープ**：局所的な reach。
+- **段落／PERFORM スコープ**：手続き的まとまり。
+- **プログラムスコープ**：WORKING-STORAGE 等の寿命。
+- **連携スコープ**：LINKAGE、ファイル、CALL。
+
+**DFG から Scope を支える** とは：依存閉包が **どの境界をまたいでいるか** を列挙し、**Scope 境界候補** の妥当性を検討する材料を与えること。
+
+## 4. Boundary Crossing Relations
+
+### 4.1 記憶クラス・セクション
+
+- **WORKING-STORAGE / LOCAL-STORAGE**：プログラム内の **長寿命** データ。依存は **同一 CFG 内** で完結しやすい。
+- **LINKAGE / USING**：**呼び出し契約**。define/use が **モジュール間** に跨る。
+- **FILE SECTION**：レコード記述。**READ/WRITE** が **ファイル境界** のエッジ。
+
+### 4.2 データ構造
+
+- **グループと従属**：親を単位にするか下位を単位にするかで **閉包の見え方** が変わる。
+- **REDEFINES**：同一物理領域の **別名**。境界を「名前」ではなく **配置** で切る必要。
+- **OCCURS**：要素単位の依存。**添字の use** が CFG と結合。
+- **COPY**：同一構造の **複製**。変更は **全コピー先** に波及しうる。
+
+### 4.3 物理配置と論理境界
+
+論理項目名で Scope を切っても、**REDEFINES やグループ MOVE** で論理をまたぐ依存が残る。**物理境界**（レコード・領域）を補助線とする。
+
+## 5. Closure Conditions
+
+- **内部閉包**：同一プログラム・同一ファイル内のみで依存が止まる。
+- **連携閉包**：契約されたインタフェース（レコードレイアウト、CALL 引数）までを含む。
+- **Scope 閉包**（`60_scope`）：判断上「ここまで含めれば十分」という **意図的な切断**。DFG は **根拠** を与え、**不足**（境界外への辺）を検知する。
+
+## 6. Connection to Guarantee and Migration Units
+
+- **Guarantee Unit** が **小さすぎる**：DFG 上の依存が **単体の外に出る** 場合、保証が **分割されすぎ** ている可能性。
+- **Migration Unit** をファイル単位で切る場合、**ファイルレコードへの依存** が別ファイルに伸びていないかを確認。
+
+## 7. Risk Interpretation
+
+- **ファイル・CALL 越え** が集中：統合テスト・契約変更のリスク。
+- **COPY 共有**：局所修正が **横断的**。
+- **REDEFINES 頻繁**：意味衝突と **検証困難**。
+
+## 8. Summary
+
+境界は **文から外部** まで多層であり、DFG は **横断エッジ** でそれを可視化する。  
+Scope は DFG の **閉包要求** と整合させ、不足は **境界外依存** として検出する。`07` で伝播・閉包を形式化する。
+
+---
+# Impact Propagation and Closure on DFG
+
+## 1. Background
+
+移行判断では、ある変更が **どこまで伝播しうるか** を把握する必要がある。DFG は **正向きの影響伝播** と **依存閉包** の主な根拠となる。
+
+## 2. Impact Propagation Model
+
+### 2.1 定義
+
+**影響伝播**：変更された **データ要素・文・式・入出力仕様** から、DFG 上の **依存エッジ** を辿って到達しうる **ノード・文・境界** の集合へ広がること。
+
+### 2.2 伝播の単位
+
+- **項目単位**：データ項目の桁・型・初期値・意味の変更。
+- **文単位**：式の変更、代入先の変更。
+- **インタフェース単位**：ファイルレイアウト、CALL シグネチャ。
+
+## 3. Direct and Indirect Effects
+
+| 種類 | 説明 |
+|------|------|
+| **直接** | 変更ノードから **出る辺** の先が直接影響 |
+| **間接** | 複数ホップの define-use 連鎖、集約・分解経由 |
+
+## 4. Conditional and Cross-Boundary Effects
+
+- **条件付き**：CFG 上 **一部の経路のみ** で伝播が成立。テストは **経路網羅** が必要。
+- **境界越え**：ファイル、CALL、共有領域。**Scope を拡張** しないと閉包が取れない。
+
+## 5. Closure Conditions
+
+### 5.1 閉包の考え方
+
+**依存閉包**（順方向）：変更起点から DFG の **正向き閉包**（一定のエッジ種別の集合に限定可）。
+
+**逆依存閉包**（テスト・回帰の観点）：ある観測点に影響しうる **原因側** の集合。
+
+### 5.2 未観測・外部で止まる場合
+
+- **未モデル化ノード**：仕様未記述。**閉包未達** は残余不確実性として明示。
+- **外部境界**：契約上ここまで、と **意図的に切断**。ただし **契約変更** は別タスク。
+
+### 5.3 CFG 未確定
+
+path-sensitive でない場合、**過大な閉包** になる。移行判断では **保守的** であり、コスト見積の **上振れ** として解釈する。
+
+### 5.4 Guarantee 範囲に収まる閉包 / 収まらない閉包
+
+- **収まる**：保証設計と整合。
+- **収まらない**：保証の **再分割**、Scope の **拡張**、または **未保証の明示**。
+
+## 6. Migration Risk Interpretation
+
+- **影響半径が大きい項目**：ハブノード。優先的に **仕様の凍結・テスト強化**。
+- **再定義密度が高い領域**：変更の **波及経路が多い**。
+- **Migration Unit**：閉包が **単位をまたぐ** なら、分割移行が **困難**。
+- **部分移行の難所**：閉包が **複数サブシステム** にまたがる箇所。
+
+```mermaid
+flowchart LR
+  C["変更起点"]
+  D1["直接依存先"]
+  D2["間接依存先"]
+  B["境界"]
+  C --> D1 --> D2
+  D2 --> B
+```
+
+## 7. Relationship to Scope and Guarantee
+
+- Scope の **閉包条件** に、DFG の **順閉包** をマッピングする。
+- Guarantee は **閉包が保証単位に収まるか** を問う。
+
+## 8. Summary
+
+影響伝播は **DFG 上の閉包** として定義し、CFG・境界・path 抽象の **不確実性** を注記する。  
+`08` の検証は、この閉包が **信頼できるか** を問う。
+
+---
+# DFG Verification Model
+
+## 1. Purpose
+
+構築された DFG 研究モデルについて、**何をもって妥当とみなすか** を検証観点として整理する。テストコードやツールの実装ではなく、**研究モデルとしての受入条件** を対象とする。
+
+## 2. Validation Dimensions
+
+1. **構造整合性**：ノード・エッジ種別の一貫性。
+2. **参照整合性**：define/use の整合、欠落・過剰。
+3. **他モデル整合**：AST / IR / CFG / Scope。
+4. **ケース照合**：代表事例での説明可能性。
+5. **判断への有効性**：Guarantee・影響分析に使えるか。
+
+## 3. Structural Consistency Checks
+
+| 観点 | 内容 |
+|------|------|
+| ノード種別 | 未定義の種別がないか |
+| エッジ種別 | 禁止接続（例：リテラルへの define）がないか |
+| 暗黙ノード | STRING 等の **一貫した方針** で載っているか |
+| 境界 | ファイル・CALL に **端点** があるか |
+
+## 4. Cross-Model Consistency Checks
+
+| 対象 | 確認内容 |
+|------|-----------|
+| **AST** | 各エッジが **起源となる文・式** に追跡可能か |
+| **IR** | IR 上の **作用単位** とデータ効果が矛盾しないか |
+| **CFG** | reach が **ありえない経路** に依存していないか（方針による） |
+| **Scope** | 閉包が **意図した境界** で切れているか説明できるか |
+| **Guarantee** | 保証の前提・結果に **必要な依存** が含まれるか |
+
+### 4.1 欠落依存・過剰依存
+
+- **欠落**：実際にはデータが流れるのに辺がない → **影響見落とし**。
+- **過剰**：実行されない経路の依存 → **テストコスト過大**（path-insensitive の代償）。
+
+## 5. Case-Based Validation
+
+`70_cases` と接続し、少なくとも以下の **タイプ** をカバーする。
+
+| タイプ | 狙い |
+|--------|------|
+| 代表構文 | MOVE / COMPUTE / IF |
+| 高リスク | STRING / INITIALIZE / REDEFINES |
+| ファイル I/O | READ / WRITE 境界 |
+| 条件分岐 | reach の分岐 |
+| ループ | 反復 define |
+| 複合 | 制御・データ・境界が重なる |
+
+## 6. Residual Uncertainty
+
+- **仕様未記述** の外部システム：DFG で閉じない。
+- **動的添字・可変長**：静的解析の限界。
+- **簡略化**：グループを一ノードにまとめた **情報損失** を文書化する。
+
+## 7. Acceptance Criteria
+
+DFG 定義が「十分」と言えるための **最低条件**（例）：
+
+1. 分類（`02`）と文規則（`04`）に **矛盾する辺** がない。
+2. 主要ケースで **説明責任** が果たせる（なぜその依存か）。
+3. CFG との統合（`05`）の前提で **reach の解釈** が一貫。
+4. Scope / Guarantee への **接続可能性** が示せる。
+
+## 8. Summary
+
+検証は **層立て** で行い、残余不確実性を **明示** する。`09` のリスクは、検証で **信頼できる依存** を前提に整理する。
+
+---
+# DFG Risk Patterns and Migration Implications
+
+## 1. Purpose
+
+DFG から読み取れる **構造パターン** を、移行困難性・保証困難性・分割困難性に **接続** する。一般論ではなく **依存グラフ上の特徴** に根ざす。
+
+## 2. Risk Pattern Catalog
+
+| パターン | 構造的特徴 | なぜリスクか | 補足モデル | 阻害する移行方針 | 追加分析 |
+|----------|-------------|--------------|------------|------------------|----------|
+| **高再定義密度** | 同一ノードへの define が多数 | 追跡・テストが複雑 | CFG, Cases | 局所リファクタ | 経路別 reach |
+| **多数 reaching definitions** | 合流後の use に多様な定義 | 仕様の分岐が多い | CFG, Scope | 一括置換 | 条件整理 |
+| **境界越え依存の集中** | cross-scope エッジがハブに集まる | 契約変更の波及 | Scope, Guarantee | 単体での先行移行 | 契約テスト |
+| **条件依存の複雑化** | condition エッジが多層 | テスト観点爆発 | CFG | 機能単位の単純移行 | 分岐網羅 |
+| **ループ内更新集中** | サイクル上に define が密 | 不変誤認・回帰漏れ | CFG | データのみの切り出し | 不変解析 |
+| **グループ／部分の混在更新** | aggregation/decomposition が交差 | 意味衝突 | 境界モデル | スキーマ単位移行 | レイアウト整合 |
+| **ファイル I/O 暗黙依存** | レコード経由で遠距離依存 | 実行時まで見えない | Scope | ファイル単位の独立移行 | レコード契約 |
+| **初期化と再代入の競合** | INITIALIZE と後続 define が競う | 期待値の誤解 | Cases | 初期化方針の固定 | ライフサイクル |
+| **出力仕様への広域波及** | sink への依存閉包が大きい | ユーザー影響 | Guarantee | UI だけの変更 | 影響閉包の可視化 |
+| **Scope に収まらない閉包** | 閉包が保証単位を超える | 保証不足 | Scope, Guarantee | 小さなリリース | Scope 拡張または未保証 |
+
+## 3. Interpretation by Migration Context
+
+- **段階移行**：境界越え依存が多い **カット線** は、DFG 上で **辺が少ない** 箇所を探す（完全ではないヒューリスティック）。
+- **部分移行**：閉包が **単一サブシステム内** に収まるかが目安。
+- **ビッグバン**：閉包が **全域** に広がる場合、リスクの **可視化** が目的になる。
+
+## 4. Connection to Scope and Guarantee
+
+- **Scope**：閉包が **意図した境界** を超えるパターンを **赤旗** とする。
+- **Guarantee**：依存が **保証単位を横断** する場合、**前提の共有** または **単位の再定義**。
+
+## 5. Prioritization and Decision Support
+
+| 指標（概念） | 判断材料の使い方 |
+|--------------|------------------|
+| 出次数・入次数 | ハブの特定 |
+| 境界エッジ数 | 統合リスク |
+| reach 集合サイズ | テスト広さの上界（近似） |
+
+**単なる危険一覧ではなく**、各パターンに **追加で確認するモデル** と **阻害する移行戦略** を対応づける。
+
+## 6. Summary
+
+DFG は **高密度・境界・条件・閉包** の観点でリスクを **構造化** する。`10` で全体理論に接続する。
+
+---
+# DFG Connection to AST IR CFG Guarantee Scope Cases
+
+## 1. Purpose
+
+`40_dfg` を研究全体に位置づけ、**AST / IR / CFG / Guarantee / Scope / Cases** への接続マップを完成させる。単独の要約ではなく、**DFG が追加する見え方** を中心に述べる。
+
+## 2. DFG in the Overall Research Architecture
+
+- **構文層（AST）** → **構造作用（IR）** → **制御（CFG）** と **データ（DFG）** → **判断（Guarantee / Scope / Decision）** と **検証（Cases）**。
+- DFG は **値の依存** を担う **構造層** であり、CFG と **双方向に参照** される（reach・条件伝播）。
+
+## 3. Connection to AST
+
+- **DFG が AST から受け取るもの**：文種、オペランド、データ記述への参照、式の構造。
+- **AST だけでは足りないもの**：**同一物理領域の別名**、**実行経路**、**ファイル境界**の意味。  
+→ IR・CFG・境界モデルで補う。
+
+## 4. Connection to IR
+
+- IR を介して **構文差異を吸収** し、**データ効果** を統一表現に近づけられる。
+- **利点**：複数方言・前処理・マクロに依存するソースでも、**IR 上の作用** から DFG 生成規則を適用しやすい。
+
+## 5. Connection to CFG
+
+- **reaching definition**、**条件付き伝播**、**ループ内の再定義** は CFG の経路に依存。
+- **統合モデル**：制御とデータの **二層** を同一プログラム点で対応づける（`05`）。
+
+## 6. Connection to Guarantee
+
+- **Guarantee Unit** の **入力前提**（どのデータが何を満たすか）と **結果**（何が保証されるか）を **データ依存** で記述する。
+- **未保証領域**：境界外への依存が **保証の外に出る** 場合を検出。
+
+## 7. Connection to Scope
+
+- **影響閉包** の **データ側根拠**。
+- **Scope 境界** が DFG 上で **辺を切断** できるか、または **意図的な未追跡** として説明できるか。
+
+## 8. Connection to Cases
+
+- `70_cases` で **代表パターン**（高リスク構文、境界、複合）を照合し、DFG 規則の **妥当性** を補強。
+- **ケース**が「この依存が説明できるか」を **反証** する役割も持つ。
+
+## 9. Integrated Research View
+
+```mermaid
+flowchart TB
+  AST["AST\n構文・位置"]
+  IR["IR\n構造作用"]
+  CFG["CFG\n制御到達"]
+  DFG["DFG\nデータ依存"]
+  G["Guarantee"]
+  S["Scope"]
+  C["Cases"]
+  D["Decision"]
+
+  AST --> IR
+  IR --> CFG
+  IR --> DFG
+  CFG --- DFG
+  DFG --> G
+  DFG --> S
+  CFG --> G
+  CFG --> S
+  C --> DFG
+  C --> CFG
+  G --> D
+  S --> D
+```
+
+## 10. Summary
+
+DFG は **AST/IR の効果** と **CFG の経路** を結び、**Guarantee / Scope** に **データ面の根拠** を与え、**Cases** で **検証** される。  
+これにより **構文層 → 構造層 → 判断層** がデータ面で貫通し、変更影響・移行判断・保証設計へ **橋渡し** できる状態になる。
+
+---
+# `40_dfg`
+
+Phase 10: DFG の文書群です。
+
+`40_dfg` は、`10_ast` `20_ir` `30_cfg` `50_guarantee` `60_scope` `70_cases` を前提として、  
+**COBOL 資産におけるデータ依存構造を、移行判断・変更影響分析・保証評価に接続可能なモデルとして定義するフェーズ** を構成します。
+
+DFG はコンパイラ最適化向けのデータフロー解析の写しではなく、**値の生成・伝播・参照・上書き・境界横断** を **構造として** 外在化する **データ依存層** として位置づけられます。CFG と独立ではなく、**制御経路とセット** で解釈されます。
+
+## Documents
+
+- `01_DFG-Core-Definition.md`
+- `02_DFG-Node-and-Edge-Taxonomy.md`
+- `03_Define-Use-and-Reaching-Definition-Model.md`
+- `04_Statement-Level-DataFlow-Rules.md`
+- `05_DFG-vs-CFG-Integration.md`
+- `06_DFG-Boundary-and-Scope-Model.md`
+- `07_Impact-Propagation-and-Closure-on-DFG.md`
+- `08_DFG-Verification-Model.md`
+- `09_DFG-Risk-Patterns-and-Migration-Implications.md`
+- `10_DFG-Connection-to-AST-IR-CFG-Guarantee-Scope-Cases.md`
+
+## Structure
+
+- `01` は DFG の中核定義、目的、AST/IR/CFG/判断層との境界を固定する。
+- `02` はノード／エッジの分類体系と粒度方針を固定する。
+- `03` は define/use/kill/reach と CFG・Scope との接続を定義する。
+- `04` は主要 COBOL 文の依存生成規則を整理する。
+- `05` は DFG と CFG の統合（分岐・合流・ループ・非構造制御）を定義する。
+- `06` はデータ境界・スコープ・境界横断と Scope／Guarantee との対応を整理する。
+- `07` は影響伝播・依存閉包・逆閉包と移行判断への接続を定義する。
+- `08` は DFG 妥当性の検証観点と受入条件を整理する。
+- `09` は高リスク依存パターンと移行含意を整理する。
+- `10` は AST / IR / CFG / Guarantee / Scope / Cases への接続マップで完結する。
+
+## Notes
+
+- DFG は **名前の同一性** と **値・意味の依存** を分離し、グループ・REDEFINES・COPY 由来の **意味境界** を重視する。
+- **path-sensitive** と **path-insensitive** のトレードオフは、判断層の用途に応じて明示する。
+- `30_cfg` は制御到達を与え、`40_dfg` はその経路上で **データ依存の成立条件** を説明する。
+
+## Prior Connection
+
+- `30_cfg`：制御経路・合流・ループ・非構造遷移（reach・merge の前提）
+
+## Next Connection
+
+- `50_guarantee`：データ前提・結果・保証単位の独立性
+- `60_scope`：影響閉包・境界妥当性
+- `60_decision`：依存リスクを移行可否判断へ
+- `70_cases`：代表・高リスクケースでの照合と検証
 
 
 # 50_guarantee
@@ -5024,11 +8174,1323 @@ Phase 6: Scope Theory の文書群です。
 
 # 70_cases
 
-This directory contains case studies and failure patterns.
-- CaseStudyIndex.md
-- VirtualProjectCases.md
-- FailurePatterns.md
-- ComparisonNotes.md
+# Case Core Definition
+
+## 1. 文書の目的
+本稿は、`70_cases` フェーズにおける **Case** を第一級の研究概念として定義することを目的とする。ここでいう `Case` は、単なる事例紹介、サンプルコード、説明用エピソードではない。`Case` とは、**移行判断を検証し、保証要求を観測し、構造モデルの適用可能性を点検するために採用される、記述可能かつ比較可能な構造的判断単位** である。
+
+`10_ast` が構造観測の基盤を与え、`50_guarantee` が保存主張の語彙を与え、`60_decision` が移行判断の語彙を与えたとしても、それだけでは研究はまだ実証的に閉じない。なぜなら、どの構造がどの保証を呼び起こし、どの判断軸において問題化するかを、同一の観測単位に束ねる概念が必要だからである。本稿の役割は、その欠落を `Case` という形で埋めることにある。
+
+## 2. Case の必要性
+AST は構文的な可視性を与えるが、それだけでは判断単位を与えない。Guarantee は保存すべき性質を与えるが、それだけでは適用すべき構造配置を与えない。Decision は可否・リスク・検証十分性の判断軸を与えるが、それだけでは何に対する判断なのかを具体化しない。
+
+`60_scope` において `Scope` は、解析・保証・判断の対象となる **有界な意味的対象領域** として定義された。しかし `Scope` が対象領域を固定しても、なお次の問いが残る。すなわち、**どのような構造配置を、どのような観測・保証・判断の束として記述すれば、研究上比較可能な単位になるのか** という問いである。
+
+`Case` はこの問いに対する答えである。`Case` が必要なのは、理論を現実の判断材料へ接続するためであり、同時に理論が本当に説明力を持つかを反証可能な形で点検するためである。`Case` がなければ、理論は抽象的に整っていても、どの構造がどの判断困難性を生むのかを再現可能な形で示せない。
+
+## 3. Case の定義
+本研究において **Case** \( c \) は、次の条件を満たす構造的記述単位として理解される。
+
+1. **対象が固定されていること**  
+   `Case` は、何を対象にしているかが明示されていなければならない。この対象は `Scope` と整合する形で有界化され、少なくとも「何が内側で、何が外側か」を記述できなければならない。
+
+2. **観測束を持つこと**  
+   `Case` は、AST / CFG / DFG における関与要素を通じて、構文・制御・データ依存の観測可能な根拠を持たなければならない。言い換えれば、`Case` は「なぜそのように記述されるのか」を構造的に遡れる必要がある。
+
+3. **保証要求と判断論点を接続できること**  
+   `Case` は、想定される `Guarantee` の候補集合と、移行判断上の論点を同一の記述内で接続できなければならない。単に構造があるだけでは `Case` にならず、保証や判断にとって意味を持つ構造配置である必要がある。
+
+4. **比較可能であること**  
+   `Case` は、他の `Case` と比較可能でなければならない。比較可能性とは、記述形式の共通性、分類可能性、判断論点の対応づけ可能性を含む。
+
+この意味で `Case` は、**構造観測の断片** でも **保証評価の原子単位** でも **判断結果そのもの** でもない。`Case` は、それらを結び付けて検証可能にするための中間的な研究単位である。
+
+## 4. Case の最小構成要素
+`Case` を研究文書として成立させるための最小構成要素は、少なくとも次のとおりである。
+
+- **識別子**：比較・参照のための安定した ID と名称
+- **対象範囲**：何を `Case` に含め、何を含めないかという範囲記述
+- **構文的手がかり**：対象構文、主要 AST 要素
+- **構造要約**：制御構造、データ依存、I/O 依存、外部依存、境界の明瞭性
+- **保証候補**：どのような保存主張が立ち上がるか
+- **判断論点**：可移行性、要分割性、要代替性、判定不能条件など
+- **影響方向**：変更時にどこへ波及しやすいか
+- **検証観点**：何を確認しなければならないか
+
+これらは後続の `03_Cases-Description-Template.md` で具体的なテンプレートとして整備されるが、本稿ではその理論的必要条件だけを固定する。
+
+## 5. Case と Scope / Guarantee / Decision の関係
+### 5.1 Case と Scope
+`Scope` は対象領域を定める。`Case` は、その対象領域に対して **どの観測・保証・判断を同時に載せるか** を定める。したがって `Case` は `Scope` と整合しなければならないが、`Scope` と同一ではない。`Scope` が有界な意味対象であるのに対し、`Case` はその対象を研究上の比較・検証単位として記述したものである。
+
+### 5.2 Case と Guarantee
+`Guarantee` は保存されるべき性質の記述である。`Case` は、どの構造配置においてどの `Guarantee` が要求されるかを観測する単位である。よって `Case` は保証の内容そのものではなく、保証要求を立ち上げる構造条件の記述単位である。
+
+### 5.3 Case と Decision
+`Decision` は移行可否・リスク・検証十分性に関する判断である。`Case` は、その判断を支える説明単位である。`Decision` が結論であるのに対し、`Case` はその結論に至るための観測束と論点束を与える。
+
+## 6. Case の抽象度（構文層／構造層／判断層）
+`Case` は単一層の概念ではない。少なくとも三つの抽象レベルを区別して扱う必要がある。
+
+### 6.1 構文層
+構文層では、Case はどのような COBOL 構文要素に anchoring されているかが問題となる。ここで重要なのは、Case が AST ノード群へトレース可能であることであり、Case 自体を AST の部分木と同一視することではない。
+
+### 6.2 構造層
+構造層では、Case は CFG / DFG / 依存構造の上で意味を持つ。分岐、反復、共有データ、I/O、外部定義、境界横断などが、この層での主要な記述対象となる。Case の難しさの多くは、構文層ではなくこの構造層で立ち上がる。
+
+### 6.3 判断層
+判断層では、Case は Guarantee 候補、移行判断論点、検証要求、影響評価の単位となる。この層で初めて「可移行か」「要分割か」「保証密度が高いか」といった論点が意味を持つ。
+
+この三層を混同すると、構文上見えることと、構造上成立することと、判断上主張できることが区別できなくなる。したがって `Case` は、**三層を横断しつつも混同しないための整理単位** として定義される必要がある。
+
+## 7. Case を判断検証単位とみなす理由
+`Case` が判断検証単位である理由は、次の三点に要約できる。
+
+1. **再現性**  
+   同じ `Case` 記述を見れば、異なる研究者が同じ構造論点へ戻れる。
+
+2. **比較可能性**  
+   同じテンプレートと分類軸を通じて、ケース間差異を構造語彙で説明できる。
+
+3. **反証可能性**  
+   ある判断や保証主張が誤っている場合、どの構造記述がその誤りを示すかを追跡できる。
+
+この意味で `Case` は、理論を事例へ適用するための受け皿であると同時に、理論の説明力を試す実験台でもある。
+
+## 8. この定義が `70_cases` 全体に与える意味
+本定義は、`70_cases` 全体の基礎となる。`02_Cases-Taxonomy.md` は `Case` を分類可能にし、`03_Cases-Description-Template.md` は記述可能にし、`04_Cases-Structural-Pattern-Model.md` は抽象化可能にする。さらに `05` 以降では、Case を Guarantee、Decision、Impact、Verification、cross-model mapping へ接続していく。
+
+逆に `Case` の定義が曖昧であれば、後続の分類は機能ラベルの寄せ集めになり、テンプレートは記述様式に留まり、比較や検証は恣意的になる。したがって `Case` の基礎定義は、`70_cases` が単なるケース集へ崩れることを防ぐための最初の防波堤である。
+
+## 9. まとめ
+`Case` とは、構造観測・保証要求・移行判断を同一の記述に束ね、比較・検証・反証を可能にする **構造的判断単位** である。`Case` は `Scope`、`Guarantee`、`Decision` と密接に関わるが、それらのいずれとも同一ではない。本稿によって、`70_cases` は「事例を集める章」ではなく、理論を実証可能にする接続層として出発できる。
+
+---
+# Cases Taxonomy
+
+## 1. 文書の目的
+本稿は、`70_cases` における **Case の分類体系（Taxonomy）** を定義することを目的とする。Case を集めること自体は研究の目的ではない。重要なのは、集められた Case 群を **構造的差異に基づいて整理し、代表パターンとして再利用可能にすること** である。
+
+Case が分類されなければ、研究は個別記述の蓄積に留まり、どの構造がどの保証要求や判断困難性を生むのかを一般化できない。したがって Taxonomy は、`70_cases` における単なる目録ではなく、Case 群を理論へ接続するための中間構造である。
+
+## 2. ケース分類が必要な理由
+Case は `01_Cases-Core-Definition.md` で定義したように、構造観測・保証要求・判断論点を束ねる単位である。しかし、Case が増えるほど知見が深まるわけではない。むしろ、分類原理がなければ次の問題が生じる。
+
+- 同型の構造が別の名前で重複収集される
+- 表面的な業務名称や機能ラベルで整理され、構造比較ができなくなる
+- Guarantee / Decision の再利用性が下がる
+- 研究上のカバレッジが見えなくなる
+
+分類が必要なのは、Case の数を増やすためではなく、**Case 群を構造語彙で秩序立てるため** である。分類は、代表ケース選定、比較、優先順位付け、検証方針、将来の評価体系の前提になる。
+
+## 3. ケース分類の基本原則
+Case の分類体系は、少なくとも次の原則に従う。
+
+### 3.1 構造主導であること
+分類は、業務ラベルや機能名称ではなく、制御構造、データ依存、I/O 依存、外部依存、境界明瞭性、影響伝播性といった **構造的差異** を中心に設計されなければならない。
+
+### 3.2 判断再利用に資すること
+分類は、Guarantee や Decision の再利用性を高めるためのものである。したがって「何が似ているか」だけでなく、**似ているものに同じ判断や同じ保証チェックを適用できるか** を重視する。
+
+### 3.3 主分類と副分類を区別すること
+1つの Case は複数の構造軸にまたがりうる。そのため、完全な相互排他性だけを求めると分類体系が不自然になる。そこで本研究では、**最も支配的な軸を主分類** とし、その他を副分類として扱う。
+
+### 3.4 分類粒度を意識すること
+Case は単一構文レベルから連携境界レベルまで異なる粒度を取りうる。したがって分類体系は、構造軸だけでなく、**どの粒度でその構造が問題化しているか** を同時に示せなければならない。
+
+## 4. 主要分類軸
+`70_cases` で採用すべき主要分類軸は、少なくとも次のとおりである。
+
+### 4.1 制御構造中心ケース
+分岐、反復、段落遷移、非局所的制御移動など、CFG 的構造が主たる困難性を生むケースである。ここでは経路の複雑性と到達可能性の理解が中心論点となる。
+
+### 4.2 データ構造中心ケース
+共有データ、定義使用関係、レコード構造、状態保持など、DFG 的構造が主たる困難性を生むケースである。データ整合性や保証密度の増大と結びつきやすい。
+
+### 4.3 I/O 中心ケース
+ファイル入出力、外部媒体とのやり取り、レコードフォーマット、順序依存など、I/O がケースの構造と判断を支配するタイプである。観測可能性や再現可能性が主要論点になる。
+
+### 4.4 外部依存中心ケース
+COPY、外部呼び出し、外部仕様、環境依存など、Case の外側にある定義や挙動が重要な拘束条件になるケースである。境界の外部化と保証前提の外在化が問題になる。
+
+### 4.5 保証困難ケース
+Guarantee の適用・確認・合成が困難なケースである。これは構造軸であると同時に判断軸でもあり、複雑な制御・データ共有・外部依存の複合によって生じやすい。
+
+### 4.6 影響伝播が大きいケース
+変更が Case 内部に留まらず、周辺構造や他の Case へ広く波及しやすいタイプである。これは Impact 分析や Decision の優先順位付けに直結する。
+
+### 4.7 境界曖昧ケース
+Case の内外が責務、依存、保証、検証の観点で一致しにくいケースである。分類上重要なのは、曖昧さそのものを構造特性として捉えることである。
+
+### 4.8 分割移行しやすいケース / しにくいケース
+Case の構造が切り出しや段階移行に向くかどうかを示す軸である。これは単なる実行計画上の都合ではなく、依存閉包、保証分解可能性、境界明瞭性と関わる。
+
+## 5. 分類粒度の設計
+構造軸に加えて、Case は次のような粒度で分類される必要がある。
+
+### 5.1 単一構文ケース
+一つの構文単位または極めて局所的な構造を中心とするケースである。記述は小さいが、保証や判断の観点では他層へ拡張しうる。
+
+### 5.2 複合構造ケース
+複数の構造要因が重なって成立するケースである。制御・データ・I/O が複合し、単一分類では説明しきれないことが多い。
+
+### 5.3 業務責務ケース
+構造と責務境界が比較的明確に結びついているケースである。業務機能で分類するのではなく、責務と構造の対応が主題となる。
+
+### 5.4 連携・システム境界ケース
+外部システム、複数プログラム、共有仕様など、Case がシステム境界をまたぐ粒度で成立するケースである。外部依存や判定不能条件が現れやすい。
+
+## 6. 主分類・副分類の考え方
+Taxonomy を運用する際には、**主分類** と **副分類** を分けて考える。
+
+- **主分類**：その Case において最も支配的な構造困難性を表す軸
+- **副分類**：補助的に現れる構造軸や判断軸
+
+例えば、外部仕様に強く拘束されつつ共有データも多いケースでは、外部依存中心を主分類、データ構造中心を副分類とすることができる。この運用により、完全な相互排他性を強要せずに比較可能性を維持できる。
+
+## 7. 代表ケース選定基準
+分類体系は、代表ケースを選ぶためにも使われる。代表ケースとは、単に典型的であるだけでなく、**その分類軸が生む判断困難性を最もよく露出するもの** でなければならない。少なくとも次の基準が重要である。
+
+- その分類軸の特徴が明瞭であること
+- 保証要求や判断論点が構造から説明できること
+- 他の類似ケースへ一般化可能であること
+- 反例や境界条件を考える際の基準点になること
+
+代表ケース選定は、ケース収集を「量」から「構造代表性」へ転換する役割を持つ。
+
+## 8. Taxonomy と Guarantee / Decision の関係
+Taxonomy は、Guarantee や Decision の適用を効率化する。
+
+Guarantee の観点では、分類軸によって **どの保証が立ち上がりやすいか** が予測できる。たとえば、データ構造中心ケースでは整合性や不変条件に関する保証が重要になり、I/O 中心ケースでは外部契約や観測可能性に関する保証が重要になる。
+
+Decision の観点では、分類軸によって **何が判断困難性の主因か** が整理される。境界曖昧ケースでは判定不能条件の管理が重要になり、分割移行しにくいケースでは移行単位の再設計が論点となる。
+
+したがって Taxonomy は、Case 群に対して同じ判断手順や同じ保証チェックを再利用するための **事前整流装置** として機能する。
+
+## 9. 今後のケース収集・比較への利用
+本 Taxonomy は、今後の `70_cases` で次のように利用される。
+
+- **ケース収集方針**：どの分類軸のケースが不足しているかを監視する
+- **比較方針**：同一主分類内で差異を比較し、異なる主分類間で緊張関係を比較する
+- **カバレッジ方針**：構造軸と粒度軸の両方から、研究上の穴を点検する
+
+特に重要なのは、Case を集めるたびに「どの分類軸をどれだけ代表しているか」を記録することである。これにより `70_cases` は単なる文書集合ではなく、理論のカバレッジ地図として機能する。
+
+## 10. まとめ
+Case の Taxonomy とは、Case 群を構造語彙で整理し、Guarantee と Decision の再利用を可能にする分類原理である。本稿では、構造主導、主分類 / 副分類、粒度設計、代表ケース選定という原則の下で、主要な分類軸を定義した。これにより `70_cases` は、雑多な事例集ではなく、代表パターンを通じて理論を精緻化するための体系へ進むことができる。
+
+---
+# Cases Description Template
+
+## 1. 文書の目的
+本稿は、`70_cases` における各 `Case` を **同一のテンプレートで記述できるようにするための記述様式** を定義することを目的とする。ここで必要なのは、単なる文書フォーマットではない。`Case` を比較可能、再利用可能、検証可能な研究単位として運用するためには、**何をどの順序で、どの抽象層に分けて記述するか** をあらかじめ固定しておく必要がある。
+
+`01_Cases-Core-Definition.md` が `Case` の意味を定義し、`02_Cases-Taxonomy.md` が `Case` の分類原理を定義したとすれば、本稿はそれらを **実際に書ける形へ落とす運用規格** である。テンプレートがなければ、Case 記述は人ごとに揺れ、比較や判断再利用が困難になる。
+
+## 2. ケース記述テンプレートが必要な理由
+テンプレートが必要な理由は三つある。
+
+第一に、**記述のばらつきを抑えるため** である。自由記述だけに依存すると、同じ構造を異なる語で表現してしまい、Case 間の差異が実体以上に大きく見えることがある。
+
+第二に、**比較可能性を高めるため** である。Case の比較は、単なる文章の読み比べではなく、同じ項目どうしを並べて初めて成立する。制御構造、データ依存、境界の明瞭性、保証候補、判断論点が、同じ位置に現れる必要がある。
+
+第三に、**Guarantee と Decision を接続しやすくするため** である。Case 記述の中で、構造要約と保証候補と判断論点が分離されていなければ、構造から何が導かれているのかが不明になる。したがってテンプレートは、単なる見た目の統一ではなく、研究モデルの因果関係を保つための装置である。
+
+## 3. テンプレート設計原則
+Case 記述テンプレートは、次の原則に従う。
+
+### 3.1 三層分離
+`Case` は、構文層・構造層・判断層を分けて記述しなければならない。構文層では何が観測対象かを示し、構造層では CFG / DFG / 境界の特徴を示し、判断層では Guarantee と Decision に関わる論点を示す。この三層を分けることで、「見えているもの」と「構造的に成立しているもの」と「判断上主張できるもの」を区別できる。
+
+### 3.2 構造中心
+テンプレートは業務説明ではなく、構造記述を中心に置く。業務的背景や用途は備考に書けても、それが Case の本体ではない。Case の中心は、制御、データ、I/O、外部依存、境界、影響の構造である。
+
+### 3.3 比較軸の埋め込み
+テンプレートには、後続の比較・評価・検証にそのまま使える項目をあらかじめ含める必要がある。たとえば境界明瞭性、分割可能性、保証候補、検証コストといった項目は、単なる説明欄ではなく、Case 比較の軸として機能する。
+
+### 3.4 不明情報の明示
+情報不足を空欄のままにしてはならない。未観測、要確認、判定不能などを明示することで、記述上の欠落と構造上の不明確性を区別できるようにする。
+
+## 4. テンプレート項目一覧
+本研究で推奨する Case 記述項目は、少なくとも次のとおりである。
+
+- ケースID
+- ケース名
+- 主分類
+- 副分類タグ
+- 対象範囲
+- 対象構文
+- 構造要約
+- 主な AST / CFG / DFG 関与要素
+- 制御構造上の特徴
+- データ依存上の特徴
+- I/O 依存
+- 外部依存
+- 境界の明瞭性
+- 想定される Guarantee
+- 判断上の論点
+- 想定リスク
+- 分割可能性
+- 変更影響の方向
+- 検証コスト / 観測コスト
+- 備考
+
+この一覧は固定的な見出し集合であり、後続の分類、比較、影響分析、検証戦略へ直接つながる。
+
+## 5. 各項目の意味
+### 5.1 ケースID / ケース名
+Case を一意に参照するための識別子と、人が読んで理解しやすい名称である。名称は説明的でよいが、識別子は安定している必要がある。
+
+### 5.2 主分類 / 副分類タグ
+`02_Cases-Taxonomy.md` で定義した分類体系に基づき、その Case の支配的な構造軸と補助的な軸を明示する。これにより、Case がどの文脈で比較されるべきかが分かる。
+
+### 5.3 対象範囲
+Case が何を含み、何を含まないかを示す範囲記述である。これは `Scope` に対応するが、`Scope` の厳密定義そのものではなく、Case 記述としての operational な境界記述である。
+
+### 5.4 対象構文
+Case がどの COBOL 構文に anchored されているかを示す。これは AST へのトレーサビリティを担保するための入口である。
+
+### 5.5 構造要約
+その Case の制御・データ・依存・境界の骨格を一段落程度でまとめた要約である。ここは判断結論を書かず、構造上何が問題なのかだけを書く。
+
+### 5.6 主な AST / CFG / DFG 関与要素
+Case の観測根拠となる構造要素を記述する。AST ノード、制御経路、依存関係などを並べることで、後から構造確認が可能になる。
+
+### 5.7 制御構造上の特徴
+分岐、反復、非局所ジャンプ、段落遷移など、制御上の難しさや特徴を記述する。
+
+### 5.8 データ依存上の特徴
+共有データ、定義使用関係、状態保持、レコード更新など、DFG 的な特徴を記述する。
+
+### 5.9 I/O 依存 / 外部依存
+ファイル、外部呼び出し、COPY、外部仕様など、Case の外側と接続する要素を明示する。
+
+### 5.10 境界の明瞭性
+Case の内外がどこまで明確かを示す。これは後続の判定不能条件や検証コストと強く結びつく。
+
+### 5.11 想定される Guarantee
+その構造からどのような保証要求が生じるかを記述する。これは保証の確定宣言ではなく、Case に付随する保証候補の整理である。
+
+### 5.12 判断上の論点
+可移行性、要分割性、要代替性、判定不能性など、Decision 上の論点を書く。ここでも結論だけでなく、何が論点なのかを書くことが重要である。
+
+### 5.13 想定リスク / 分割可能性 / 変更影響の方向
+Case が持つリスク、切り出しやすさ、変更の波及方向を記述することで、比較・優先順位・影響分析に接続する。
+
+### 5.14 検証コスト / 観測コスト
+Case を検証するための証拠収集や構造把握の難しさを記述する。これは `09_Cases-Verification-Strategy.md` へ接続する。
+
+### 5.15 備考
+分類上の注意、関連ケース、未解決事項などを補足する欄である。
+
+## 6. 構文層／構造層／判断層の分離
+本テンプレートでは、項目を次の三層に分けて扱う。
+
+### 6.1 構文層
+- 対象構文
+- 主な AST 要素
+
+この層では、「何がソース上の観測起点か」を明確にする。
+
+### 6.2 構造層
+- 対象範囲
+- 構造要約
+- CFG / DFG 関与要素
+- 制御構造上の特徴
+- データ依存上の特徴
+- I/O 依存
+- 外部依存
+- 境界の明瞭性
+- 分割可能性
+- 変更影響の方向
+
+この層では、構造上何が起きているかを書く。
+
+### 6.3 判断層
+- 想定される Guarantee
+- 判断上の論点
+- 想定リスク
+- 検証コスト / 観測コスト
+
+この層では、構造がどのような判断や保証要求につながるかを書く。
+
+三層を分けることにより、構造事実と判断結論の混同を防ぎ、Case 記述の監査可能性を高める。
+
+## 7. 比較可能性を高めるためのルール
+Case を比較可能にするには、テンプレート項目が単に埋まっているだけでは足りない。少なくとも次のルールが必要である。
+
+- 同じ項目には同じ意味で書くこと
+- 「高 / 中 / 低」「あり / なし」「明瞭 / 不明瞭」などの定性的尺度を一定に保つこと
+- 構造要約と判断論点を同じ欄に混ぜないこと
+- 不明情報を空欄にせず、未観測や要確認と書くこと
+- 結論だけでなく、その根拠となる構造記述へ戻れること
+
+このルールにより、Case 比較は文章の印象比較ではなく、構造比較として成立する。
+
+## 8. 不明情報・判定不能の扱い
+不明情報は、Case 記述の欠陥ではなく、研究上の重要な情報である。したがって次のように扱う。
+
+- **未観測**：まだ構造確認ができていない
+- **要確認**：外部仕様や依存関係の確認が必要
+- **判定不能**：情報不足により判断論点を確定できない
+
+この区別により、「情報がない」のか「構造が曖昧なのか」「判断が保留なのか」を分けて記録できる。とくに判定不能は Decision 上の正当な状態であり、空白とは異なる。
+
+## 9. 推奨テンプレート（そのまま使える形）
+以下のテンプレートを、Case 記述の標準様式として推奨する。
+
+```markdown
+### Case: {CASE_ID} - {CASE_NAME}
+
+#### 分類
+- 主分類:
+- 副分類タグ:
+
+#### 構文層
+- 対象構文:
+- 主な AST 要素:
+
+#### 構造層
+- 対象範囲:
+- 構造要約:
+- 主な CFG 要素:
+- 主な DFG 要素:
+- 制御構造上の特徴:
+- データ依存上の特徴:
+- I/O 依存:
+- 外部依存:
+- 境界の明瞭性:
+- 分割可能性:
+- 変更影響の方向:
+
+#### 判断層
+- 想定される Guarantee:
+- 判断上の論点:
+- 想定リスク:
+- 検証コスト / 観測コスト:
+
+#### 備考
+- 
+```
+
+このテンプレートは、後続の分類、比較、影響分析、検証戦略のいずれにもそのまま接続できる最小形として設計されている。
+
+## 10. まとめ
+Case 記述テンプレートとは、`70_cases` を記述の集合ではなく、比較・検証・再利用可能な研究体系として運用するための規格である。本稿では、三層分離、構造中心、不明情報の明示、比較軸の埋め込みという原則の下で、Case 記述に必要な項目とその意味を整理し、標準テンプレートを提示した。これにより `70_cases` は、後続の構造パターン化、Guarantee 接続、Decision 接続、比較、影響、検証へと安定して接続できる。
+# Cases Description Template
+
+## 1. 文書の目的
+本稿は、`70_cases` における各 `Case` を、**同一のテンプレートで記述できるようにするための記述様式** を定義することを目的とする。Case が比較可能であり、検証可能であり、Guarantee や Decision に接続可能であるためには、単に内容が良いだけでなく、**記述形式そのものが構造的であること** が必要である。
+
+テンプレートは単なる文書フォーマットではない。それは `Case` を **研究単位として安定化するための規範** である。したがって本稿では、見栄えや説明のしやすさではなく、比較可能性、再利用性、検証可能性を最大化する観点からテンプレートを設計する。
+
+## 2. ケース記述テンプレートが必要な理由
+Case は `01_Cases-Core-Definition.md` で定義したように、構造観測・保証要求・判断論点を束ねる単位である。しかし、その記述方法がケースごとにばらつくなら、次の問題が起きる。
+
+- 同じ構造特性が異なる表現で書かれ、比較が難しくなる
+- Taxonomy 上どこに位置づくかが不明瞭になる
+- Guarantee や Decision の対応づけが恣意的になる
+- 不明情報と判定不能条件が混同される
+- 将来の自動抽出・自動比較に接続できなくなる
+
+したがってテンプレートは、Case を単に「説明する」ためではなく、**Case を研究上操作可能な単位にするため** に必要である。
+
+## 3. テンプレート設計原則
+Case 記述テンプレートは、少なくとも次の原則に従う必要がある。
+
+### 3.1 三層分離
+テンプレートは、構文層・構造層・判断層を明示的に分けて記述できなければならない。構文上見えること、構造上成立すること、判断上主張されることを混同しないためである。
+
+### 3.2 比較可能性優先
+各項目は、他の Case と比較するための軸になりうる形で書かれていなければならない。自由な物語化ではなく、構造差異が見えるように設計することが必要である。
+
+### 3.3 観測根拠への接続
+Case 記述は AST / CFG / DFG へトレースできる形でなければならない。これは厳密なノード列挙を意味しないが、少なくとも構文・制御・データ依存の観測根拠を曖昧にしないことを意味する。
+
+### 3.4 不明情報の明示
+テンプレートは、「まだ観測していないこと」と「観測した結果として判定不能であること」を区別できるように設計されなければならない。
+
+## 4. テンプレート項目一覧
+Case 記述テンプレートには、少なくとも次の項目を含める。
+
+- ケースID
+- ケース名
+- 対象範囲
+- 対象構文
+- 構造要約
+- 主な AST / CFG / DFG 関与要素
+- 制御構造上の特徴
+- データ依存上の特徴
+- I/O 依存
+- 外部依存
+- 境界の明瞭性
+- 想定される Guarantee
+- 判断上の論点
+- 想定リスク
+- 分割可能性
+- 変更影響の方向
+- 検証コスト / 観測コスト
+- 備考
+
+これらは、Case を単独で説明するためだけでなく、Case 群を比較し、分類し、評価し、保証・判断モデルへ接続するための必須フィールドとして置かれる。
+
+## 5. 各項目の意味
+### 5.1 ケースID / ケース名
+識別と参照のための基本情報である。ケース名は人間可読性のために必要だが、比較やツール連携のためには安定した ID が不可欠である。
+
+### 5.2 対象範囲
+Case が何を含み、何を明示的に含まないかを示す。これは `Scope` と整合している必要がある。
+
+### 5.3 対象構文 / AST 要素
+Case がどの構文カテゴリに anchored されているかを示す。Case を AST と同一視するためではなく、Case の構文的起点をトレース可能にするために必要である。
+
+### 5.4 構造要約 / CFG / DFG 関与要素
+制御構造、データ依存、依存境界、共有状態、外部接続など、Case の主要な構造特性を短くまとめる。これはテンプレート全体の中核であり、比較の起点になる。
+
+### 5.5 制御構造上の特徴
+分岐、反復、段落遷移、多重条件など、CFG 的な観点で何が問題になるかを示す。
+
+### 5.6 データ依存上の特徴
+共有データ、定義使用関係、不変条件、更新順序、暗黙依存など、DFG 的観点で重要な点を示す。
+
+### 5.7 I/O 依存 / 外部依存
+Case がどれだけ外部契約や環境に拘束されているかを示す。これは Guarantee と Decision の両方に強く効く。
+
+### 5.8 境界の明瞭性
+Case の内外がどこまで明確かを示す。曖昧さは重要な観測結果であり、省略してはならない。
+
+### 5.9 想定される Guarantee
+その Case において重要になる保存主張の候補を列挙する。ここでは Guarantee を確定するのではなく、Case が何を要求するかを明示する。
+
+### 5.10 判断上の論点 / 想定リスク
+可移行性、要分割性、代替の必要性、判定不能条件など、Decision に関わる論点とリスク仮説を記述する。
+
+### 5.11 分割可能性 / 変更影響の方向 / 検証コスト
+Case を移行や影響分析や検証の単位として扱う際に、どの方向へ難しさが現れるかを示す。これは後続の比較・影響・検証戦略で活用される。
+
+## 6. 構文層／構造層／判断層の分離
+テンプレートでは、三層を明確に分けて扱う。
+
+### 構文層
+- 対象構文
+- 主要 AST 要素
+
+### 構造層
+- 対象範囲
+- 構造要約
+- CFG / DFG 関与要素
+- 制御構造上の特徴
+- データ依存上の特徴
+- I/O 依存
+- 外部依存
+- 境界の明瞭性
+
+### 判断層
+- 想定される Guarantee
+- 判断上の論点
+- 想定リスク
+- 分割可能性
+- 変更影響の方向
+- 検証コスト / 観測コスト
+
+この層別記述により、「構文上見えるから判断できる」「構造が複雑だからそのまま高リスクと断定する」といった短絡を避けられる。
+
+## 7. 比較可能性を高めるためのルール
+テンプレートを比較可能な様式として機能させるには、次のルールが重要である。
+
+- 同じ種類の情報は同じ欄に記述する
+- 構造要約と判断結論を混同しない
+- 定性的情報と将来定量化可能な情報を区別する
+- 主分類 / 副分類を明示できる余地を持つ
+- 不明情報を空欄にせず、理由付きで記述する
+
+特に重要なのは、Case の難しさを物語的に書くのではなく、**どの欄のどの特性がその難しさを支えているか** を見えるようにすることである。
+
+## 8. 不明情報・判定不能の扱い
+テンプレート運用では、「不明」と「判定不能」を区別する。
+
+- **不明情報**：まだ観測していない、または情報取得できていない状態
+- **判定不能**：観測や仕様が欠けているため、Decision を確定できない状態
+
+不明情報はテンプレート上で明示し、その不明がどの判断に影響するかを書かなければならない。判定不能は、判断層における正当な出力であり、空欄ではない。
+
+## 9. 推奨テンプレート（そのまま使える形）
+以下を `70_cases` における推奨 Case 記述テンプレートとする。
+
+```markdown
+# {{Case ID}} {{Case Name}}
+
+## 1. 基本情報
+- 主分類:
+- 副分類:
+- 対象範囲:
+
+## 2. 構文層
+- 対象構文:
+- 主な AST 要素:
+
+## 3. 構造層
+- 構造要約:
+- 主な CFG 関与:
+- 主な DFG 関与:
+- 制御構造上の特徴:
+- データ依存上の特徴:
+- I/O 依存:
+- 外部依存:
+- 境界の明瞭性:
+
+## 4. 判断層
+- 想定される Guarantee:
+- 判断上の論点:
+- 想定リスク:
+- 分割可能性:
+- 変更影響の方向:
+- 検証コスト / 観測コスト:
+
+## 5. 備考
+- 不明情報:
+- 判定不能条件:
+- 関連 Case:
+```
+
+このテンプレートは、単なる記入フォームではなく、Case を研究データとして蓄積するための最小スキーマである。
+
+## 10. まとめ
+Case 記述テンプレートは、`70_cases` における比較可能性・再利用性・検証可能性を保証するための規範である。本稿では、Case 記述に必要な項目、その意味、三層分離、比較ルール、不明情報の扱いを整理した。これにより `70_cases` は、個別記述の集合ではなく、理論的に比較・検証可能なケースベースへ進むことができる。
+
+---
+# Cases Structural Pattern Model
+
+## 1. 文書の目的
+本稿は、`Case` を単なる個別事例としてではなく、**構造パターンとして抽象化するためのモデル** を定義することを目的とする。`70_cases` の価値は、ケースをたくさん並べることではなく、個別 Case の背後にある反復的な構造を取り出し、判断再利用と理論検証に使える形へ整えることにある。
+
+`01` で `Case` を判断検証単位として定義し、`02` で Taxonomy を置き、`03` で記述テンプレートを定義した。ここで次に必要なのは、Case の個別性を保ちつつも、そこから **Case → Pattern → Decision** という抽象化の橋を設計することである。本稿は、その橋を与える。
+
+## 2. 構造パターン化の必要性
+Case を個別記述のまま保持するだけでは、比較や知見の再利用に限界がある。たとえば同じようなデータ共有や同じような制御分岐が複数の Case に現れていても、それらを別々のものとして扱ってしまえば、保証要求や判断困難性の共通構造を見落とすことになる。
+
+構造パターン化が必要なのは、個別 Case の背後にある **再出現する骨格** を明らかにするためである。パターン化により、次のことが可能になる。
+
+- Case 群を少数の代表型で説明できる
+- Guarantee や Decision のチェック項目を再利用できる
+- 研究上のカバレッジを Case 数ではなく構造代表性で測れる
+- リスクパターンや難所パターンを理論的に取り出せる
+
+したがって構造パターン化は、Case の情報を削ることではなく、Case 群の説明力を高めるための抽象化である。
+
+## 3. 構造パターンの定義
+本研究において **構造パターン** とは、複数の `Case` に共通して現れうる **制御・データ・依存・境界の配置骨格** を、個別事例から抽出して固定した抽象モデルである。
+
+ここで重要なのは、構造パターンが構文パターンでも業務機能分類でもないという点である。
+
+- **Case との差**：Case は検証単位であり、パターンはその背後の再利用可能な骨格である
+- **構文パターンとの差**：構文の見た目ではなく、CFG / DFG / 境界の関係が中心である
+- **業務機能分類との差**：業務上の用途ではなく、構造上の困難性や依存配置で識別する
+
+したがって構造パターンは、個別 Case を圧縮したラベルではなく、**保証要求と判断論点を再利用するための抽象構造** である。
+
+## 4. Case と Pattern の関係
+Case と Pattern の関係は、個別と抽象の関係である。ただし、その抽象化は任意であってはならない。
+
+1つの Case は、通常、1つ以上の構造パターンに関与する。しかし比較と再利用のためには、少なくとも **主パターン** を1つ定め、必要に応じて副パターンを付加するのが望ましい。これにより、Case の個別差異を失わずに、どの抽象骨格に属するかを明示できる。
+
+逆に1つの構造パターンは、複数の Case を包含しうる。異なる業務文脈や異なるソース記述であっても、制御・依存・境界の骨格が同型であれば、同じパターンに属しうる。
+
+この意味で Pattern は、Case 群の上に定義される **同型類に近い抽象単位** である。
+
+## 5. 代表的な構造パターン一覧
+`70_cases` で少なくとも意識すべき代表的な構造パターンは次のとおりである。
+
+### 5.1 単純分岐型
+浅い条件分岐を中心に成立するケースである。局所的に理解しやすいが、他の依存が重なると判断論点が増える。
+
+### 5.2 多分岐判定型
+複数条件、多出口、ネストした判定が組み合わさるタイプである。制御経路の爆発と保証網羅性が問題になりやすい。
+
+### 5.3 ネスト複雑型
+分岐や反復が深く入れ子になっており、局所の見通しが悪くなるタイプである。構造理解コストと検証コストが高まりやすい。
+
+### 5.4 状態依存型
+フラグ、モード、共有状態などにより、後続の挙動が条件づけられるタイプである。データ依存と制御依存が結びつきやすい。
+
+### 5.5 反復更新型
+ループや繰返し処理の中でデータが段階的に更新されるタイプである。更新順序や不変条件が Guarantee 上の主要論点となる。
+
+### 5.6 入出力駆動型
+I/O が制御やデータ依存の結節点になるタイプである。観測可能性、外部契約、再現可能性が重要になる。
+
+### 5.7 外部定義拘束型
+COPY、外部仕様、外部データ定義、他システムとの契約などが内部構造を強く拘束するタイプである。Case の内外境界が外部仕様と連動する。
+
+### 5.8 段落遷移複雑型
+段落間ジャンプや `PERFORM` 系の制御遷移が複雑に絡み、局所構文では追い切れないタイプである。CFG 的把握が中心課題になる。
+
+### 5.9 データ共有密結合型
+複数処理が共有データに強く依存し、局所変更が広く波及しやすいタイプである。Guarantee 分解や分割移行が難しい。
+
+### 5.10 境界曖昧型
+責務、依存、保証、検証の観点で境界が一致しにくいタイプである。判定不能や影響過小評価の温床になりやすい。
+
+これらのパターンは排他的な一覧ではなく、Case 比較や分類を整理するための基本語彙として使う。
+
+## 6. パターン抽出の原則
+個別 Case から構造パターンを抽出する際には、次の原則が必要である。
+
+### 6.1 必要情報を落としすぎない
+識別子名や業務固有名は抽象化してよいが、Guarantee や Decision に効く制御・依存・境界情報は残さなければならない。
+
+### 6.2 構文ではなく構造を残す
+見た目が似ていることよりも、制御到達、データ共有、外部拘束、境界横断がどう配置されているかを優先して残す。
+
+### 6.3 個別差異をパラメータ化する
+同じパターンに属していても、複雑度、共有度、外部依存強度などには差がある。これらはパターンの外へ捨てるのではなく、パターン内の変数として持つべきである。
+
+### 6.4 主パターンと副パターンを分ける
+1つの Case に複数の骨格が重なる場合でも、どの骨格が支配的かを決める必要がある。これにより比較と代表ケース選定が安定する。
+
+## 7. パターンと Guarantee / Decision の関係
+構造パターンは、それ自体が Guarantee や Decision ではないが、それらを再利用するための接続点になる。
+
+Guarantee の観点では、あるパターンがどのような保証要求を生みやすいかを整理できる。たとえば反復更新型では不変条件や更新順序保証が重要になり、外部定義拘束型では外部契約保証が重要になる。
+
+Decision の観点では、どのパターンが可移行性を高め、どのパターンが要分割や要代替の判断を呼びやすいかを整理できる。たとえばデータ共有密結合型や境界曖昧型は、分割移行を難しくする代表例である。
+
+この意味で構造パターンは、Guarantee / Decision の **条件側の語彙** として働く。
+
+## 8. ケース比較・評価への利用
+構造パターンは、Case 比較と評価に次のように使われる。
+
+- **Case 比較**：同じパターンに属するケース同士を比べることで差異を明確にする
+- **ケース群カバレッジ**：どのパターンが未収集か、どのパターンが過剰かを点検する
+- **リスク抽出**：高リスクパターンに属する Case を優先的に検討する
+- **将来の評価体系**：構造パターンを評価ルールやスコアリングの入力単位とする
+
+これにより `70_cases` は、個別ケース記述の集合から、再利用可能な判断パターン群へ移行できる。
+
+## 9. まとめ
+構造パターンとは、個別 `Case` の背後にある再出現可能な制御・データ・依存・境界の骨格である。本稿では、Case と Pattern の違いを明確にし、代表的な構造パターンと抽出原則を定義した。これにより `70_cases` は、個別ケースから判断テンプレートへ至る抽象化の経路を持つことができる。
+
+---
+# Cases vs Guarantee
+
+## 1. 文書の目的
+本稿は、`Case` と `Guarantee` の関係を整理し、**Case がどのような保証要求を生み、Guarantee 理論の検証材料としてどのように機能するか** を定義することを目的とする。ここで扱うのは、Guarantee Space 全体の再定義ではなく、`70_cases` において Case が **保証適用の観測単位** としてどのような位置を占めるかである。
+
+`50_guarantee` において Guarantee は、保存されるべき性質、評価単位、保証空間の関係として整理された。しかし、その保証がどのような構造配置においてどの程度要求され、どのように検証困難性を生むかを理解するには、Case 層が必要である。本稿はその接続を与える。
+
+## 2. Case と Guarantee を接続する意義
+Guarantee は、対象が定まらなければ意味を持たない。何を保存するかという問いは、常に **何に対して保存を主張するのか** という問いを伴う。`Scope` はその対象領域を定めるが、それだけでは、どのような構造配置においてどの保証が問題化するかは記述しきれない。
+
+`Case` は、構造観測と保証要求を同一の単位に載せることで、この不足を補う。ノード単位では依存や境界横断が小さすぎて見えにくく、Scope 単位だけでは構造差異が粗すぎて保証密度や保証衝突の違いが見えにくい。Case はその中間にあり、**構造のどの特徴が保証要求を立ち上げるかを説明する単位** になる。
+
+したがって Case 単位で Guarantee を考えることの意義は、保証を抽象的主張のままにせず、**構造的条件付きの検証対象** として扱えるようにすることにある。
+
+## 3. ケースが保証要求を生む仕組み
+Case が保証要求を生むのは、その内部にある構造配置が、保存性・整合性・再現性・境界安定性などの論点を立ち上げるからである。主な要因は次のとおりである。
+
+### 3.1 制御構造の複雑性
+分岐、反復、段落遷移、例外的経路などが複雑になると、どの経路で同じ性質が維持されるかを確認する必要が生じる。経路数が増えるほど、保証確認コストも増える。
+
+### 3.2 データ依存
+共有データ、更新順序、状態保持、定義使用関係は、整合性や不変条件に関する保証を要求する。データ依存が濃いほど、局所保証は大域条件へ引き上げられやすい。
+
+### 3.3 I/O 依存
+入出力や外部媒体とのやり取りは、観測可能性、再現可能性、インタフェース同等性に関する保証を必要とする。内部だけを見た保証では不十分になることが多い。
+
+### 3.4 外部依存
+COPY、外部定義、他プログラム呼び出し、環境仕様などがある場合、Guarantee の前提条件が Case の外側へ押し出される。その結果、保証適用範囲と検証証拠範囲の調整が必要になる。
+
+### 3.5 境界曖昧性
+Case の内外が不明瞭であると、どこまでを保証対象に含めるべきかが不安定になる。これは、見かけ上は局所に見える保証が、実際には外部条件に依存しているという誤りを生みやすい。
+
+### 3.6 影響伝播性
+変更が他構造へ波及しやすい Case では、局所保証だけでは不十分となる。影響が保証適用領域を押し広げるため、Case は Guarantee の最小単位であるより、**保証要求を露出する単位** として理解されるべきである。
+
+## 4. 保証密度の高いケース
+本稿では **保証密度** を、「1つの Case に対して同時に要求される Guarantee の量と相互拘束の強さ」として理解する。保証密度が高いケースでは、保証項目の数が多いだけでなく、それらを同時に確認するための証拠収集や境界調整のコストも高くなる。
+
+保証密度が高くなりやすいのは、たとえば次のようなケースである。
+
+- 制御とデータ依存が強く結びついているケース
+- I/O と外部依存が保証前提を左右するケース
+- 共有データが多く、局所変更が他箇所へ波及しやすいケース
+- 境界が不明瞭で、保証対象の切り出し自体が難しいケース
+
+重要なのは、保証密度は行数や構文量ではなく、**構造上どれだけ多くの保存条件が同時に活性化するか** によって決まるという点である。
+
+## 5. 保証衝突が起きやすいケース
+**保証衝突** とは、複数の保証要件や前提条件が同一 Case 上で緊張関係を持ち、単純には同時充足できない状態を指す。たとえば、局所最適化と大域整合性、I/O 契約の維持と内部構造の再編成、部分移行と共有状態一貫性などは、互いに衝突しうる。
+
+保証衝突が起きやすいのは、次のような構造配置である。
+
+- 外部契約に強く拘束されつつ内部再編成の余地が小さいケース
+- 共有データが多く、複数の不変条件が同じ箇所へ集中するケース
+- 制御経路が多く、経路ごとに保持すべき条件が異なるケース
+- 分割移行を想定すると保証前提が分裂するケース
+
+保証衝突は単なる困難性ではなく、**どの構造がどの保証要求を同時に押し出しているか** を可視化する機会でもある。その意味で Case は、Guarantee の緊張関係を観測する装置として機能する。
+
+## 6. 保証分解可能性とケース構造
+**保証分解可能性** とは、1つの Case に対して必要な保証要求を、より小さな局所保証へ分解し、その合成によって全体保証を支えられる度合いを指す。
+
+分解しやすいケースは、一般に次の特徴を持つ。
+
+- 境界が比較的明瞭である
+- データ共有が限定されている
+- 制御構造が局所化しやすい
+- 外部依存が明示的である
+
+逆に分解しにくいケースは、次の特徴を持つ。
+
+- 共有データが広く波及している
+- 制御とデータ依存が絡み合っている
+- 外部仕様が内部構造に深く食い込んでいる
+- Case の境界自体が安定しない
+
+保証分解可能性は、分割移行や段階移行のしやすさとも強く関係する。ただし両者は同一ではない。分解可能でも運用判断上は難しいことがあり、逆に構造的には重いが段階的導入が可能なこともある。したがって保証分解可能性は、Decision への入力条件として理解されるべきである。
+
+## 7. Case と Guarantee Space の関係
+Guarantee Space は、保証の種類、関係、合成可能性を扱う理論空間である。Case は、その空間全体を再定義するものではなく、**特定の構造配置がどの保証集合を活性化するかを切り出す観測面** として機能する。
+
+各 Case に対して、想定される保証集合 \( G_c \) を考えることができる。ここで \( G_c \) は、その Case の構造要約、依存、境界、外部拘束を考慮したときに問題化する Guarantee の候補集合である。Case 比較とは、単に構造差異を比べるだけでなく、**どの Guarantee 集合がどの程度重なるか、どこで乖離するか** を比較することでもある。
+
+この意味で Case は、Guarantee Space への局所的な射影面として理解できる。
+
+## 8. ケースを用いた Guarantee 理論の検証可能性
+Case 群を用いることで、Guarantee 理論に対して少なくとも次の点を検証できる。
+
+1. **適用可能性の検証**  
+   既存の Guarantee 語彙が、現実の構造差異を十分に説明できるかを点検できる。
+
+2. **保証密度の検証**  
+   複雑な Case に対して、どの保証が同時に立ち上がるかを比較できる。
+
+3. **衝突と分解の検証**  
+   理論上分解可能とみなした保証が、実際の構造ではどこで衝突するかを観測できる。
+
+4. **理論不足の発見**  
+   既存の保証分類では記述しきれないケースが現れた場合、Guarantee 理論の側に新たな区別や語彙が必要であることが分かる。
+
+したがって Case は、Guarantee 理論を適用する場であると同時に、その理論を鍛え直す場でもある。
+
+## 9. まとめ
+Case は、Guarantee を抽象的保存主張のままに留めず、**構造条件付きの保証要求** として観測可能にする単位である。本稿では、Case が保証要求を生む要因、保証密度、保証衝突、保証分解可能性を整理し、Case が Guarantee Space の局所的射影面として機能することを示した。これにより `70_cases` は、Guarantee 理論を具体的構造へ接地し、その妥当性を検証する層として位置づけられる。
+
+---
+# Cases vs Decision
+
+## 1. 文書の目的
+本稿は、`Case` と `Decision` の関係を整理し、**Case をどの判断軸で評価し、どのように移行可否・要分割・要代替・要保留といった判断へ接続するか** を定義することを目的とする。ここで重要なのは、Decision を単なる結果ラベルの集合として扱わないことである。Case は、判断がどの構造観測に基づいて成立しているかを説明可能にする単位であり、その意味で `70_cases` は `60_decision` の適用層である。
+
+`60_decision` が判断軸を与えたとしても、どの程度の構造情報が揃っていれば判断できるのか、なぜその判断になるのかを言語化するには、Case 単位での整理が必要である。本稿はその橋渡しを行う。
+
+## 2. Case 単位で判断する意義
+移行判断は、プログラム全体へ一括に下されるわけでも、個々の AST ノードへ直接下されるわけでもない。全体単位では粗すぎて局所構造の差異が消え、ノード単位では狭すぎて依存や境界が見えなくなる。Case はその中間に位置し、**構造、保証要求、影響、境界を束ねた判断単位** として機能する。
+
+Case 単位で判断する意義は、少なくとも次の三点にある。
+
+- **説明可能性**：なぜその判断に至るのかを、構造上の理由に戻って説明できる
+- **比較可能性**：類似した構造配置に対し、判断の一貫性を検証できる
+- **反証可能性**：判断が誤っていれば、どの観測不足または構造誤認が原因かを追える
+
+したがって Case は、Decision の対象であると同時に、Decision の監査単位でもある。
+
+## 3. ケース評価の主要判断軸
+`70_cases` において、Case は少なくとも次の判断軸で評価されるべきである。
+
+### 3.1 可移行
+Case が、その構造と保証要求を保ったまま、実質的に移行可能であると考えられる状態である。ここでいう可移行は、単に変換可能という意味ではなく、**構造的説明と保証維持の見通しがあること** を含む。
+
+### 3.2 要分割
+Case をそのまま単一単位として扱うには構造的負荷が高く、境界再設計や責務分割が必要と判断される状態である。依存閉包が大きい場合や、共有データが多い場合に現れやすい。
+
+### 3.3 要代替
+同じ意味を保持したまま直接移行することが難しく、別の実現方式や設計変更を前提としなければならない状態である。外部依存や構造拘束が強く、既存形態をそのまま移せない場合に問題化する。
+
+### 3.4 要保留 / 判定不能
+構造情報、外部仕様、Guarantee 要件、境界条件などが不足しており、現時点では判断を確定できない状態である。これは失敗ではなく、Decision モデルにおける正当な出力である。
+
+これらの軸は単純な1ラベル分類ではなく、段階的・複合的に記述されうる。たとえば「最終的には可移行だが、その前に要分割」といった構造を持つことがある。
+
+## 4. 判断に必要な観測情報
+Case に対する Decision は、少なくとも次の観測情報に依拠する。
+
+### 4.1 制御構造
+分岐、反復、到達可能性、段落遷移の複雑性は、Case の理解容易性と検証負荷に直結する。
+
+### 4.2 データ依存
+共有状態、更新順序、定義使用関係、データ境界は、局所変更がどこまで有効かを左右する。
+
+### 4.3 I/O 依存
+入出力契約や観測可能性の有無は、保証確認や段階移行の難しさを左右する。
+
+### 4.4 外部依存
+COPY、外部呼び出し、外部仕様、環境前提は、判定可能性の前提条件になる。
+
+### 4.5 境界の明瞭性
+Case の内外が明瞭でないと、何に対する Decision かが不安定になる。
+
+### 4.6 保証要求
+どの Guarantee を維持すべきかが不明なら、可移行性も評価できない。Decision は Guarantee に無関係ではない。
+
+### 4.7 影響範囲
+Case の変更がどこまで波及するかによって、リスクと分割可能性の判断が変わる。
+
+このように Decision は、構造を見た判断であって、表面的なコード片の見た目だけで成立するものではない。
+
+## 5. 判定不能条件
+判定不能とは、構造上の複雑さではなく、**判断に必要な前提が不足している状態** を指す。典型的には次の条件がある。
+
+- CFG / DFG の把握が不十分である
+- 外部仕様や I/O 契約が確認できない
+- 維持すべき Guarantee が未定義である
+- Case の境界が曖昧である
+- 変更影響の波及先が十分に観測されていない
+
+判定不能を曖昧な結論として扱ってはならない。それは、研究上「何が不足しているか」を明示するための重要な状態である。Case において判定不能条件を記述することは、Decision モデルの適用限界を明らかにすることでもある。
+
+## 6. ケースを通じた判断説明性
+Decision の品質は、結論ラベルの妥当性だけでなく、**なぜその結論になるのかを構造的に説明できるか** によって決まる。Case はその説明性を担保する単位である。
+
+たとえば、
+
+- なぜ可移行なのか
+- なぜ要分割なのか
+- なぜ要代替なのか
+- なぜ判定不能なのか
+
+といった問いに対し、Case 記述は制御、データ、境界、Guarantee、影響の観点から根拠を返せなければならない。これにより Decision はブラックボックスの結論ではなく、監査可能な判断になる。
+
+## 7. ケースによる Decision モデル検証
+Case 群は、Decision モデルを適用するだけでなく、その健全性を検証するためにも使われる。
+
+### 7.1 判断一貫性の確認
+類似した構造パターンに対して、判断が大きくぶれるなら、Decision 軸または観測ルールの側に不足がある可能性がある。
+
+### 7.2 判断軸不足の発見
+Case を通して見たときに、既存の判断軸では説明しきれない状況が繰り返し現れるなら、新しい判断軸や補助軸が必要であることが分かる。
+
+### 7.3 判定不能の境界確認
+どの程度の観測情報が揃えば判定可能になるかを、Case 群を通じて比較できる。
+
+この意味で Case は、Decision モデルの適用対象であると同時に、Decision モデルを鍛え直すための反証場でもある。
+
+## 8. 今後の評価・比較への接続
+Case と Decision の対応づけは、後続の比較・優先順位付け・影響分析・検証戦略に接続される。Case にどの判断軸が立ち上がるかを整理しておくことで、PoC 向きケース、本番危険ケース、優先的に観測すべきケースを体系的に選べるようになる。
+
+また、構造パターンと Decision 結果の対応が蓄積されれば、将来的にはケースベースの判断支援や半自動分類にもつながる。
+
+## 9. まとめ
+Case は `Decision` の適用層であり、移行可否や難易度を **構造的理由付きで説明する単位** である。本稿では、Case を可移行・要分割・要代替・要保留の判断軸へ接続し、そのために必要な観測情報と判定不能条件を整理した。これにより `70_cases` は、Decision 理論を現実の構造差異へ接地し、その一貫性を検証する層として機能できる。
+
+---
+# Cases Comparison and Ordering
+
+## 1. 文書の目的
+本稿は、複数の `Case` を比較し、**難易度・優先順位・実証価値・危険性の観点から順序づけるための原理** を定義することを目的とする。`70_cases` は Case を記述するだけでは完結しない。Case 群を比較し、どの順で扱うべきか、どれが代表性を持ち、どれが危険信号を持つのかを整理して初めて、研究計画と移行判断へ接続できる。
+
+本稿で扱うのは、厳密な数式スコアリングではなく、**比較原理** と **順序づけ原理** である。すなわち、どの Case をなぜ先に見るのか、どの Case を慎重に扱うべきかを、構造語彙で説明するための文書である。
+
+## 2. ケース比較が必要な理由
+Case 群を比較しないまま蓄積すると、次の問題が起きる。
+
+- 類似 Case が重複して集まり、研究上の広がりが見えなくなる
+- 実証順序が場当たり的になり、学習効果が低い
+- 本来先に観察すべき危険ケースが後回しになる
+- 判断モデルのカバレッジ不足を見落とす
+
+Case 比較が必要なのは、優劣を決めるためではなく、**構造的な違いが何を引き起こすかを相対化するため** である。比較によって初めて、代表ケースの選定、PoC 対象の選定、危険ケースの識別、判断モデルの偏りの点検が可能になる。
+
+## 3. ケース比較軸
+Case 比較の主要軸は、少なくとも次のとおりである。
+
+### 3.1 構造複雑度
+制御構造、データ依存、外部拘束、境界の交差がどの程度複雑かを示す軸である。複雑度が高いほど、理解コスト、保証コスト、検証コストが増えやすい。
+
+### 3.2 保証要求量
+その Case に対してどれだけ多くの Guarantee が立ち上がり、どの程度相互拘束が強いかを示す軸である。これは `05_Cases-vs-Guarantee.md` でいう保証密度と密接に関係する。
+
+### 3.3 影響範囲
+変更や構造誤認が、その Case の外へどの程度波及しうるかを示す軸である。影響範囲が広いほど、局所 PoC だけでは安全判断が難しくなる。
+
+### 3.4 境界明瞭性
+Case の内外がどこまで明確かを示す軸である。境界が曖昧な Case は、判断も検証も不安定になりやすい。
+
+### 3.5 分割可能性
+Case を小さな単位へ切り出し、段階移行や局所検証へ落としやすいかを示す軸である。
+
+### 3.6 外部依存強度
+I/O、COPY、外部呼び出し、環境前提など、Case の外側に依存する要素がどれだけ強いかを示す軸である。
+
+### 3.7 検証コスト
+その Case を保証・判断の観点で十分に確認するために必要な観測・証拠収集のコストである。
+
+### 3.8 判断困難性
+既存の Decision 軸でどれだけ説明しやすいか、または判定不能条件に落ちやすいかを示す軸である。
+
+これらの比較軸は独立ではなく、互いに連動する。たとえば構造複雑度が高いと保証要求量も増えやすく、境界明瞭性が低いと判断困難性と検証コストが上がりやすい。
+
+## 4. 比較結果の読み方
+Case 比較は、単に「どちらが難しいか」を決めるためのものではない。比較結果は次のように読む必要がある。
+
+第一に、**何が難しさの主因か** を分解する。構造複雑度が高いのか、外部依存が重いのか、保証要求が多いのかを区別することで、Case の本質が見える。
+
+第二に、**比較軸どうしの緊張関係** を見る。たとえば構造は単純でも外部依存が強いケース、構造は複雑だが境界は明瞭なケースなど、単純な一軸比較では捉えられない差異が重要になる。
+
+第三に、**研究目的と実務目的を切り分ける**。研究上は良い反例であっても、実務上は最初に触れるべきでないケースがありうる。したがって比較結果は、その利用目的に応じて解釈しなければならない。
+
+## 5. ケースの順序づけ原理
+Case の順序づけは、少なくとも次の原理に従って行うのが望ましい。
+
+### 5.1 研究着手しやすいケースを先に置く
+構造が比較的明瞭で、境界も安定し、保証要求が局所に近い Case は、理論の初期適用に向く。これらは PoC やテンプレート検証の入口として有効である。
+
+### 5.2 代表性の高いケースを早めに入れる
+単純だからという理由だけで入口 Case を選ぶと、理論が現実の難所を説明できるかどうかが見えなくなる。したがって、早い段階で代表的パターンを含める必要がある。
+
+### 5.3 危険ケースは十分な準備の後に扱う
+境界曖昧、外部依存過多、保証衝突多発、影響伝播大などのケースは、研究上重要だが、初期段階では判断軸やテンプレートが未整備だと扱いにくい。したがって危険ケースは、比較軸と記述様式が安定した後で扱うのが望ましい。
+
+### 5.4 類似ケースの連続投入を避ける
+同じパターンばかりを続けて扱うと、研究上のカバレッジが偏る。順序づけは学習曲線と代表性の両立を考えて設計する必要がある。
+
+## 6. PoC 向きケースと危険ケース
+### 6.1 PoC 向きケース
+PoC 向きケースは、次の特徴を持つ。
+
+- 境界が比較的明瞭
+- 分割可能性が高い
+- 外部依存が限定的
+- 保証要求量が中程度以下
+- 判断結果を説明しやすい
+
+これらは理論の入口として有効であり、テンプレートや Taxonomy の妥当性確認にも向く。
+
+### 6.2 危険ケース
+危険ケースは、次の特徴を持つ。
+
+- 境界が曖昧
+- 外部依存が強い
+- 保証密度が高い
+- 影響伝播が大きい
+- 判定不能条件が多い
+
+危険ケースは、研究上の難所であると同時に、Decision モデルの弱点を露出しやすい。そのため後回しにするのではなく、**準備の整った段階で重点的に扱うべき対象** と理解するのが適切である。
+
+## 7. ケースカバレッジと代表性
+Case 群の評価では、単純な件数ではなく、**どの比較軸の組合せをどれだけカバーしているか** が重要である。たとえば制御複雑度の高い Case ばかりが集まり、外部依存中心 Case が不足していれば、研究は偏ったものになる。
+
+したがって Case カバレッジは、Taxonomy の分類軸と Comparison の比較軸の両方を使って点検されるべきである。代表性とは、多数派であることではなく、**理論上区別すべき構造差異を代表していること** である。
+
+## 8. 研究計画・移行判断への利用
+本稿の比較原理と順序づけ原理は、研究計画と移行判断の双方に使われる。
+
+研究計画の観点では、どの Case を先に扱い、どの段階で危険ケースを導入するかを決める基準になる。移行判断の観点では、PoC 対象選定、本番優先順位、検証計画の立案に使われる。
+
+また、比較結果が蓄積されれば、Case ごとの難易度や優先順位を経験則ではなく、構造軸にもとづいて説明できるようになる。
+
+## 9. まとめ
+Case の比較と順序づけは、`70_cases` を単なる記述集ではなく、**研究実施順と移行優先順位に接続する体系** として成立させるために不可欠である。本稿では、構造複雑度、保証要求量、影響範囲、境界明瞭性、分割可能性、外部依存強度、検証コスト、判断困難性を主要比較軸として整理し、PoC 向きケースと危険ケースの違い、順序づけ原理、カバレッジの考え方を定義した。
+
+---
+# Cases Impact and Propagation
+
+## 1. 文書の目的
+本稿は、Case ごとの変更影響と影響伝播の特性を整理し、**Case を変更影響分析の観測単位として扱う枠組み** を定義することを目的とする。`70_cases` における Case は、単に構造や保証要求を記述するための単位ではなく、変更が生じたときに **どこへ、どのように、どの程度広がるか** を観測する単位でもある。
+
+`60_scope` では `Impact Scope` とその伝播が理論的に定義された。本稿はその議論を `Case` へ接続し、Case の比較、優先順位付け、検証要求、移行判断に影響分析を組み込むための基礎を与える。
+
+## 2. Case を影響分析単位として扱う意義
+変更影響をノード単位だけで見ると、局所的な変化しか捉えられない。一方、システム全体単位で見ると、影響が広すぎてどの構造が波及の原因か分からなくなる。Case はその中間にあり、**構造的まとまりと判断単位を保ったまま、影響の伝播を追跡できる**。
+
+Case を影響分析単位として扱う意義は、少なくとも次の三点にある。
+
+- **局所と大域の橋渡し**：変更の起点と、その波及先を同一の観測語彙で追える
+- **Guarantee / Decision への接続**：影響がどの保証要求や判断軸へ波及するかを説明できる
+- **比較可能性**：どの Case が影響を内側で閉じやすく、どの Case が外へ広げやすいかを比べられる
+
+この意味で Case は、構造観測単位であると同時に、影響伝播の実験単位でもある。
+
+## 3. 主な変更種別
+Case に対する影響分析では、少なくとも次の変更種別を区別して扱う必要がある。
+
+### 3.1 データ項目変更
+変数、レコード、共有状態、フィールド定義の変更である。DFG 上の伝播を引き起こしやすく、保証整合性にも強く影響する。
+
+### 3.2 制御条件変更
+条件分岐、遷移条件、反復条件の変更である。CFG 上の到達可能性や実行経路に直接波及する。
+
+### 3.3 I/O 仕様変更
+入力形式、出力形式、ファイル仕様、入出力順序などの変更である。Case 内部だけでなく外部契約にも波及しやすい。
+
+### 3.4 COPY / 外部定義変更
+外部定義や共有定義に対する変更である。単一 Case の外側で広い影響を持つことが多い。
+
+### 3.5 外部呼び出し条件変更
+呼び出し先仕様、前提条件、応答契約などの変更である。Case の境界の外側へ影響を押し出しやすい。
+
+これらの変更種別を区別することで、何が起点で何が波及先かを整理しやすくなる。
+
+## 4. ケース内影響とケース外伝播
+Case における影響分析では、**Case 内部で閉じる影響** と **Case 外部へ拡張する影響** を区別する必要がある。
+
+### 4.1 ケース内影響
+変更の影響が、その Case の内部構造だけで説明可能な状態である。たとえば局所条件変更が内部の分岐とデータ更新にのみ影響する場合がこれに当たる。ケース内影響は、比較的局所的な検証や分割計画に向いている。
+
+### 4.2 ケース外伝播
+変更が、他の Case、共有データ、外部契約、検証責務、判断対象へ波及する状態である。たとえば共有データ変更や外部仕様変更は、Case の外側へ容易に伝播する。
+
+重要なのは、局所的に見える変更でも、構造的には外へ広がることがありうる点である。Case は、その広がりの方向と強さを記述するための単位として機能する。
+
+## 5. 影響伝播しやすい構造
+影響が広がりやすい Case には、いくつかの典型構造がある。
+
+### 5.1 共有データが多いケース
+複数の処理や Case が同じデータ定義を参照していると、データ変更の影響が広範に波及しやすい。
+
+### 5.2 外部依存が強いケース
+外部仕様や他システム契約に依存する Case では、変更が外へ伝播しやすく、同時に外からの影響も受けやすい。
+
+### 5.3 境界が曖昧なケース
+Case の内外が曖昧であると、影響が Case 内で閉じるかどうかを判定しにくい。その結果、影響過小評価が起きやすい。
+
+### 5.4 制御とデータが強結合なケース
+制御条件とデータ更新が密接に結びついていると、一方の変更がもう一方の保証や判断に連鎖しやすい。
+
+これらの構造は、Case の危険度や優先順位を決める際の重要な指標になる。
+
+## 6. 影響閉包の考え方
+`60_scope` において `Impact Closure` は、意味的に有意な伝播先を残さない状態として論じられた。Case 側では、これを **その Case に対する影響評価が、どこまでで閉じたとみなせるか** という問いに引き直す必要がある。
+
+Case が影響閉包を持つとは、少なくとも次の条件が満たされることである。
+
+- 主要な制御伝播先が把握されている
+- 主要なデータ依存先が把握されている
+- 外部依存や契約変更の波及先が認識されている
+- Guarantee と Decision に対する主要波及先が識別されている
+
+逆に、Case が閉じない場合は、影響評価をその Case だけで完結させてはならない。閉じないこと自体が、その Case の特徴であり、判断上のリスクになる。
+
+## 7. Guarantee / Decision への波及
+影響分析は、Guarantee と Decision に直接つながる。
+
+Guarantee の観点では、影響がどの保証要件を再検証させるかが重要になる。局所変更でも、共有データや外部契約を介して大域保証へ波及することがある。
+
+Decision の観点では、影響範囲が広い Case は、要分割や要保留の判断を呼びやすい。また、影響閉包が不十分な Case では、移行可否判断そのものが不安定になる。
+
+したがって影響分析は、Case の付随情報ではなく、Guarantee と Decision を成立させる前提条件の一部である。
+
+## 8. 将来の変更影響分析モデルへの接続
+本稿の整理は、将来的な変更影響分析モデルや半自動支援へ接続される。Case 単位で、変更種別、伝播方向、外部波及、影響閉包の有無を記録できれば、Case 比較や優先順位付け、検証対象選定にそのまま利用できる。
+
+さらに、構造パターンと影響伝播パターンの対応が取れるようになれば、どの種類の Case がどの程度の影響リスクを持ちやすいかを経験的に蓄積できる。
+
+## 9. まとめ
+Case は、変更影響を観測するための適切な中間単位である。本稿では、主な変更種別、ケース内影響とケース外伝播、影響しやすい構造、影響閉包、Guarantee / Decision への波及を整理した。これにより `70_cases` は、静的な記述集ではなく、変更と移行判断の波及を扱う動的な研究層として位置づけられる。
+
+---
+# Cases Verification Strategy
+
+## 1. 文書の目的
+本稿は、`70_cases` で定義・分類・比較された Case 群を、**どのように検証するか** の戦略を定義することを目的とする。`70_cases` は、Case を記述して終わる章ではない。Case が研究上有効であるためには、その定義、分類、構造記述、Guarantee 割当、Decision 判断、比較結果が、一定の妥当性を持つことを確認しなければならない。
+
+本稿でいう検証とは、実行テストの自動化だけではない。むしろ、Case 群が **理論を適用し検証する単位として十分に機能しているか** を点検することである。そのため本稿は、`70_cases` 全体の品質保証方針として位置づけられる。
+
+## 2. `70_cases` における検証対象
+Case 群に対して検証すべき対象は、少なくとも次のとおりである。
+
+### 2.1 ケース定義の妥当性
+`Case` が本当に構造的判断単位として定義されているか、単なる事例や業務説明へ崩れていないかを確認する。
+
+### 2.2 ケース分類の妥当性
+Taxonomy が構造差異に基づいて機能しているか、分類軸や主分類 / 副分類が恣意的になっていないかを確認する。
+
+### 2.3 構造記述の正しさ
+テンプレートに記載された AST / CFG / DFG / 境界情報が、実際の構造と整合しているかを確認する。
+
+### 2.4 Guarantee 割当の妥当性
+Case に対して想定された Guarantee が、その構造差異に基づいて適切に導かれているかを確認する。
+
+### 2.5 Decision 判断の一貫性
+可移行、要分割、要代替、要保留といった判断が、構造観測と論理的につながっているかを確認する。
+
+### 2.6 ケース比較の妥当性
+比較軸や順序づけが、印象や恣意ではなく構造差異に基づいているかを確認する。
+
+これらは互いに独立ではなく、1つが崩れると他も不安定になる。したがって検証戦略は、Case 記述全体を横断して設計される必要がある。
+
+## 3. 検証観点
+`70_cases` における検証は、次の観点から行われる。
+
+### 3.1 一貫性
+同じ原理で記述された Case 群に、同じ分類・保証・判断ルールが適用されているかを見る。表記の統一だけでなく、論理の一貫性が重要である。
+
+### 3.2 再現性
+別の研究者が同じ Case 記述を読んだとき、同じ構造論点と同じ判断理由へ到達できるかを見る。再現性は、Case 記述テンプレートとトレーサビリティに依存する。
+
+### 3.3 説明可能性
+Case に対してなされた分類、保証割当、判断結果が、構造記述へ戻って説明できるかを見る。
+
+### 3.4 網羅性
+Case 群が構造パターン、危険パターン、代表ケースを十分にカバーしているかを見る。件数ではなく、理論上区別すべき差異を押さえているかが重要である。
+
+### 3.5 判定可能性
+どの Case が十分な観測情報を持ち、どの Case が判定不能条件を持つかが適切に記述されているかを見る。判定不能を曖昧にしないことが重要である。
+
+## 4. 検証方法
+Case 群の検証は、複数の方法を組み合わせて行う。
+
+### 4.1 レビュー
+各 Case 文書を読み、構造記述、Guarantee 候補、Decision 論点の整合性を確認する。レビューは最も基本的な検証方法である。
+
+### 4.2 ケース間比較
+類似した Taxonomy や Pattern を持つ Case 同士を比較し、分類や判断が整合しているかを確認する。
+
+### 4.3 代表ケースによる確認
+各構造パターンや分類軸を代表する Case を用いて、理論の説明力が十分かを確認する。
+
+### 4.4 境界ケースによる確認
+境界曖昧、外部依存過多、保証衝突多発など、理論が崩れやすい Case を用いて、定義や分類の限界を点検する。
+
+### 4.5 反例による確認
+既存の Taxonomy や Guarantee / Decision の枠組みでうまく説明できない Case を意図的に取り上げ、理論不足を洗い出す。
+
+これらを組み合わせることで、Case 群の整合性だけでなく、研究モデル全体の伸びしろも見えるようになる。
+
+## 5. 代表ケース・境界ケース・反例の扱い
+Case 検証では、すべての Case を同じ重みで扱う必要はない。とくに次の三種類は重要である。
+
+### 5.1 代表ケース
+分類軸や構造パターンを典型的に表す Case である。テンプレート、Taxonomy、Pattern、Guarantee、Decision の整合確認に使う。
+
+### 5.2 境界ケース
+分類しづらい、境界が曖昧、外部依存が強いなど、理論の境界条件を露出する Case である。理論の適用可能範囲を確認するのに有効である。
+
+### 5.3 反例
+既存理論では説明困難な Case である。反例は失敗ではなく、新しい区別や軸の必要性を示す研究資源である。
+
+この三種類を区別して扱うことで、検証戦略は単なる品質確認に留まらず、理論精緻化の循環へ入る。
+
+## 6. 検証失敗の兆候
+Case 群の検証が失敗している、または不十分であることを示す兆候として、少なくとも次がある。
+
+- 分類が毎回ぶれる
+- 同じような Case に異なる Guarantee が恣意的に割り当てられる
+- Decision 結果は書かれているが理由が説明できない
+- テンプレート記述の粒度が大きく揺れる
+- 影響分析の結果と分割可能性判断が整合しない
+- 判定不能条件が明示されず、空欄や曖昧語で済まされる
+
+これらの兆候が現れた場合、個別 Case を修正するだけでなく、Taxonomy、テンプレート、Pattern、Guarantee 接続、Decision 接続のいずれかに遡って見直す必要がある。
+
+## 7. 将来の自動化との接続
+本稿の検証戦略は、将来的な自動支援にもつながる。たとえば、
+
+- 構造抽出支援
+- ケース比較支援
+- 判断補助
+- カバレッジ確認
+
+などは、Case テンプレートと検証観点が安定して初めて可能になる。ただし自動化の対象は、Case そのものを置き換えることではなく、**Case 記述と検証の補助** と考えるべきである。
+
+## 8. 研究全体における意味
+`70_cases` の検証戦略は、研究全体において「理論が実証的に耐えているか」を確認する層である。AST、Guarantee、Decision の各理論が個別には整っていても、Case 群を通した検証がなければ、それらが本当に現実の構造差異を説明できるかは分からない。
+
+したがって本稿は、`70_cases` を文書群から研究インフラへ引き上げるための基盤である。
+
+## 9. まとめ
+Case 検証とは、Case 文書が書かれていることを確認する作業ではなく、Case が **理論適用・判断説明・反例発見の単位として機能しているか** を点検することである。本稿では、検証対象、検証観点、検証方法、代表ケース・境界ケース・反例の扱い、検証失敗の兆候、自動化への接続を整理した。これにより `70_cases` は、記述だけでなく検証を内包する研究フェーズとして成立する。
+
+---
+# Cases Mapping to AST CFG DFG Guarantee Decision
+
+## 1. 文書の目的
+本稿は、`Case` を既存の研究モデルである **AST / CFG / DFG / Guarantee / Decision** に対応付け、`70_cases` を研究全体の接続層として位置づけることを目的とする。`70_cases` は独立したケース集ではない。ここまでの各文書で定義・分類・テンプレート化・パターン化・保証接続・判断接続・比較・影響・検証を行ってきたが、それらは最終的に、Case を中心として既存モデル群を横断的に束ねるためにある。
+
+本稿では、各モデルを再定義するのではなく、Case がそれぞれのモデルにおいてどのような役割を持ち、どこで同じ対象を見ており、どこで異なる読みを与えるのかを整理する。
+
+## 2. `70_cases` が研究全体で担う役割
+`10_ast` は構文観測の基盤を与えた。`50_guarantee` は保存主張の語彙を与えた。`60_decision` は移行可否・リスク・検証十分性の判断軸を与えた。さらに `60_scope` は、これらが適用される有界な意味対象を定義した。
+
+`70_cases` が担う役割は、それらを **適用・接続・検証する中間層** を与えることである。Case は、抽象理論が現実の構造差異にどう現れるかを記述し、同時にその理論が本当に説明力を持つかを点検する単位である。
+
+したがって `70_cases` は、理論の後付け説明ではなく、理論を現実の判断材料へ落とし、その妥当性を検証するための研究上のハブである。
+
+## 3. Case と AST の対応
+AST は、Case の **構文的アンカー** を与える。Case がどの COBOL 構文要素に anchored されているか、どの AST ノード群へトレース可能かは、Case 記述の再現性と監査可能性の前提になる。
+
+しかし、Case は AST の部分木そのものではない。AST は構文上何が存在するかを示すが、Case は **それらを判断単位としてどう束ねるか** を示す。1つの Case は複数の AST ノード群にまたがりうるし、逆に1つの AST 部分木は複数の Case から異なる意味で参照されうる。
+
+この意味で AST は **観測基盤** であり、Case は **その観測を判断可能な単位へ持ち上げたもの** である。
+
+## 4. Case と CFG の対応
+CFG は、Case の **制御的広がり** を与える。どの分岐が関係し、どの反復が支配的で、どの遷移が複雑性を生んでいるかは、Case の制御構造上の特徴として記述される。
+
+Case は CFG の部分構造に対応しうるが、CFG 断片そのものではない。CFG は経路と到達可能性を示すが、Case はそれに加えて境界、Guarantee 候補、Decision 論点を含む。したがって Case と CFG の関係は、**Case が制御部分構造を含み、その上で判断語彙を付加する** という形で理解されるべきである。
+
+## 5. Case と DFG の対応
+DFG は、Case の **データ依存的広がり** を与える。共有データ、更新順序、定義使用関係、境界横断依存などは、Case の難しさや影響伝播の主要因となる。
+
+Case は DFG 上の依存断片を含みうるが、DFG 断片と同一ではない。DFG は何が何に依存するかを示すが、Case はその依存がどのような保証要求や判断困難性を引き起こすかまで含む。
+
+この意味で DFG は、Case の構造層を構成する主要射影であり、Case はそれを判断層へ接続する器である。
+
+## 6. Case と Guarantee の対応
+Case は、Guarantee が **どの構造配置のもとで、どの程度問題化するか** を観測する単位である。`05_Cases-vs-Guarantee.md` で整理したように、Case は保証密度、保証衝突、保証分解可能性を露出する。
+
+Guarantee は保存主張の語彙であり、Case はその主張がどのような構造において活性化するかを示す。したがって両者は同一ではないが、Case により Guarantee は抽象的命題から **構造条件付きの要求** へ接地される。
+
+## 7. Case と Decision の対応
+Case は、Decision が **何に対して、どのような根拠で下されるか** を説明する単位である。`06_Cases-vs-Decision.md` で整理したように、可移行、要分割、要代替、要保留といった判断は、Case の構造、Guarantee、影響、境界記述に依拠して成立する。
+
+Decision は結論であり、Case はその結論の理由束である。この対応があることで、Decision はブラックボックスの判定ではなく、監査可能な説明体系として機能する。
+
+## 8. モデル横断マッピングの意義
+Case を中心に AST / CFG / DFG / Guarantee / Decision を並べることの意義は、**同じ対象を異なる層でどう読んでいるかを一致・不一致の両面から点検できること** にある。
+
+AST だけでは見えていても、CFG や DFG では広がりが違うことがある。Guarantee だけでは主張できても、Decision へ接続すると証拠不足が露出することがある。Case は、それらを **同一の研究単位の上に並置するための索引** である。
+
+したがってモデル横断マッピングの意義は、各モデルを同一化することではなく、**どこが一致し、どこが緊張し、どこが不足しているかを見えるようにすること** にある。
+
+## 9. 将来展開への接続
+Case をモデル横断で整理できるようになると、将来的には次のような展開が考えられる。
+
+- Case ベースの診断支援
+- 構造観測からのテンプレート半自動生成
+- Pattern と Guarantee / Decision の対応表の自動補助
+- Case カバレッジの可視化
+
+ただしその前提は、Case が各モデルとの対応を明確に持ち、どの層の情報が不足しているかを明示できることである。本稿は、その前提条件を理論的に整理する役割を持つ。
+
+## 10. まとめ
+Case は、AST / CFG / DFG / Guarantee / Decision を横断的に接続する **研究上のハブ単位** である。AST は観測起点、CFG は制御的広がり、DFG は依存的広がり、Guarantee は保存主張、Decision は判断結論を与えるが、Case はそれらを同一の比較・検証単位へ束ねる。本稿により `70_cases` は、独立した章ではなく、研究体系全体の適用層・接続層・検証層として明確に位置づけられる。
+
+---
+# `70_cases`
+
+Phase 7: Cases の文書群です。
+
+`70_cases` は、`10_ast` `50_guarantee` `60_decision` および `60_scope` を前提として、
+**Case を構造的判断単位として記述・分類・比較・検証するための適用層** を与えます。
+
+## Documents
+
+- `01_Cases-Core-Definition.md`
+- `02_Cases-Taxonomy.md`
+- `03_Cases-Description-Template.md`
+- `04_Cases-Structural-Pattern-Model.md`
+- `05_Cases-vs-Guarantee.md`
+- `06_Cases-vs-Decision.md`
+- `07_Cases-Comparison-and-Ordering.md`
+- `08_Cases-Impact-and-Propagation.md`
+- `09_Cases-Verification-Strategy.md`
+- `10_Cases-Mapping-to-AST-CFG-DFG-Guarantee-Decision.md`
+
+## Notes
+
+- `Case` は単なる事例ではなく、**構造観測・保証要求・移行判断を束ねる判断検証単位** として扱う。
+- 各文書は、定義、分類、記述様式、構造パターン、Guarantee / Decision 接続、比較、影響、検証、モデル横断写像へ段階的に接続する。
+- `70_cases` は独立したケース集ではなく、研究全体の **適用層 / 接続層 / 検証層** として位置づけられる。
 
 # 70_planning
 
