@@ -8,7 +8,8 @@ COBOL構造解析研究室の用語定義集です。
 
 ### 概要・ガイド
 - `README.md` — 用語集の概要、読み方ガイド、フォーマット定義
-- `GlossaryStructure.md` — ディレクトリ構造の説明
+- `INDEX.md` — 本ファイル（ディレクトリ全体の索引）
+- `GlossaryStructure.md` — ディレクトリ構造の詳細説明
 
 ### 集約定義ファイル
 - `TermsAstIrCfgDfg.md` — 構文・構造解析層（AST, IR, CFG, DFG）の用語
@@ -47,6 +48,7 @@ COBOL構造解析研究室の用語定義集です。
 | Phase 8 | `20_ir` | IR, IR Unit, Control/Data/Boundary Abstraction |
 | Phase 9 | `30_cfg` | CFG, Basic Block, Dominance, Reachability, Loop |
 | Phase 10 | `40_dfg` | DFG, Define/Use, Reaching Definition, Impact Closure |
+| Additional | `80_geometry`, `80_reviews` | Migration Geometry, Safe Region, Failure Region |
 
 ## Term Format
 

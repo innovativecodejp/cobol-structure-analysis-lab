@@ -19,6 +19,7 @@ where $V$ are syntax nodes, $E$ represent containment (parent-child), $\lambda: 
 
 **Related Concepts**:
 - [[IR]], [[CFG]], [[DFG]]
+- [[Node Taxonomy]], [[Structural Layer Stack]]
 
 **Example**:
 COBOL の `MOVE A TO B` は、AST 上で `MoveStatement` ノードの子として `SourceOperand(A)` と `DestinationOperand(B)` を持つ。
@@ -46,6 +47,7 @@ where $U$ is a set of IR units, $\Sigma$ is effect signatures (control, data, bo
 
 **Related Concepts**:
 - [[AST]], [[CFG]], [[DFG]], [[Guarantee]], [[Scope]]
+- [[IR Unit]], [[Control Abstraction]], [[Data Abstraction]]
 
 ---
 
@@ -71,6 +73,7 @@ where $V$ are basic blocks, $E \subseteq V \times V$ are control transitions, $s
 
 **Related Concepts**:
 - [[Basic Block]], [[DFG]], [[Guarantee]], [[Scope]]
+- [[Dominance]], [[Reachability]], [[Loop Structure]]
 
 ---
 
@@ -96,6 +99,7 @@ where $V$ are data elements (items, literals, expressions, I/O endpoints), $E$ r
 
 **Related Concepts**:
 - [[CFG]], [[Define-Use]], [[Reaching Definition]], [[Scope]], [[Guarantee]]
+- [[Impact Closure]], [[Data Dependency]]
 
 ---
 
@@ -183,4 +187,4 @@ $$
 $$
 
 **Related Concepts**:
-- [[DFG]], [[Scope Boundary]]
+- [[DFG]], [[Scope Boundary]], [[Data Scope]]
