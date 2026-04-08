@@ -1,4 +1,4 @@
-﻿# 10_ast
+# 10_ast
 
 # 01_AST-Scope-Definition
 
@@ -13029,22 +13029,652 @@ This directory contains review logs and decision records.
 
 # 90_glossary
 
+# アルファベット順索引 (Alphabetical Index)
+
+用語を**アルファベット順**で一覧します。各用語の**所在ファイル**と**Layer**を併記。
+
+## A
+
+- **Abstraction Level** — Structure | `01_CoreConcepts.md`
+- **Aggregation Edge** — Structure | `09_DataStructureModel.md`
+- **Antichain** — Geometry | `10_LatticeOrderTheory.md`
+- **AST (Abstract Syntax Tree)** — Syntax | `02_StructuralAnalysisLayer.md`, `TermsAstIrCfgDfg.md`
+
+## B
+
+- **Back Edge** — Structure | `08_ControlStructureModel.md`
+- **Basic Block** — Structure | `08_ControlStructureModel.md`, `TermsAstIrCfgDfg.md`
+- **Boolean Algebra** — Geometry | `10_LatticeOrderTheory.md`
+- **Branch-Merge Pattern** — Structure | `08_ControlStructureModel.md`
+
+## C
+
+- **Case Study Analysis** — Decision | `07_MigrationDecisionModel.md`
+- **CFG (Control Flow Graph)** — Structure | `02_StructuralAnalysisLayer.md`, `TermsAstIrCfgDfg.md`
+- **Chain** — Geometry | `10_LatticeOrderTheory.md`
+- **COBOL Structure Analysis Lab** — Structure | `01_CoreConcepts.md`
+- **Cohesion** — Decision | `11_DerivedMetrics.md`
+- **Complete Lattice** — Geometry | `10_LatticeOrderTheory.md`
+- **Condition-Dependency Edge** — Structure | `09_DataStructureModel.md`
+- **Control Dependency** — Structure | `08_ControlStructureModel.md`
+- **Control Nesting** — Structure | `08_ControlStructureModel.md`
+- **Control Region** — Structure | `08_ControlStructureModel.md`
+- **Control Risk Pattern** — Decision | `08_ControlStructureModel.md`
+- **Control Structure** — Structure | `08_ControlStructureModel.md`
+- **Cross-Scope Transfer** — Structure | `09_DataStructureModel.md`
+- **Cyclomatic Complexity** — Decision | `11_DerivedMetrics.md`
+
+## D
+
+- **Data Boundary** — Structure | `09_DataStructureModel.md`
+- **Data Coupling** — Decision | `11_DerivedMetrics.md`
+- **Data Dependency** — Structure | `09_DataStructureModel.md`
+- **Data Flow Complexity** — Decision | `11_DerivedMetrics.md`
+- **Data Lifetime** — Structure | `09_DataStructureModel.md`
+- **Data Propagation** — Structure | `09_DataStructureModel.md`
+- **Data Risk Pattern** — Decision | `09_DataStructureModel.md`
+- **Data Scope** — Structure | `09_DataStructureModel.md`
+- **Data Structure** — Structure | `09_DataStructureModel.md`
+- **Decision Boundary** — Decision | `07_MigrationDecisionModel.md`
+- **Decomposition Edge** — Structure | `09_DataStructureModel.md`
+- **Define (def)** — Structure | `09_DataStructureModel.md`
+- **Define-Use** — Structure | `TermsAstIrCfgDfg.md`
+- **Define-Use Chain** — Structure | `09_DataStructureModel.md`
+- **Dependent Guarantee Space** — Geometry | `04_GuaranteeSpaceTheory.md`
+- **Dependency Fan-in** — Decision | `11_DerivedMetrics.md`
+- **Dependency Fan-out** — Decision | `11_DerivedMetrics.md`
+- **DFG (Data Flow Graph)** — Structure | `02_StructuralAnalysisLayer.md`, `TermsAstIrCfgDfg.md`
+- **Distributive Lattice** — Geometry | `10_LatticeOrderTheory.md`
+- **Dominance** — Structure | `08_ControlStructureModel.md`
+
+## E
+
+- **Edge Taxonomy** — Structure | `02_StructuralAnalysisLayer.md`
+
+## F
+
+- **Failure Region** — Geometry | `05_GeometryOfMigration.md`, `TermsGuaranteeSpace.md`
+- **Fixed Point** — Geometry | `10_LatticeOrderTheory.md`
+
+## G
+
+- **Galois Connection** — Geometry | `10_LatticeOrderTheory.md`
+- **Granularity** — Structure | `06_StructuralModeling.md`
+- **Guarantee** — Guarantee | `01_CoreConcepts.md`, `03_GuaranteeTheory.md`
+- **Guarantee Axis** — Geometry | `04_GuaranteeSpaceTheory.md`, `TermsGuaranteeSpace.md`
+- **Guarantee Composition** — Guarantee | `03_GuaranteeTheory.md`
+- **Guarantee Coverage** — Decision | `11_DerivedMetrics.md`
+- **Guarantee Decision Space** — Decision | `07_MigrationDecisionModel.md`
+- **Guarantee Dimension** — Geometry | `04_GuaranteeSpaceTheory.md`
+- **Guarantee Equivalence** — Guarantee | `03_GuaranteeTheory.md`
+- **Guarantee Lattice** — Geometry | `04_GuaranteeSpaceTheory.md`
+- **Guarantee Layer** — Guarantee | `03_GuaranteeTheory.md`
+- **Guarantee Metric** — Geometry | `04_GuaranteeSpaceTheory.md`
+- **Guarantee Order** — Guarantee | `03_GuaranteeTheory.md`
+- **Guarantee Space** — Geometry | `01_CoreConcepts.md`, `04_GuaranteeSpaceTheory.md`, `TermsGuaranteeSpace.md`
+- **Guarantee Topology** — Geometry | `04_GuaranteeSpaceTheory.md`
+- **Guarantee Unit** — Guarantee | `03_GuaranteeTheory.md`
+- **Guarantee Vector** — Geometry | `04_GuaranteeSpaceTheory.md`, `TermsGuaranteeSpace.md`
+- **Guarantee Verification** — Guarantee | `03_GuaranteeTheory.md`
+- **Guarantee Violation** — Guarantee | `03_GuaranteeTheory.md`
+
+## I
+
+- **Ideal State** — Geometry | `05_GeometryOfMigration.md`, `TermsGuaranteeSpace.md`
+- **Impact Analysis** — Structure / Decision | `02_StructuralAnalysisLayer.md`
+- **Impact Closure** — Structure / Decision | `09_DataStructureModel.md`, `TermsAstIrCfgDfg.md`
+- **Impact Scope** — Structure | `06_StructuralModeling.md`
+- **Invariant** — Guarantee | `03_GuaranteeTheory.md`
+- **IR (Intermediate Representation)** — Structure | `02_StructuralAnalysisLayer.md`, `TermsAstIrCfgDfg.md`
+
+## J
+
+- **Join Operation** — Geometry | `10_LatticeOrderTheory.md`
+
+## K
+
+- **Kill** — Structure | `09_DataStructureModel.md`
+
+## L
+
+- **Lattice** — Geometry | `10_LatticeOrderTheory.md`
+- **Lattice Theory** — Geometry | `10_LatticeOrderTheory.md`
+- **Layer Architecture** — Structure | `02_StructuralAnalysisLayer.md`
+- **Legacy System** — Structure / Decision | `01_CoreConcepts.md`
+- **Loop Structure** — Structure | `08_ControlStructureModel.md`
+
+## M
+
+- **Meet Operation** — Geometry | `10_LatticeOrderTheory.md`
+- **Migration** — Geometry / Decision | `01_CoreConcepts.md`
+- **Migration Barrier** — Geometry | `05_GeometryOfMigration.md`
+- **Migration Complexity** — Decision | `11_DerivedMetrics.md`
+- **Migration Cost** — Geometry / Decision | `05_GeometryOfMigration.md`, `TermsGuaranteeSpace.md`
+- **Migration Decision** — Decision | `07_MigrationDecisionModel.md`
+- **Migration Distance** — Geometry | `05_GeometryOfMigration.md`, `TermsGuaranteeSpace.md`
+- **Migration Failure Pattern** — Decision | `07_MigrationDecisionModel.md`
+- **Migration Feasibility** — Decision | `07_MigrationDecisionModel.md`
+- **Migration Field** — Geometry | `05_GeometryOfMigration.md`
+- **Migration Geometry** — Geometry | `01_CoreConcepts.md`
+- **Migration Optimization** — Geometry / Decision | `05_GeometryOfMigration.md`
+- **Migration Path** — Geometry | `05_GeometryOfMigration.md`, `TermsGuaranteeSpace.md`
+- **Migration Risk** — Geometry / Decision | `05_GeometryOfMigration.md`, `TermsGuaranteeSpace.md`
+- **Migration State** — Geometry | `05_GeometryOfMigration.md`, `TermsGuaranteeSpace.md`
+- **Migration Strategy** — Decision | `07_MigrationDecisionModel.md`, `TermsGuaranteeSpace.md`
+- **Migration Topology** — Geometry | `05_GeometryOfMigration.md`
+- **Migration Unit** — Structure / Decision | `06_StructuralModeling.md`
+- **Monotonic Function** — Geometry | `10_LatticeOrderTheory.md`
+
+## N
+
+- **Node Taxonomy** — Structure | `02_StructuralAnalysisLayer.md`
+- **Non-Structured Control** — Structure | `08_ControlStructureModel.md`
+
+## P
+
+- **Partial Order** — Geometry | `10_LatticeOrderTheory.md`
+- **Path Closure** — Structure | `08_ControlStructureModel.md`
+- **Path Complexity** — Decision | `11_DerivedMetrics.md`
+- **Path Structure** — Structure | `08_ControlStructureModel.md`
+- **Post-Dominance** — Structure | `08_ControlStructureModel.md`
+
+## R
+
+- **Reaching Definition** — Structure | `09_DataStructureModel.md`, `TermsAstIrCfgDfg.md`
+- **Reachability** — Structure | `08_ControlStructureModel.md`
+- **Reachability Index** — Decision | `11_DerivedMetrics.md`
+- **Redesign Requirement** — Decision | `07_MigrationDecisionModel.md`
+- **Responsibility Boundary** — Structure / Decision | `06_StructuralModeling.md`
+- **Reverse Closure** — Structure / Decision | `09_DataStructureModel.md`
+- **Risk Density** — Decision | `11_DerivedMetrics.md`
+- **Risk Tolerance** — Decision | `07_MigrationDecisionModel.md`
+
+## S
+
+- **Safe Region** — Geometry | `05_GeometryOfMigration.md`, `TermsGuaranteeSpace.md`
+- **Scope** — Structure | `06_StructuralModeling.md`
+- **Scope Boundary** — Structure | `06_StructuralModeling.md`
+- **Scope Closure** — Structure | `06_StructuralModeling.md`
+- **Scope Completeness** — Decision | `11_DerivedMetrics.md`
+- **Scope Composition** — Structure | `06_StructuralModeling.md`
+- **Scope Taxonomy** — Structure | `06_StructuralModeling.md`
+- **Semantic Equivalence** — Guarantee | `03_GuaranteeTheory.md`
+- **Strangler Fig Strategy** — Decision | `TermsGuaranteeSpace.md`
+- **Structural Analysis** — Structure | `01_CoreConcepts.md`
+- **Structural Complexity** — Decision | `11_DerivedMetrics.md`
+- **Structural Dependency** — Structure | `06_StructuralModeling.md`
+- **Structural Evidence** — Structure / Decision | `01_CoreConcepts.md`
+- **Structural Layer Stack** — Structure | `02_StructuralAnalysisLayer.md`
+- **Structural Risk** — Decision | `07_MigrationDecisionModel.md`
+
+## T
+
+- **Target System** — Structure / Decision | `01_CoreConcepts.md`
+- **Total Order** — Geometry | `10_LatticeOrderTheory.md`
+
+## U
+
+- **Use** — Structure | `09_DataStructureModel.md`
+- **Use-Define Chain** — Structure | `09_DataStructureModel.md`
+
+## V
+
+- **Variable Scope** — Structure | `TermsAstIrCfgDfg.md`
+- **Verification Framework** — Decision | `07_MigrationDecisionModel.md`
+- **Verification Scope** — Structure | `06_StructuralModeling.md`
+- **Verification Strategy** — Guarantee / Decision | `03_GuaranteeTheory.md`
+
+## W
+
+- **Weighted Guarantee Space** — Geometry | `04_GuaranteeSpaceTheory.md`
+
+---
+
+**総計**: 約85用語
+
+**Layer分布**:
+- Syntax: 1用語
+- Structure: 32用語  
+- Guarantee: 10用語
+- Geometry: 29用語
+- Decision: 13用語
+---
+# 相互参照マップ (Cross Reference Map)
+
+用語間の**相互参照関係**を可視化し、概念間のつながりを示します。
+
+## 中核概念の参照関係
+
+```mermaid
+graph TD
+    Migration[Migration] --> Guarantee[Guarantee]
+    Migration --> Target[Target System]
+    Migration --> Legacy[Legacy System]
+    
+    Guarantee --> GSpace[Guarantee Space]
+    Guarantee --> GUnit[Guarantee Unit]
+    
+    GSpace --> GVector[Guarantee Vector]
+    GSpace --> GLattice[Guarantee Lattice]
+    
+    AST --> IR
+    IR --> CFG
+    IR --> DFG
+    CFG --> Guarantee
+    DFG --> Guarantee
+    
+    Structural[Structural Analysis] --> AST
+    Structural --> CFG  
+    Structural --> DFG
+```
+
+## 層間参照パターン
+
+| From Layer | To Layer | 参照の性質 | 主要な関係 |
+|------------|----------|------------|------------|
+| **Syntax → Structure** | 構文から構造へ | 解析の入力 | AST → IR, CFG, DFG |
+| **Structure → Guarantee** | 構造から保証へ | 根拠の提供 | CFG/DFG → Guarantee Unit |
+| **Structure → Geometry** | 構造から幾何へ | 空間の構成 | Scope → Guarantee Space |
+| **Guarantee → Geometry** | 保証から幾何へ | 空間の定義 | Guarantee → Guarantee Space |
+| **Geometry → Decision** | 幾何から判断へ | 判断材料 | Migration Path → Migration Decision |
+| **Structure → Decision** | 構造から判断へ | 直接評価 | Structural Risk → Migration Decision |
+
+## 高参照用語（5回以上参照される）
+
+| 用語 | 参照数（概算） | 主な参照元Layer |
+|------|----------------|----------------|
+| **CFG** | 15+ | Structure, Decision |
+| **DFG** | 12+ | Structure, Decision |
+| **Guarantee** | 10+ | Guarantee, Geometry, Decision |
+| **Migration** | 8+ | Decision, Geometry |
+| **Scope** | 8+ | Structure, Decision |
+| **Migration Risk** | 6+ | Decision, Geometry |
+| **Structural Risk** | 5+ | Decision |
+
+## 概念クラスター
+
+### クラスター1: 構造解析基盤
+- **中心**: AST, IR, CFG, DFG
+- **周辺**: Basic Block, Node/Edge Taxonomy, Define-Use
+
+### クラスター2: 保証理論
+- **中心**: Guarantee, Guarantee Unit  
+- **周辺**: Guarantee Composition, Verification, Invariant
+
+### クラスター3: 空間・幾何学
+- **中心**: Guarantee Space, Migration Path
+- **周辺**: Safe/Failure Region, Migration Cost/Risk
+
+### クラスター4: スコープ・境界
+- **中心**: Scope, Scope Boundary
+- **周辺**: Impact Scope, Migration Unit, Granularity
+
+### クラスター5: 判断・評価
+- **中心**: Migration Decision, Migration Feasibility
+- **周辺**: Risk Patterns, Metrics, Strategy
+
+## 参照チェーン例
+
+### 例1: 構造から判断への流れ
+```
+AST → IR → DFG → Impact Closure → Migration Risk → Migration Decision
+```
+
+### 例2: 保証から幾何学への流れ  
+```
+Guarantee → Guarantee Space → Migration Path → Migration Optimization
+```
+
+### 例3: 制御分析の流れ
+```
+AST → CFG → Basic Block → Control Risk Pattern → Migration Decision
+```
+
+## 循環参照
+
+以下の用語ペアは**相互に参照**しています（設計上の意図的な循環）：
+
+- **Define-Use Chain** ↔ **Use-Define Chain**
+- **Safe Region** ↔ **Failure Region**  
+- **Aggregation Edge** ↔ **Decomposition Edge**
+- **Join Operation** ↔ **Meet Operation**
+- **Migration Cost** ↔ **Migration Risk**
+
+これらは概念的に対称・補完的な関係にあります。
+
+## 未参照用語（isolated terms）
+
+現在のところ、他の用語から参照されていない**独立用語**はありません。すべての用語が適切に相互接続されています。
+
+---
+
+*この相互参照マップにより、用語集の概念的な一貫性と完全性を確認できます。*
+---
+# Layer別索引 (Index by Layer)
+
+用語を**抽象層（Layer）別**で整理します。
+
+## Syntax Layer (構文層) — 1用語
+
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **AST (Abstract Syntax Tree)** | `02`, `TermsAstIrCfgDfg` | Tree $T = (V, E, \lambda)$ |
+
+## Structure Layer (構造層) — 32用語
+
+### 基礎構造
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **IR (Intermediate Representation)** | `02`, `TermsAstIrCfgDfg` | $IR = (U, \Sigma, \delta)$ |
+| **CFG (Control Flow Graph)** | `02`, `TermsAstIrCfgDfg` | Graph $G = (V, E, s, t)$ |
+| **DFG (Data Flow Graph)** | `02`, `TermsAstIrCfgDfg` | Graph $G = (V, E, \tau)$ |
+| **Structural Layer Stack** | `02` | AST → IR → CFG/DFG → Guarantee/Scope/Decision |
+
+### 制御構造
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Basic Block** | `08`, `TermsAstIrCfgDfg` | $BB = (s_1, \ldots, s_n)$ |
+| **Control Structure** | `08` | $CS = \{Sequential, Branch, Loop\} \subseteq CFG$ |
+| **Control Region** | `08` | $CR = (V_{sub}, E_{sub})$ |
+| **Dominance** | `08` | $A \text{ dom } B$ |
+| **Post-Dominance** | `08` | $A \text{ pdom } B$ |
+| **Reachability** | `08` | $\text{reach}(A, B) \iff \exists \text{path } A \to^* B$ |
+| **Path Closure** | `08` | $\text{closure}(v) = \{ u \mid v \to^* u \}$ |
+| **Loop Structure** | `08` | $Loop = (header, body, backedge)$ |
+| **Back Edge** | `08` | $BE = \{(v, u) \in E \mid u \text{ dominates } v\}$ |
+| **Non-Structured Control** | `08` | $NSC = \{edges \mid \neg reducible(CFG)\}$ |
+| **Branch-Merge Pattern** | `08` | $BMP = (branch\_node, \{path_i\}, merge\_node)$ |
+| **Control Nesting** | `08` | $Nesting(v) = \max\{depth(path) \mid v \in path\}$ |
+| **Control Dependency** | `08` | $v \text{ cd } u \iff v \text{ pdom one but not all successors of } u$ |
+| **Path Structure** | `08` | $PS = \{Linear, Branching, Cyclic, Complex\}$ |
+
+### データ構造
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Data Structure** | `09` | $DS = (Elements, Relations, Layout)$ |
+| **Define (def)** | `09` | $\text{def}(v, p)$ |
+| **Use** | `09` | $\text{use}(v, p)$ |
+| **Kill** | `09` | $\text{kill}(d, p)$ |
+| **Reaching Definition** | `09`, `TermsAstIrCfgDfg` | $\text{reach}(v, p) = \{d \mid \ldots\}$ |
+| **Define-Use Chain** | `09` | $DUC = \{(d, u) \mid \ldots\}$ |
+| **Use-Define Chain** | `09` | $UDC = \{(u, d) \mid \ldots\}$ |
+| **Data Dependency** | `09` | $DD = \{(v_1, v_2) \mid \ldots\}$ |
+| **Data Propagation** | `09` | $Propagate: def(v_1) \to^* use(v_n)$ |
+| **Cross-Scope Transfer** | `09` | $CST = \{(v_1, v_2) \mid scope(v_1) \neq scope(v_2)\}$ |
+| **Aggregation Edge** | `09` | $AE = \{(\{v_1, v_2, \ldots\}, v_{target})\}$ |
+| **Decomposition Edge** | `09` | $DE = \{(v_{source}, \{v_1, v_2, \ldots\})\}$ |
+| **Condition-Dependency Edge** | `09` | $CDE = \{(v, condition) \mid v \in operands(condition)\}$ |
+| **Data Boundary** | `09` | $DB = \{b \mid \forall v_1, v_2: \ldots\}$ |
+| **Data Lifetime** | `09` | $Lifetime(v) = [create(v), destroy(v)]$ |
+| **Data Scope** | `09` | $DataScope(v) = \{location \mid visible(v, location)\}$ |
+| **Variable Scope** | `TermsAstIrCfgDfg` | $\text{scope}(v) \subseteq \text{ProgramPoints}$ |
+
+### スコープ・モデリング
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Scope** | `06` | $Scope \subseteq System$ |
+| **Scope Boundary** | `06` | $\partial Scope$ |
+| **Scope Taxonomy** | `06` | $ScopeTypes = \{S_{statement}, \ldots\}$ |
+| **Scope Composition** | `06` | $Scope_1 \cup Scope_2 \cup \ldots$ |
+| **Scope Closure** | `06` | $\text{closure}(Scope) = Scope \cup \text{dependencies}(Scope)$ |
+| **Granularity** | `06` | $G: \mathbb{N} \to Units$ |
+| **Structural Dependency** | `06` | $A \to B$ |
+| **Impact Scope** | `06` | $\text{impact}(change) = \{elements \mid affected\_by(change, elements)\}$ |
+| **Verification Scope** | `06` | $VS \subseteq System$ |
+
+### 分類・アーキテクチャ
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Node Taxonomy** | `02` | $NodeTypes = \{N_{ast}, N_{cfg}, N_{dfg}\}$ |
+| **Edge Taxonomy** | `02` | $EdgeTypes = \{E_{control}, E_{data}, E_{dependency}\}$ |
+| **Layer Architecture** | `02` | $Architecture = (Layers, Dependencies, Interfaces)$ |
+
+## Guarantee Layer (保証層) — 10用語
+
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Guarantee** | `01`, `03` | $g \in [0,1]$ |
+| **Guarantee Unit** | `03` | $U \subseteq Program$ |
+| **Guarantee Composition** | `03` | $G(Parent) = \bigwedge_{child} G(child)$ |
+| **Guarantee Order** | `03` | $g_a \leq g_b \iff b \implies a$ |
+| **Guarantee Equivalence** | `03` | $S_A \equiv S_B \iff G(S_A) = G(S_B)$ |
+| **Guarantee Layer** | `03` | $L_i$ where $i \in \{1,2,3,4,5\}$ |
+| **Guarantee Violation** | `03` | $\neg G(S)$ |
+| **Guarantee Verification** | `03` | $Verify: (G, S) \to \{true, false, unknown\}$ |
+| **Invariant** | `03` | $I: State \to Boolean$ |
+| **Semantic Equivalence** | `03` | $S_1 \equiv_sem S_2$ |
+| **Verification Strategy** | `03` | $VS = (Methods, Coverage, Criteria)$ |
+
+## Geometry Layer (幾何層) — 29用語
+
+### 保証空間
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Guarantee Space** | `01`, `04`, `TermsGuaranteeSpace` | $GS = [0,1]^n$ or $(2^{\mathbb{P}}, \subseteq)$ |
+| **Guarantee Dimension** | `04` | $g_i \in \{ g_{ctrl}, g_{data}, g_{state}, g_{txn}, g_{if} \}$ |
+| **Guarantee Vector** | `04`, `TermsGuaranteeSpace` | $\vec{g} = (g_1, g_2, \ldots, g_n) \in GS$ |
+| **Guarantee Axis** | `04`, `TermsGuaranteeSpace` | $axis_i: \text{保証観点}_i$ |
+| **Dependent Guarantee Space** | `04` | $\mathcal{G}_{dep} = \{ S \in \mathcal{G} \mid S \text{ satisfies dependencies} \}$ |
+| **Weighted Guarantee Space** | `04` | $(GS, d_w)$ |
+| **Guarantee Metric** | `04` | $d: GS \times GS \to \mathbb{R}_{\geq 0}$ |
+| **Guarantee Lattice** | `04` | $(G, \leq, \vee, \wedge)$ |
+| **Guarantee Topology** | `04` | $(GS, \mathcal{T})$ |
+
+### 移行幾何学
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Migration Path** | `05`, `TermsGuaranteeSpace` | $P: [0,1] \to GS$ |
+| **Migration State** | `05`, `TermsGuaranteeSpace` | $S(t) \in GS$ |
+| **Migration Distance** | `05`, `TermsGuaranteeSpace` | $d: GS \times GS \to \mathbb{R}_{\geq 0}$ |
+| **Safe Region** | `05`, `TermsGuaranteeSpace` | $\mathcal{S} = \{S \in GS \mid \forall g_i, S_i \geq threshold_i\}$ |
+| **Failure Region** | `05`, `TermsGuaranteeSpace` | $\mathcal{F} = \{S \in GS \mid \exists g_i, S_i < critical_i\}$ |
+| **Ideal State** | `05`, `TermsGuaranteeSpace` | $S_{ideal} = (1, 1, \ldots, 1) \in GS$ |
+| **Migration Topology** | `05` | $(GS, \mathcal{T}_{migration})$ |
+| **Migration Field** | `05` | $\vec{F}: GS \to T(GS)$ |
+| **Migration Barrier** | `05` | $B \subset GS$ |
+| **Migration Optimization** | `05` | $\min_{P} \{Cost(P), Risk(P)\}$ |
+
+### 束論・順序
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Lattice** | `10` | $(L, \leq, \vee, \wedge)$ |
+| **Partial Order** | `10` | $(S, \leq)$ |
+| **Total Order** | `10` | $\forall x, y \in S: x \leq y \lor y \leq x$ |
+| **Join Operation** | `10` | $a \vee b = \sup\{a, b\}$ |
+| **Meet Operation** | `10` | $a \wedge b = \inf\{a, b\}$ |
+| **Complete Lattice** | `10` | $\forall S \subseteq L, \exists \sup S, \inf S$ |
+| **Distributive Lattice** | `10` | $a \wedge (b \vee c) = (a \wedge b) \vee (a \wedge c)$ |
+| **Boolean Algebra** | `10` | $(B, \vee, \wedge, \neg, 0, 1)$ |
+| **Galois Connection** | `10` | $(f, g): P \leftrightarrows Q$ |
+| **Fixed Point** | `10` | $x = f(x)$ |
+| **Monotonic Function** | `10` | $x \leq y \implies f(x) \leq f(y)$ |
+| **Chain** | `10` | $\forall x, y \in C, x \leq y \lor y \leq x$ |
+| **Antichain** | `10` | $x \neq y \implies x \not\leq y \land y \not\leq x$ |
+| **Lattice Theory** | `10` | Theory of $(L, \leq, \vee, \wedge)$ structures |
+
+## Decision Layer (判断層) — 13用語
+
+### 移行判断
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Migration Decision** | `07` | $D: Context \times Metrics \to Strategy$ |
+| **Migration Feasibility** | `07` | $F(P, C) \in \{feasible, infeasible\}$ |
+| **Migration Strategy** | `07`, `TermsGuaranteeSpace` | $Strategy \in \{BigBang, StranglerFig, Phased, \ldots\}$ |
+| **Decision Boundary** | `07` | $B_{decision} = \{(risk, cost) \mid \ldots\}$ |
+| **Redesign Requirement** | `07` | $RR: (S_{current}, S_{target}) \to \{required, optional, none\}$ |
+| **Verification Framework** | `07` | $VF = (Methods, Criteria, Tools)$ |
+| **Risk Tolerance** | `07` | $T_{risk} \in [0, 1]$ |
+
+### リスク・パターン
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Structural Risk** | `07` | $R_{struct}(S) = f(\text{complexity}, \text{coupling}, \text{cohesion})$ |
+| **Migration Failure Pattern** | `07` | $FP = \{pattern_i \mid \Pr[\text{failure} \mid pattern_i] > threshold\}$ |
+| **Control Risk Pattern** | `08` | $CRP = \{pattern \mid complexity(pattern) > threshold\}$ |
+| **Data Risk Pattern** | `09` | $DRP = \{pattern \mid risk\_level(pattern) > acceptable\_threshold\}$ |
+
+### メトリクス
+| Term | File | Formal Description |
+|------|------|-------------------|
+| **Structural Complexity** | `11` | $C_{struct} = f(CFG_{complexity}, DFG_{complexity}, nesting_{depth})$ |
+| **Cyclomatic Complexity** | `11` | $V(G) = E - N + 2$ |
+| **Data Coupling** | `11` | $Coupling = \frac{\|shared\_data\|}{\|total\_data\|}$ |
+| **Cohesion** | `11` | $Cohesion = \frac{internal\_relations}{total\_relations}$ |
+| **Migration Complexity** | `11` | $M_{complexity} = w_1 \cdot Risk + w_2 \cdot Dependencies + w_3 \cdot Guarantees$ |
+| **Guarantee Coverage** | `11` | $Coverage = \frac{\|guaranteed\_functions\|}{\|total\_functions\|}$ |
+| **Scope Completeness** | `11` | $Completeness = \frac{\|covered\_dependencies\|}{\|total\_dependencies\|}$ |
+| **Risk Density** | `11` | $\rho_{risk} = \frac{\|risk\_elements\|}{area}$ |
+| **Dependency Fan-out** | `11` | $FanOut(M) = \|\{M' \mid M \to M'\}\|$ |
+| **Dependency Fan-in** | `11` | $FanIn(M) = \|\{M' \mid M' \to M\}\|$ |
+| **Path Complexity** | `11` | $P_{complexity} = \|paths\| + nest\_penalty$ |
+| **Data Flow Complexity** | `11` | $DF_{complexity} = \frac{\|def\text{-}use\_chains\|}{\|data\_elements\|}$ |
+| **Reachability Index** | `11` | $R_{index} = \frac{\|reachable\_nodes\|}{\|total\_nodes\|}$ |
+
+---
+
+**Layer使用統計**:
+- Structure (32): 構造モデルの中核
+- Geometry (29): 幾何学・空間理論  
+- Decision (13): 判断・メトリクス
+- Guarantee (10): 保証理論
+- Syntax (1): 構文表現
+---
+# 研究フェーズ対応表 (Research Phase Mapping)
+
+各**研究フェーズ**の成果物と**用語集**の対応関係を詳細に示します。
+
+## フェーズ概要
+
+| Phase | ディレクトリ | 主要テーマ | 期間（推定） | 主要成果物 |
+|-------|-------------|------------|-------------|-----------|
+| **Phase 1-7** | `10_ast`, `50_guarantee`, `60_scope`, `60_decision`, `70_cases` | 基礎理論構築 | 初期 | AST, Guarantee, Scope, Decision, Cases |
+| **Phase 8** | `20_ir` | 中間表現理論 | 中期 | IR, 構造作用理論 |
+| **Phase 9** | `30_cfg` | 制御フロー理論 | 中期 | CFG, 制御構造理論 |
+| **Phase 10** | `40_dfg` | データフロー理論 | 中期 | DFG, データ依存理論 |
+| **Extension** | `80_geometry`, `80_reviews` | 幾何学拡張 | 継続 | Migration Geometry |
+
+## Phase別用語対応
+
+### Phase 1-7: 基礎理論構築
+
+**主要ディレクトリ**: `10_ast`, `50_guarantee`, `60_scope`, `60_decision`, `70_cases`
+
+| 用語 | 用語集ファイル | 研究での役割 |
+|------|----------------|-------------|
+| **AST (Abstract Syntax Tree)** | `02_StructuralAnalysisLayer.md` | 構文観測の基底層 |
+| **Guarantee** | `03_GuaranteeTheory.md` | 正しさの基本単位 |
+| **Guarantee Unit** | `03_GuaranteeTheory.md` | 保証の最小単位 |
+| **Guarantee Space** | `04_GuaranteeSpaceTheory.md` | 保証状態の数理空間 |
+| **Scope** | `06_StructuralModeling.md` | 解析・移行の範囲 |
+| **Scope Boundary** | `06_StructuralModeling.md` | 範囲の境界定義 |
+| **Migration Decision** | `07_MigrationDecisionModel.md` | 移行判断の形式化 |
+| **Migration Feasibility** | `07_MigrationDecisionModel.md` | 実行可能性評価 |
+| **Case Study Analysis** | `07_MigrationDecisionModel.md` | 事例による検証 |
+
+### Phase 8: 中間表現理論
+
+**ディレクトリ**: `20_ir`  
+**用語集への反映**: `02_StructuralAnalysisLayer.md`, `TermsAstIrCfgDfg.md`
+
+| 用語 | 定義概要 | Phase 8 での確立内容 |
+|------|----------|---------------------|
+| **IR (Intermediate Representation)** | 構造作用の中間層 | AST と CFG/DFG をつなぐ統一表現 |
+| **Layer Architecture** | 階層構造の設計原則 | 構文層・構造層・判断層の分担 |
+| **Structural Layer Stack** | 層の積み上げ構造 | AST → IR → CFG/DFG の流れ |
+
+**成果**: AST の構文情報を構造的判断に接続する中間抽象化
+
+### Phase 9: 制御フロー理論
+
+**ディレクトリ**: `30_cfg`  
+**用語集への反映**: `08_ControlStructureModel.md`, `TermsAstIrCfgDfg.md`
+
+| 用語 | Phase 9 での重要性 | 移行判断への貢献 |
+|------|-------------------|------------------|
+| **CFG (Control Flow Graph)** | 制御到達と経路閉包の中核 | 経路依存性の可視化 |
+| **Basic Block** | CFG の最小解析単位 | 保証境界の候補 |
+| **Dominance** / **Post-Dominance** | 支配関係の定義 | 依存構造の分析 |
+| **Reachability** / **Path Closure** | 到達可能性の形式化 | 影響範囲の特定 |
+| **Loop Structure** / **Back Edge** | 反復構造の解析 | ループリスクの評価 |
+| **Non-Structured Control** | GO TO 等の非構造制御 | 移行リスクの特定 |
+| **Path Structure** | 経路パターンの分類 | テスト設計の基礎 |
+| **Control Risk Pattern** | 高リスク制御の特定 | 移行困難度の予測 |
+
+**成果**: COBOL の制御構造を移行判断可能な形で抽象化
+
+### Phase 10: データフロー理論
+
+**ディレクトリ**: `40_dfg`  
+**用語集への反映**: `09_DataStructureModel.md`, `TermsAstIrCfgDfg.md`
+
+| 用語 | Phase 10 での重要性 | CFG との統合 |
+|------|-------------------|--------------|
+| **DFG (Data Flow Graph)** | データ依存の中核モデル | CFG と制御敏感で統合 |
+| **Define** / **Use** / **Kill** | データフローの基本要素 | CFG 経路との対応 |
+| **Reaching Definition** | 到達定義の形式化 | 制御経路に依存 |
+| **Define-Use Chain** / **Use-Define Chain** | 依存関係の双方向表現 | 影響分析の基礎 |
+| **Impact Closure** / **Reverse Closure** | 影響伝播の閉包 | 変更影響の範囲特定 |
+| **Cross-Scope Transfer** | 境界横断データ依存 | 統合リスクの要因 |
+| **Aggregation/Decomposition Edge** | 集約・分解の依存 | COBOL 特有の構造 |
+| **Data Risk Pattern** | データ依存のリスク | 移行困難度の予測 |
+
+**成果**: データ依存を移行判断・影響分析に接続する理論基盤
+
+## フェーズ間の理論発展
+
+### Phase 8 → Phase 9
+```
+IR の構造作用 → CFG の制御構造
+```
+- IR で定義した制御作用を CFG のノード・エッジに展開
+- 構造の抽象化から制御の可視化へ
+
+### Phase 9 → Phase 10  
+```
+CFG の制御経路 → DFG のデータ依存
+```
+- CFG で定義した経路上でのデータ依存の成立条件
+- 制御とデータの統合モデル
+
+### Phase 8-10 → 判断層
+```
+IR + CFG + DFG → Migration Decision
+```
+- 3つの構造層を総合した移行判断材料の生成
+- 構造的根拠から判断への橋渡し
+
+## 今後の発展（予想）
+
+### Phase 11+: 統合応用
+- **実案件適用**: `70_cases` の具体化
+- **ツール化**: 解析の自動化
+- **検証**: 理論の実証
+
+### 長期展開
+- **他言語拡張**: COBOL 以外への理論適用
+- **産業応用**: 実際の移行プロジェクトでの検証
+- **理論深化**: 数学的厳密化
+
+---
+
+*研究フェーズの積み上げにより、構文観測から移行判断まで一貫した理論体系が構築されています。*
+---
 # Glossary 1. Core Concepts
 
 This document defines the fundamental concepts that form the backbone of the COBOL Structure Analysis Lab research.
 
 | Term | Layer | Definition | Formal Description | Related Concepts |
 | :--- | :--- | :--- | :--- | :--- |
-| **COBOL Structure Analysis Lab** | Structure | COBOL資産の構造解析と移行判断のための理論研究・実装プロジェクト。構文だけでなく抽象モデル（AST/IR/CFG/DFG）を積み上げ、移行可否の構造的根拠を生成する。 | - | [[Structural Analysis]], [[Migration]] |
+| **COBOL Structure Analysis Lab** | Structure | COBOL資産の構造解析と移行判断のための理論研究・実装プロジェクト。構文だけでなく抽象モデル（AST/IR/CFG/DFG）を積み上げ、移行可否の構造的根拠を生成する。 | $Project: \{AST, IR, CFG, DFG\} \to Evidence_{migration}$ | [[Structural Analysis]], [[Migration]] |
 | **Legacy System** | Structure / Decision | 事業運営に不可欠だが、古い技術やアーキテクチャに基づいている既存システム。本研究では特にCOBOLシステムを指す。 | $S_{legacy}$ | [[Target System]], [[Migration]] |
 | **Target System** | Structure / Decision | 移行後の目標となるシステム状態。 | $S_{target}$ | [[Legacy System]], [[Migration]] |
 | **Migration** | Geometry / Decision | 重要な性質（Guarantee）を維持しながら、Legacy SystemをTarget Systemへ変換するプロセス。 | $P: [0,1] \to GS, \quad P(0)=S_{legacy}, \quad P(1)=S_{target}$ | [[Migration Geometry]], [[Guarantee]] |
 | **Guarantee** | Guarantee | 移行プロセスにおいて維持または満たされるべきシステムの性質や振る舞い。「正しさ」の基本単位。 | $g \in [0,1]$ | [[Guarantee Space]], [[Guarantee Unit]] |
 | **Guarantee Space** | Geometry | すべての可能な保証状態の集合が構成する数理的空間。包含関係による半順序構造（束）を持ち、移行プロセスはこの空間内の移動として表現される。 | $\mathcal{G} = (2^{\mathbb{P}}, \subseteq)$ or $GS = [0,1]^n$ | [[Migration Geometry]], [[Guarantee Lattice]] |
-| **Structural Analysis** | Structure | ソースコードを文字列としてではなく、AST、CFG、DFGなどの構造モデルとして解析する手法。 | - | [[AST]], [[CFG]], [[DFG]] |
+| **Structural Analysis** | Structure | ソースコードを文字列としてではなく、AST、CFG、DFGなどの構造モデルとして解析する手法。 | $Analysis: Source \to \{AST, IR, CFG, DFG\}$ | [[AST]], [[CFG]], [[DFG]] |
 | **Migration Geometry** | Geometry | 移行プロセスを幾何学的な「経路（Path）」や「距離（Distance）」として扱うための理論フレームワーク。 | $\mathcal{M} = (GS, d, \mathcal{S}, \mathcal{F}, \phi)$ | [[Guarantee Space]], [[Migration Path]] |
-| **Structural Evidence** | Structure / Decision | 移行可否判断や変更影響分析に使える、構造解析から得られる根拠・材料。構文の羅列ではなく、判断に接続可能な抽象情報。 | - | [[Migration Decision]], [[Impact Analysis]] |
-| **Abstraction Level** | Structure | 本研究で扱う抽象の階層。構文層（Syntax Layer）、構造層（Structure Layer）、判断層（Decision Layer）など。 | - | [[Layer Architecture]] |
+| **Structural Evidence** | Structure / Decision | 移行可否判断や変更影響分析に使える、構造解析から得られる根拠・材料。構文の羅列ではなく、判断に接続可能な抽象情報。 | $Evidence = f(Structure) \mid f: \text{analyzable} \land \text{actionable}$ | [[Migration Decision]], [[Impact Analysis]] |
+| **Abstraction Level** | Structure | 本研究で扱う抽象の階層。構文層（Syntax Layer）、構造層（Structure Layer）、判断層（Decision Layer）など。 | $Levels = \{L_{syntax}, L_{structure}, L_{guarantee}, L_{geometry}, L_{decision}\}$ | [[Layer Architecture]] |
 ---
 # Glossary 2. Structural Analysis Layer
 
@@ -13056,9 +13686,11 @@ This document defines concepts related to the parsing and structural modeling of
 | **IR (Intermediate Representation)** | Structure | AST と CFG/DFG の中間に位置し、**構造作用（制御・データ・境界）を再編成した中間構造**。言語依存の構文差異を吸収し、移行判断に必要な統一的な作用単位を与える。 | $IR = (U, \Sigma, \delta)$ where $U$ are IR units, $\Sigma$ are effect signatures, $\delta$ assigns effects. | [[AST]], [[CFG]], [[DFG]], [[Guarantee]] |
 | **CFG (Control Flow Graph)** | Structure | プログラム内の **実効的に遷移しうる制御順序** を有向グラフとして表現したもの。ノードは基本ブロック、エッジは制御の遷移を表す。本研究では **制御到達と経路閉包の構造層** として位置づけられる。 | Graph $G = (V, E, s, t)$ where $V$ are basic blocks, $E \subseteq V \times V$ are control transitions. | [[Basic Block]], [[DFG]], [[Dominance]], [[Reachability]] |
 | **DFG (Data Flow Graph)** | Structure | データの依存関係（定義と使用）を有向グラフとして表現したもの。本研究では **移行判断・変更影響分析・保証評価に接続可能なデータ依存モデル** として位置づけられる。 | Graph $G = (V, E, \tau)$ where $V$ are data elements, $E$ represent data dependency, $\tau$ assigns edge types. | [[CFG]], [[Define-Use]], [[Reaching Definition]], [[Impact Closure]] |
-| **Structural Layer Stack** | Structure | 構文層（AST）→ 構造作用層（IR）→ 制御層（CFG）・データ層（DFG）→ 判断層（Guarantee/Scope/Decision）の積層構造。 | AST → IR → CFG/DFG → Guarantee/Scope/Decision | [[AST]], [[IR]], [[CFG]], [[DFG]] |
-| **Node Taxonomy** | Structure | AST、CFG、DFGにおけるノード種別の分類体系。構文ノード、基本ブロック、データ要素などを体系的に分類。 | - | [[Edge Taxonomy]] |
-| **Edge Taxonomy** | Structure | CFG、DFGにおけるエッジ種別の分類体系。制御遷移、データ依存、定義-使用関係などの分類。 | - | [[Node Taxonomy]] |
+| **Structural Layer Stack** | Structure | 構文層（AST）→ 構造作用層（IR）→ 制御層（CFG）・データ層（DFG）→ 判断層（Guarantee/Scope/Decision）の積層構造。各層は上位層に構造的根拠を提供し、下位層から抽象化された情報を受け取る。 | AST → IR → CFG/DFG → Guarantee/Scope/Decision | [[AST]], [[IR]], [[CFG]], [[DFG]] |
+| **Node Taxonomy** | Structure | AST、CFG、DFGにおけるノード種別の分類体系。構文ノード、基本ブロック、データ要素などを体系的に分類。 | $NodeTypes = \{N_{ast}, N_{cfg}, N_{dfg}\}$ where $N_i = \{type_1, type_2, \ldots\}$ | [[Edge Taxonomy]] |
+| **Edge Taxonomy** | Structure | CFG、DFGにおけるエッジ種別の分類体系。制御遷移、データ依存、定義-使用関係などの分類。 | $EdgeTypes = \{E_{control}, E_{data}, E_{dependency}\}$ where $E_i \subseteq V \times V$ | [[Node Taxonomy]] |
+| **Layer Architecture** | Structure | 研究フレームワークの階層構造。各抽象層（Syntax, Structure, Guarantee, Geometry, Decision）の責務分担と相互関係を定義する設計原則。 | $Architecture = (Layers, Dependencies, Interfaces)$ where $Layers = \{L_i\}$ | [[Abstraction Level]], [[Structural Layer Stack]] |
+| **Impact Analysis** | Structure / Decision | 変更や修正がシステムに与える影響を構造的に分析する手法。データ依存、制御依存、スコープ越え依存を総合して影響範囲を特定する。 | $IA: Change \to 2^{SystemElements}$ where affected elements identified | [[Impact Closure]], [[Data Dependency]], [[Structural Analysis]] |
 ---
 # Glossary 3. Guarantee Theory
 
@@ -13067,15 +13699,16 @@ This document defines the constituent elements of the Guarantee concept.
 | Term | Layer | Definition | Formal Description | Related Concepts |
 | :--- | :--- | :--- | :--- | :--- |
 | **Guarantee** | Guarantee | 移行プロセスにおいて維持または満たされるべきシステムの性質や振る舞い。「正しさ」の基本単位。定量的には $0$ から $1$ の値を取る。 | $g \in [0,1]$ | [[Guarantee Unit]], [[Invariant]] |
-| **Guarantee Unit** | Guarantee | 保証を検証・維持する最小の機能単位。L1（文）からL5（業務機能）までの階層を持つ。 | $U \subseteq Program$ | [[Guarantee Layer]] |
+| **Guarantee Unit** | Guarantee | 保証を検証・維持する最小の機能単位。L1（文）からL5（業務機能）までの階層を持つ。単一の責務を持つ独立検証可能な範囲。 | $U \subseteq Program$ | [[Guarantee Layer]] |
 | **Guarantee Composition** | Guarantee | 複数の小さな保証を組み合わせて、より大きな保証を構成する操作または理論。 | $G(Parent) = \bigwedge_{child} G(child)$ | [[Guarantee Unit]], [[Guarantee Lattice]] |
 | **Guarantee Order** | Guarantee | 保証の強さや包含関係に基づく順序関係。「保証Aは保証Bよりも強い（A implies B）」などの関係。 | Partial order $\leq$ on Guarantee Space: $g_a \leq g_b \iff b \implies a$ | [[Guarantee Lattice]] |
-| **Guarantee Equivalence** | Guarantee | 2つのプログラム要素が、保証の観点で「等価」であるとみなされるための条件。 | $S_A \equiv S_B \iff G(S_A) = G(S_B)$ | [[Semantic Equivalence]] |
+| **Guarantee Equivalence** | Guarantee | 2つのプログラム要素が、保証の観点で「等価」であるとみなされるための条件。構文は異なるが保証的に同等な状態。 | $S_A \equiv S_B \iff G(S_A) = G(S_B)$ | [[Semantic Equivalence]] |
 | **Guarantee Layer** | Guarantee | 保証の階層レベル。L1（文レベル）からL5（業務機能レベル）までの抽象度。 | $L_i$ where $i \in \{1,2,3,4,5\}$ | [[Guarantee Unit]] |
 | **Guarantee Violation** | Guarantee | 保証が満たされない状態。移行失敗やシステム不整合の原因となる。 | $\neg G(S)$ | [[Guarantee]], [[Migration Risk]] |
-| **Guarantee Verification** | Guarantee | 保証が実際に満たされているかを検証するプロセスや手法。 | - | [[Guarantee]], [[Verification Strategy]] |
-| **Invariant** | Guarantee | プログラムの実行を通じて常に真であるべき条件や性質。 | $I: State \to Boolean$ | [[Guarantee]] |
+| **Guarantee Verification** | Guarantee | 保証が実際に満たされているかを検証するプロセスや手法。テスト、レビュー、静的解析などを含む。 | $Verify: (G, S) \to \{true, false, unknown\}$ where $G$ is guarantee, $S$ is system state | [[Guarantee]], [[Verification Strategy]] |
+| **Invariant** | Guarantee | プログラムの実行を通じて常に真であるべき条件や性質。ループ不変条件、オブジェクト不変条件などを含む。 | $I: State \to Boolean$ | [[Guarantee]] |
 | **Semantic Equivalence** | Guarantee | 構文は異なるが意味的に同等なプログラム要素間の関係。 | $S_1 \equiv_sem S_2$ | [[Guarantee Equivalence]] |
+| **Verification Strategy** | Guarantee / Decision | 保証の検証を効率的かつ確実に行うための戦略と手法の体系。テスト戦略、レビュー手順、ツール選択などを含む。 | $VS = (Methods, Coverage, Criteria)$ where each component has specific objectives | [[Guarantee Verification]], [[Verification Framework]] |
 ---
 # Glossary 4. Guarantee Space Theory
 
@@ -13110,6 +13743,7 @@ This document defines concepts for the geometric modeling of migration processes
 | **Migration Topology** | Geometry | 移行可能性を定義する保証空間上の位相構造。連結性や経路の存在を定義。 | $(GS, \mathcal{T}_{migration})$ | [[Guarantee Space]], [[Migration Path]] |
 | **Migration Field** | Geometry | 保証空間の各点において、最適な移行方向を示すベクトル場。 | $\vec{F}: GS \to T(GS)$ | [[Migration Path]], [[Migration Optimization]] |
 | **Migration Barrier** | Geometry | 移行を阻害する保証空間内の障壁。通過に高いコストやリスクを伴う領域。 | $B \subset GS$ where crossing $B$ has high cost/risk | [[Migration Path]], [[Migration Risk]] |
+| **Migration Optimization** | Geometry / Decision | 保証空間内で最適な移行経路を見つける手法と理論。コスト最小化、リスク最小化、時間最短化などの目的関数を用いる。 | $\min_{P} \{Cost(P), Risk(P)\}$ subject to constraints | [[Migration Path]], [[Migration Field]], [[Migration Cost]] |
 ---
 # Glossary 6. Structural Modeling
 
@@ -13119,15 +13753,15 @@ This document defines concepts for modeling software structure.
 | :--- | :--- | :--- | :--- | :--- |
 | **Scope** | Structure | 特定の解析や移行ステップにおいて検討対象となるコードやシステム機能の範囲。 | $Scope \subseteq System$ | [[Scope Boundary]], [[Granularity]] |
 | **Scope Boundary** | Structure | Scopeの内側と外側を分ける境界線またはインターフェース。 | $\partial Scope$ | [[Scope]], [[Responsibility Boundary]] |
-| **Scope Taxonomy** | Structure | スコープの種類や分類体系。文レベル、段落レベル、プログラムレベルなど。 | - | [[Scope]], [[Granularity]] |
+| **Scope Taxonomy** | Structure | スコープの種類や分類体系。文レベル、段落レベル、プログラムレベルなど。 | $ScopeTypes = \{S_{statement}, S_{paragraph}, S_{section}, S_{program}, S_{system}\}$ | [[Scope]], [[Granularity]] |
 | **Scope Composition** | Structure | 複数のスコープを組み合わせて、より大きなスコープを構成する操作。 | $Scope_1 \cup Scope_2 \cup \ldots$ | [[Scope]] |
 | **Scope Closure** | Structure | スコープが影響分析や保証の観点で「閉じている」状態。外部依存が制御されている。 | $\text{closure}(Scope) = Scope \cup \text{dependencies}(Scope)$ | [[Impact Closure]], [[Scope]] |
-| **Granularity** | Structure | 構造解析や移行を行う際の詳細レベルや単位の大きさ（例：ファイル、セクション、パラグラフ、文）。 | - | [[Guarantee Unit]], [[Scope]] |
+| **Granularity** | Structure | 構造解析や移行を行う際の詳細レベルや単位の大きさ（例：ファイル、セクション、パラグラフ、文）。 | $G: \mathbb{N} \to Units$ where $G(0) = finest, G(\infty) = coarsest$ | [[Guarantee Unit]], [[Scope]] |
 | **Structural Dependency** | Structure | ある構造要素が別の要素に依存している関係（例：AがBを呼ぶ、Aが変数Xを使用する）。 | $A \to B$ | [[Data Dependency]], [[Control Dependency]] |
-| **Responsibility Boundary** | Structure / Decision | システム内の異なる機能的責務を分ける概念的な境界線。移行では構造的境界をこの責務境界に一致させることが目指される。 | - | [[Scope Boundary]] |
+| **Responsibility Boundary** | Structure / Decision | システム内の異なる機能的責務を分ける概念的な境界線。移行では構造的境界をこの責務境界に一致させることが目指される。 | $RB: System \to 2^{Responsibilities}$ where $\bigcup RB = System$ | [[Scope Boundary]] |
 | **Impact Scope** | Structure | 変更や修正が影響を与える範囲。データ依存や制御依存を通じて伝播する。 | $\text{impact}(change) = \{elements \mid affected\_by(change, elements)\}$ | [[Impact Closure]], [[Scope]] |
-| **Verification Scope** | Structure | 保証や検証を行う対象範囲。テストやレビューの境界を定義。 | - | [[Scope]], [[Guarantee]] |
-| **Migration Unit** | Structure / Decision | 移行作業の最小単位。一括で移行される機能やコンポーネントの範囲。 | - | [[Scope]], [[Migration]] |
+| **Verification Scope** | Structure | 保証や検証を行う対象範囲。テストやレビューの境界を定義。 | $VS \subseteq System$ where $\forall g \in Guarantees, verify(g) \text{ covers } VS$ | [[Scope]], [[Guarantee]] |
+| **Migration Unit** | Structure / Decision | 移行作業の最小単位。一括で移行される機能やコンポーネントの範囲。 | $MU \subseteq System$ where $\text{atomic}(MU) \land \text{independent}(MU)$ | [[Scope]], [[Migration]] |
 ---
 # Glossary 7. Migration Decision Model
 
@@ -13140,11 +13774,11 @@ This document defines concepts related to decision making in migration projects.
 | **Structural Risk** | Decision | 既存システム（Legacy System）の内部構造（スパゲッティコード、密結合など）に起因する移行リスク。 | $R_{struct}(S) = f(\text{complexity}, \text{coupling}, \text{cohesion})$ | [[Migration Failure Pattern]], [[Legacy System]] |
 | **Migration Strategy** | Decision | Big Bang、Strangler Fig、段階移行など、移行の実行方針や手法。 | $Strategy \in \{BigBang, StranglerFig, Phased, \ldots\}$ | [[Migration Path]], [[Migration Decision]] |
 | **Decision Boundary** | Decision | 移行可否や戦略選択の境界条件。リスクやコストの閾値として定義。 | $B_{decision} = \{(risk, cost) \mid risk \leq R_{max} \land cost \leq C_{max}\}$ | [[Migration Decision]] |
-| **Redesign Requirement** | Decision | 目標状態（Target State）を達成するために、システム構造を変更する必要性。 | - | [[Migration Decision]], [[Target System]] |
-| **Migration Failure Pattern** | Decision | 移行失敗につながることが知られているアンチパターンや構造的条件。 | - | [[Structural Risk]], [[Migration Risk]] |
-| **Case Study Analysis** | Decision | 具体的な移行事例を通じた分析手法。成功・失敗パターンの抽出。 | - | [[Migration Decision]], [[Verification Framework]] |
+| **Redesign Requirement** | Decision | 目標状態（Target State）を達成するために、システム構造を変更する必要性。 | $RR: (S_{current}, S_{target}) \to \{required, optional, none\}$ | [[Migration Decision]], [[Target System]] |
+| **Migration Failure Pattern** | Decision | 移行失敗につながることが知られているアンチパターンや構造的条件。 | $FP = \{pattern_i \mid \Pr[\text{failure} \mid pattern_i] > threshold\}$ | [[Structural Risk]], [[Migration Risk]] |
+| **Case Study Analysis** | Decision | 具体的な移行事例を通じた分析手法。成功・失敗パターンの抽出。 | $CSA: Cases \to \{Patterns, Insights, Recommendations\}$ | [[Migration Decision]], [[Verification Framework]] |
 | **Guarantee Decision Space** | Decision | 保証レベルと移行判断の関係を表現する決定空間。 | $DS = GS \times \{go, no\-go, conditional\}$ | [[Guarantee Space]], [[Migration Decision]] |
-| **Verification Framework** | Decision | 移行判断の妥当性を検証するための枠組み。検証手法や基準の体系。 | - | [[Migration Decision]], [[Guarantee]] |
+| **Verification Framework** | Decision | 移行判断の妥当性を検証するための枠組み。検証手法や基準の体系。 | $VF = (Methods, Criteria, Tools)$ where $Methods: Decision \to \{valid, invalid\}$ | [[Migration Decision]], [[Guarantee]] |
 | **Risk Tolerance** | Decision | 組織や プロジェクトが受け入れ可能なリスクレベル。意思決定の基準となる。 | $T_{risk} \in [0, 1]$ | [[Structural Risk]], [[Migration Decision]] |
 ---
 # Glossary 8. Control Structure Model
@@ -13153,20 +13787,21 @@ This document defines concepts related to control flow and CFG (Control Flow Gra
 
 | Term | Layer | Definition | Formal Description | Related Concepts |
 | :--- | :--- | :--- | :--- | :--- |
-| **Control Structure** | Structure | プログラム内での制御フロー要素（順次、選択、反復）の配置や構成。 | - | [[CFG]] |
+| **Control Structure** | Structure | プログラム内での制御フロー要素（順次、選択、反復）の配置や構成。実行順序を決定する構文要素の組み合わせパターン。 | $CS = \{Sequential, Branch, Loop\} \subseteq CFG$ | [[CFG]] |
 | **Basic Block** | Structure | 単一入口・単一出口の連続した文の列。最初の文が実行されれば最後まで必ず実行される CFG の最小解析単位。 | $BB = (s_1, \ldots, s_n)$ where $\forall i, succ(s_i) = \{s_{i+1}\}$ | [[CFG]] |
-| **Control Region** | Structure | 単一の入口と単一の出口を持つCFGの部分グラフ。多くの場合、論理的なブロックに対応する。 | - | [[Guarantee Unit]], [[Basic Block]] |
+| **Control Region** | Structure | 単一の入口と単一の出口を持つCFGの部分グラフ。多くの場合、論理的なブロックに対応する。構造化プログラミングの単位となる。 | $CR = (V_{sub}, E_{sub})$ where $|\{v \in V_{sub} \mid \text{entry}(v)\}| = 1$ | [[Guarantee Unit]], [[Basic Block]] |
 | **Dominance** | Structure | CFG 上で、あるノード A を経由しなければノード B に到達できない関係。A は B を支配する（A dominates B）。 | $A \text{ dom } B$ | [[CFG]], [[Reachability]] |
 | **Post-Dominance** | Structure | CFG 上で、ノード B から終端に至るすべての経路がノード A を通過する関係。A は B を後支配する。 | $A \text{ pdom } B$ | [[CFG]], [[Dominance]] |
-| **Reachability** | Structure | CFG 上で、あるノードから別のノードへの経路が存在するかどうか。 | $\text{reach}(A, B) \iff \exists \text{path } A \to^* B$ | [[CFG]], [[Path Closure]] |
+| **Reachability** | Structure | CFG 上で、あるノードから別のノードへの経路が存在するかどうか。実行可能性の基礎概念。 | $\text{reach}(A, B) \iff \exists \text{path } A \to^* B$ | [[CFG]], [[Path Closure]] |
 | **Path Closure** | Structure | CFG 上の経路集合の閉包。すべての到達可能な経路を含む。 | $\text{closure}(v) = \{ u \mid v \to^* u \}$ | [[CFG]], [[Reachability]] |
-| **Loop Structure** | Structure | 反復（PERFORM UNTIL, PERFORM VARYING 等）を表す CFG 上のサイクル構造。バックエッジを持つ。 | - | [[CFG]], [[Control Region]] |
-| **Back Edge** | Structure | CFG 上で、ループの終端からループヘッダへ戻るエッジ。自然ループを識別する。 | - | [[Loop Structure]] |
-| **Non-Structured Control** | Structure | GO TO、ALTER、EXIT 等による構造化されていない制御遷移。CFG 上で非還元性を引き起こしうる。 | - | [[CFG]], [[Structural Risk]] |
-| **Branch-Merge Pattern** | Structure | 分岐と合流の組み合わせパターン。IF-THEN-ELSE、EVALUATE などの制御構造。 | - | [[CFG]], [[Path Structure]] |
-| **Control Nesting** | Structure | 入れ子になった制御構造（ネストされたIFやPERFORMループなど）の深さと複雑さ。 | - | [[Structural Complexity]] |
-| **Control Dependency** | Structure | ある命令の実行が、別の命令（条件分岐など）の実行結果によって決定される関係。 | - | [[Structural Dependency]] |
-| **Control Risk Pattern** | Decision | CFG 上に現れる移行困難性を増加させる制御構造パターン（多層 GO TO、ループ内分岐集中など）。 | - | [[Migration Risk]], [[Non-Structured Control]] |
+| **Loop Structure** | Structure | 反復（PERFORM UNTIL, PERFORM VARYING 等）を表す CFG 上のサイクル構造。バックエッジを持つ。 | $Loop = (header, body, backedge)$ where $backedge: body \to header$ | [[CFG]], [[Control Region]] |
+| **Back Edge** | Structure | CFG 上で、ループの終端からループヘッダへ戻るエッジ。自然ループを識別する。 | $BE = \{(v, u) \in E \mid u \text{ dominates } v\}$ | [[Loop Structure]] |
+| **Non-Structured Control** | Structure | GO TO、ALTER、EXIT 等による構造化されていない制御遷移。CFG 上で非還元性を引き起こしうる。移行時の高リスク要素。 | $NSC = \{edges \mid \neg reducible(CFG)\}$ | [[CFG]], [[Structural Risk]] |
+| **Branch-Merge Pattern** | Structure | 分岐と合流の組み合わせパターン。IF-THEN-ELSE、EVALUATE などの制御構造。 | $BMP = (branch\_node, \{path_i\}, merge\_node)$ | [[CFG]], [[Path Structure]] |
+| **Control Nesting** | Structure | 入れ子になった制御構造（ネストされたIFやPERFORMループなど）の深さと複雑さ。 | $Nesting(v) = \max\{depth(path) \mid v \in path\}$ | [[Structural Complexity]] |
+| **Control Dependency** | Structure | ある命令の実行が、別の命令（条件分岐など）の実行結果によって決定される関係。 | $v \text{ cd } u \iff v \text{ pdom one but not all successors of } u$ | [[Structural Dependency]] |
+| **Control Risk Pattern** | Decision | CFG 上に現れる移行困難性を増加させる制御構造パターン（多層 GO TO、ループ内分岐集中など）。 | $CRP = \{pattern \mid complexity(pattern) > threshold\}$ | [[Migration Risk]], [[Non-Structured Control]] |
+| **Path Structure** | Structure | CFG 上の経路の形状と特性。直線的、分岐的、循環的などの経路パターンを表現する。テストケース設計や複雑度測定の基礎となる。 | $PS = \{Linear, Branching, Cyclic, Complex\}$ | [[CFG]], [[Branch-Merge Pattern]], [[Path Closure]] |
 ---
 # Glossary 9. Data Structure Model
 
@@ -13174,25 +13809,25 @@ This document defines concepts related to data flow and DFG (Data Flow Graph).
 
 | Term | Layer | Definition | Formal Description | Related Concepts |
 | :--- | :--- | :--- | :--- | :--- |
-| **Data Structure** | Structure | システム内のデータ要素（変数、レコード、ファイル）の構成と配置。 | - | [[DFG]] |
+| **Data Structure** | Structure | システム内のデータ要素（変数、レコード、ファイル）の構成と配置。 | $DS = (Elements, Relations, Layout)$ where $Elements \subseteq Variables$ | [[DFG]] |
 | **Define (def)** | Structure | データ要素が新たな値を持つ操作。代入、算術結果の格納、READ、INITIALIZE など。 | $\text{def}(v, p)$ where $v$ is variable, $p$ is program point | [[DFG]], [[Define-Use]] |
 | **Use** | Structure | データ要素の値を参照する操作。右辺参照、条件、出力、引数など。 | $\text{use}(v, p)$ where $v$ is variable, $p$ is program point | [[DFG]], [[Define-Use]] |
 | **Kill** | Structure | 同一の論理ストレージ上で、後続の define により先行する定義が無効化されること。 | $\text{kill}(d, p)$ where $d$ is definition, $p$ is kill point | [[Reaching Definition]] |
 | **Reaching Definition** | Structure | ある use に到達しうる define の集合。CFG 経路上で kill されなかった定義のみが到達する。 | $\text{reach}(v, p) = \{d \mid d \in def(v) \land path(d, p) \land \neg killed(d, p)\}$ | [[DFG]], [[CFG]] |
-| **Define-Use Chain** | Structure | define から use への依存関係の連鎖。DFG のエッジを構成する。 | - | [[DFG]], [[Use-Define Chain]] |
-| **Use-Define Chain** | Structure | use から、その値を供給する define への逆参照。 | - | [[DFG]], [[Define-Use Chain]] |
-| **Data Dependency** | Structure | あるデータ要素が別のデータ要素から導出される、あるいは影響を与える関係。 | - | [[Structural Dependency]] |
-| **Data Propagation** | Structure | define から use への、または中間結果を経由した依存の連鎖。 | - | [[DFG]], [[Impact Closure]] |
+| **Define-Use Chain** | Structure | define から use への依存関係の連鎖。DFG のエッジを構成する。 | $DUC = \{(d, u) \mid d \in def(v) \land u \in use(v) \land reach(d, u)\}$ | [[DFG]], [[Use-Define Chain]] |
+| **Use-Define Chain** | Structure | use から、その値を供給する define への逆参照。 | $UDC = \{(u, d) \mid u \in use(v) \land d \in reach(u)\}$ | [[DFG]], [[Define-Use Chain]] |
+| **Data Dependency** | Structure | あるデータ要素が別のデータ要素から導出される、あるいは影響を与える関係。 | $DD = \{(v_1, v_2) \mid \exists path: def(v_1) \to use(v_2)\}$ | [[Structural Dependency]] |
+| **Data Propagation** | Structure | define から use への、または中間結果を経由した依存の連鎖。 | $Propagate: def(v_1) \to^* use(v_n)$ through intermediate variables | [[DFG]], [[Impact Closure]] |
 | **Impact Closure** | Structure / Decision | 変更起点から DFG 上の依存エッジを辿って到達しうるノード・文・境界の集合。 | $\text{closure}(v) = \{u \mid v \to^* u \text{ on DFG}\}$ | [[DFG]], [[Scope]] |
 | **Reverse Closure** | Structure / Decision | ある観測点に影響しうる原因側の集合。回帰テストの範囲決定に用いる。 | $\text{rev-closure}(v) = \{u \mid u \to^* v \text{ on DFG}\}$ | [[Impact Closure]] |
-| **Cross-Scope Transfer** | Structure | CALL 引数、ファイル I/O、共有領域など、スコープ境界をまたぐデータ依存。 | - | [[DFG]], [[Scope Boundary]] |
-| **Aggregation Edge** | Structure | 複数のデータ要素から一つへの依存（グループ MOVE、複合式など）。 | - | [[DFG]], [[Decomposition Edge]] |
-| **Decomposition Edge** | Structure | 一つのデータ要素から複数への依存（UNSTRING、部分参照など）。 | - | [[DFG]], [[Aggregation Edge]] |
-| **Condition-Dependency Edge** | Structure | データが条件式の真偽に関与する依存。CFG の分岐と連動。 | - | [[DFG]], [[CFG]] |
-| **Data Boundary** | Structure | データ依存が止まる境界（文、段落、プログラム、ファイル、外部インタフェース）。 | - | [[Scope]], [[DFG]] |
-| **Data Lifetime** | Structure | データ要素が有効な値を保持している期間またはスコープ。 | - | [[Data Scope]] |
-| **Data Scope** | Structure | コード内でデータ要素が参照可能（可視）である範囲。 | - | [[Scope]] |
-| **Data Risk Pattern** | Decision | DFG 上に現れる移行困難性を増加させるパターン（高再定義密度、境界越え集中、広域閉包など）。 | - | [[Migration Risk]], [[Impact Closure]] |
+| **Cross-Scope Transfer** | Structure | CALL 引数、ファイル I/O、共有領域など、スコープ境界をまたぐデータ依存。 | $CST = \{(v_1, v_2) \mid scope(v_1) \neq scope(v_2) \land dependency(v_1, v_2)\}$ | [[DFG]], [[Scope Boundary]] |
+| **Aggregation Edge** | Structure | 複数のデータ要素から一つへの依存（グループ MOVE、複合式など）。 | $AE = \{(\{v_1, v_2, \ldots\}, v_{target}) \mid aggregate\_operation\}$ | [[DFG]], [[Decomposition Edge]] |
+| **Decomposition Edge** | Structure | 一つのデータ要素から複数への依存（UNSTRING、部分参照など）。 | $DE = \{(v_{source}, \{v_1, v_2, \ldots\}) \mid decompose\_operation\}$ | [[DFG]], [[Aggregation Edge]] |
+| **Condition-Dependency Edge** | Structure | データが条件式の真偽に関与する依存。CFG の分岐と連動。 | $CDE = \{(v, condition) \mid v \in operands(condition)\}$ | [[DFG]], [[CFG]] |
+| **Data Boundary** | Structure | データ依存が止まる境界（文、段落、プログラム、ファイル、外部インタフェース）。 | $DB = \{b \mid \forall v_1, v_2: dependency(v_1, v_2) \implies \neg crosses(b, v_1, v_2)\}$ | [[Scope]], [[DFG]] |
+| **Data Lifetime** | Structure | データ要素が有効な値を保持している期間またはスコープ。 | $Lifetime(v) = [create(v), destroy(v)]$ | [[Data Scope]] |
+| **Data Scope** | Structure | コード内でデータ要素が参照可能（可視）である範囲。 | $DataScope(v) = \{location \mid visible(v, location)\}$ | [[Scope]] |
+| **Data Risk Pattern** | Decision | DFG 上に現れる移行困難性を増加させるパターン（高再定義密度、境界越え集中、広域閉包など）。 | $DRP = \{pattern \mid risk\_level(pattern) > acceptable\_threshold\}$ | [[Migration Risk]], [[Impact Closure]] |
 ---
 # Glossary 10. Lattice Order Theory
 
@@ -13202,16 +13837,18 @@ This document defines mathematical concepts related to lattice structures and pa
 | :--- | :--- | :--- | :--- | :--- |
 | **Lattice** | Geometry | 半順序集合において、任意の二つの要素に対して上限（join）と下限（meet）が存在する構造。保証の包含関係を表現するのに用いる。 | $(L, \leq, \vee, \wedge)$ where $\vee$ is join, $\wedge$ is meet | [[Partial Order]], [[Guarantee Lattice]] |
 | **Partial Order** | Geometry | 反射的、推移的、反対称的な二項関係。保証の強弱関係などを表現。 | $(S, \leq)$ where $\leq$ is reflexive, transitive, antisymmetric | [[Lattice]], [[Total Order]] |
+| **Total Order** | Geometry | 任意の二つの要素が比較可能な順序関係。線形順序とも呼ばれる。 | $(S, \leq)$ where $\forall x, y \in S: x \leq y \lor y \leq x$ | [[Partial Order]], [[Chain]] |
 | **Join Operation** | Geometry | 束における上限演算。二つの要素の最小上界を求める。 | $a \vee b = \sup\{a, b\}$ | [[Lattice]], [[Meet Operation]] |
 | **Meet Operation** | Geometry | 束における下限演算。二つの要素の最大下界を求める。 | $a \wedge b = \inf\{a, b\}$ | [[Lattice]], [[Join Operation]] |
 | **Complete Lattice** | Geometry | 任意の部分集合に対して上限と下限が存在する束。無限集合にも適用可能。 | $(L, \leq)$ where $\forall S \subseteq L, \exists \sup S, \inf S$ | [[Lattice]] |
 | **Distributive Lattice** | Geometry | join と meet が分配法則を満たす束。論理演算との対応がある。 | $a \wedge (b \vee c) = (a \wedge b) \vee (a \wedge c)$ | [[Lattice]], [[Boolean Algebra]] |
-| **Boolean Algebra** | Geometry | 補元を持つ分配束。論理演算の代数構造を提供。 | $(B, \vee, \wedge, \neg, 0, 1)$ | [[Distributive Lattice]] |
+| **Boolean Algebra** | Geometry | 補元を持つ分配束。論理演算の代数構造を提供。命題論理や集合演算の基礎となる。 | $(B, \vee, \wedge, \neg, 0, 1)$ where $\neg$ is complement, $0$ is bottom, $1$ is top | [[Distributive Lattice]] |
 | **Galois Connection** | Geometry | 二つの半順序集合間の特別な対応関係。抽象化と具象化の関係を表現。 | $(f, g): P \leftrightarrows Q$ where $f \dashv g$ | [[Partial Order]] |
 | **Fixed Point** | Geometry | 関数における不動点。束上の単調関数の最小不動点などに用いる。 | $x = f(x)$ | [[Lattice]], [[Monotonic Function]] |
-| **Monotonic Function** | Geometry | 順序を保存する関数。束の構造を維持しながら変換を行う。 | $f: L_1 \to L_2$ where $x \leq y \implies f(x) \leq f(y)$ | [[Partial Order]], [[Fixed Point]] |
+| **Monotonic Function** | Geometry | 順序を保存する関数。束の構造を維持しながら変換を行う。データフロー解析や保証の伝播に用いられる。 | $f: L_1 \to L_2$ where $x \leq y \implies f(x) \leq f(y)$ | [[Partial Order]], [[Fixed Point]] |
 | **Chain** | Geometry | 全順序を持つ部分集合。要素が一列に並ぶ構造。 | $C \subseteq L$ where $\forall x, y \in C, x \leq y \lor y \leq x$ | [[Total Order]] |
 | **Antichain** | Geometry | 比較不能な要素のみからなる部分集合。独立な要素の集合。 | $A \subseteq L$ where $\forall x, y \in A, x \neq y \implies x \not\leq y \land y \not\leq x$ | [[Partial Order]] |
+| **Lattice Theory** | Geometry | 束構造の性質と操作を研究する数学分野。保証空間や移行経路のモデリングに理論的基盤を提供する。 | Theory of $(L, \leq, \vee, \wedge)$ structures and their properties | [[Lattice]], [[Guarantee Lattice]] |
 ---
 # Glossary 11. Derived Metrics
 
@@ -13219,15 +13856,15 @@ This document defines quantitative metrics derived from structural analysis.
 
 | Term | Layer | Definition | Formal Description | Related Concepts |
 | :--- | :--- | :--- | :--- | :--- |
-| **Structural Complexity** | Decision | プログラムの構造的複雑さを表す定量指標。制御フロー、データフロー、入れ子の深さなどから算出。 | $C_{struct} = f(CFG_{complexity}, DFG_{complexity}, nesting_{depth})$ | [[CFG]], [[DFG]], [[Control Nesting]] |
+| **Structural Complexity** | Decision | プログラムの構造的複雑さを表す定量指標。制御フロー、データフロー、入れ子の深さなどから算出。移行困難度の主要因子。 | $C_{struct} = f(CFG_{complexity}, DFG_{complexity}, nesting_{depth})$ | [[CFG]], [[DFG]], [[Control Nesting]] |
 | **Cyclomatic Complexity** | Decision | CFG の線形独立な経路の数。制御フローの複雑さを表す古典的指標。 | $V(G) = E - N + 2$ where $E$ = edges, $N$ = nodes | [[CFG]], [[Structural Complexity]] |
-| **Data Coupling** | Decision | モジュール間のデータ依存の強さ。共有データや引数の複雑さを測定。 | $Coupling = \frac{\|shared\_data\|}{\|total\_data\|}$ | [[DFG]], [[Cross-Scope Transfer]] |
+| **Data Coupling** | Decision | モジュール間のデータ依存の強さ。共有データや引数の複雑さを測定。高い値は移行リスクを示唆。 | $Coupling = \frac{\|shared\_data\|}{\|total\_data\|}$ | [[DFG]], [[Cross-Scope Transfer]] |
 | **Cohesion** | Decision | モジュール内の要素間の結合度。単一責任原則の達成度を測定。 | $Cohesion = \frac{internal\_relations}{total\_relations}$ | [[Scope]], [[Responsibility Boundary]] |
 | **Migration Complexity** | Decision | システム移行の複雑さを表す合成指標。構造リスク、依存関係、保証要求から算出。 | $M_{complexity} = w_1 \cdot Risk + w_2 \cdot Dependencies + w_3 \cdot Guarantees$ | [[Migration Risk]], [[Structural Risk]] |
 | **Guarantee Coverage** | Decision | システムの機能に対する保証の網羅率。未保証領域の特定に用いる。 | $Coverage = \frac{\|guaranteed\_functions\|}{\|total\_functions\|}$ | [[Guarantee]], [[Guarantee Unit]] |
 | **Scope Completeness** | Decision | 影響分析や変更対象のスコープが完全に定義されている度合い。 | $Completeness = \frac{\|covered\_dependencies\|}{\|total\_dependencies\|}$ | [[Scope]], [[Impact Closure]] |
 | **Risk Density** | Decision | 単位領域あたりのリスク要素の密度。高リスク領域の特定に用いる。 | $\rho_{risk} = \frac{\|risk\_elements\|}{area}$ | [[Migration Risk]], [[Structural Risk]] |
-| **Dependency Fan-out** | Decision | あるモジュールが依存する他モジュールの数。結合度の指標。 | $FanOut(M) = \|\{M' \mid M \to M'\}\|$ | [[Structural Dependency]] |
+| **Dependency Fan-out** | Decision | あるモジュールが依存する他モジュールの数。結合度の指標。高い値は影響範囲の拡大を示す。 | $FanOut(M) = \|\{M' \mid M \to M'\}\|$ | [[Structural Dependency]] |
 | **Dependency Fan-in** | Decision | あるモジュールに依存する他モジュールの数。影響範囲の指標。 | $FanIn(M) = \|\{M' \mid M' \to M\}\|$ | [[Structural Dependency]] |
 | **Path Complexity** | Decision | CFG 上の経路数やネストの複雑さ。テストケース数の見積りに用いる。 | $P_{complexity} = \|paths\| + nest\_penalty$ | [[CFG]], [[Path Structure]] |
 | **Data Flow Complexity** | Decision | DFG の複雑さを表す指標。定義-使用関係の密度や範囲から算出。 | $DF_{complexity} = \frac{\|def\text{-}use\_chains\|}{\|data\_elements\|}$ | [[DFG]], [[Define-Use Chain]] |
