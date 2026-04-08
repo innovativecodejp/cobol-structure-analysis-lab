@@ -1,4 +1,4 @@
-# concat-docs.ps1
+﻿# concat-docs.ps1
 # COBOL Structure Analysis Lab - Documentation Concatenation Script
 #
 # Purpose:
@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 
 $docsRoot = "docs"
 $tempDocsRoot = "temp/docs"
-$finalOutput = "docs/CobolStructureAnalysis.md"
+$finalOutput = "docs/CobolStructureAnalysisMemo.md"
 
 # Track if any directory was updated
 $anyUpdated = $false
