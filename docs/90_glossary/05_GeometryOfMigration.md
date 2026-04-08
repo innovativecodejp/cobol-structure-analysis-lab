@@ -15,3 +15,4 @@ This document defines concepts for the geometric modeling of migration processes
 | **Migration Topology** | Geometry | 移行可能性を定義する保証空間上の位相構造。連結性や経路の存在を定義。 | $(GS, \mathcal{T}_{migration})$ | [[Guarantee Space]], [[Migration Path]] |
 | **Migration Field** | Geometry | 保証空間の各点において、最適な移行方向を示すベクトル場。 | $\vec{F}: GS \to T(GS)$ | [[Migration Path]], [[Migration Optimization]] |
 | **Migration Barrier** | Geometry | 移行を阻害する保証空間内の障壁。通過に高いコストやリスクを伴う領域。 | $B \subset GS$ where crossing $B$ has high cost/risk | [[Migration Path]], [[Migration Risk]] |
+| **Migration Optimization** | Geometry / Decision | 保証空間内で最適な移行経路を見つける手法と理論。コスト最小化、リスク最小化、時間最短化などの目的関数を用いる。 | $\min_{P} \{Cost(P), Risk(P)\}$ subject to constraints | [[Migration Path]], [[Migration Field]], [[Migration Cost]] |
